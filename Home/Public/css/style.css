@@ -1,0 +1,21 @@
+body {
+    margin-left: 0px;
+    margin-top: 0px;
+    margin-right: 0px;
+    margin-bottom: 0px;
+  }
+  .STYLE1 {
+    font-size: 12px;
+    color: #FFFFFF;
+  }
+  .STYLE3 {
+    font-size: 12px;
+    color: #033d61;
+  }
+
+.menu_title SPAN {
+    FONT-WEIGHT: bold; LEFT: 3px; COLOR: #ffffff; POSITION: relative; TOP: 2px 
+  }
+  .menu_title2 SPAN {
+    FONT-WEIGHT: bold; LEFT: 3px; COLOR: #FFCC00; POSITION: relative; TOP: 2px
+  }

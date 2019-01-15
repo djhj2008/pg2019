@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>delete</title>
+	<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script>
+	
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+	<!--<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css">-->
+	<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+    <style>
+  b {color: #23527C;}
+</style>
+</head>
+<body>
+<div class="header" >
+  <div class="container" >
+  <div class="navbar navbar-default navbar-fixed-left" >
+    <ul class="nav navbar-nav">
+      <li><a href="<%$smarty.const.__APP__%>/devselect/select"><b >首页</b></a></li>
+      <li><a href="<%$smarty.const.__APP__%>/add/add"><b>添加设备</b></a></li>
+      <li><a href="<%$smarty.const.__APP__%>/add/move"><b>移动设备</b></a></li>
+      <li><a href="<%$smarty.const.__APP__%>/add/saveinfo"><b>修改设备信息</b></a></li>
+      <li><a href="<%$smarty.const.__APP__%>/add/select"><b>查询设备信息</b></a></li>
+      <!--<li><a href="<%$smarty.const.__APP__%>/acadd/add"><b>温度输入</b></a></li>-->
+      <li><a href="<%$smarty.const.__APP__%>/acadd/select"><b>查询温度情况</b></a></li>
+      <!--<li><a href="<%$smarty.const.__APP__%>/acadd/save"><b>修改温度记录</b></a></li>-->
+      <li class="active"><a href="<%$smarty.const.__APP__%>/acadd/delete"><b>删除温度记录</b></a></li>
+    </ul>
+  </div>
+  </div>
+
+<div class="container">
+
+  <form class="form-horizontal" name="f1"      action=""   method="post" >
+    <fieldset>
+    <div class="control-group" >
+      <label class="control-label" >devid</label>
+      <div class="controls">
+      <input name="devid"  type="text">
+     
+      </div>
+
+
+    </fieldset>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">删除</button>
+  </div>
+  </form>
+ </div>
+</div>
+</body>
+</html>

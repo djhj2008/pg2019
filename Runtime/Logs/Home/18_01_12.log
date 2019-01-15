@@ -1,0 +1,12 @@
+[ 2018-01-12T11:39:22+08:00 ] 124.207.250.67 /base/index.php/home/datapush/test>temp=48000
+ERR: 非法操作:test>temp=48000
+
+[ 2018-01-12T11:40:55+08:00 ] 124.207.250.67 /base/index.php/home/datapush/test>temp=48000
+ERR: 非法操作:test>temp=48000
+
+[ 2018-01-12T11:41:13+08:00 ] 124.207.250.67 /base/index.php/home/datapush/test>temp=48000
+ERR: 非法操作:test>temp=48000
+
+[ 2018-01-12T16:16:52+08:00 ] 223.104.3.136 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
+

@@ -1,0 +1,59 @@
+.inp{background:url(../img/inputbg.gif) left top repeat-x;height:22px;border:#CCCCCC solid 1px;padding:6px 0 0 4px;font-size:14px;}
+
+.regcap{float:left;width:940px;background:url(../img/bg950x30.gif) left top no-repeat;height:30px;line-height:30px;margin:30px 0 0 5px;_margin:30px 0 0 2px;font-size:14px;padding-left:10px;text-align:left;}
+.regmain{float:left;width:948px;border:#DDDDDD solid 1px;border-top:0;margin:0 0 0 5px;_margin:0 0 0 2px;padding:15px 0 25px 0;}
+.regmain .opents{float:left;margin:10px 0 0 134px;_margin:10px 0 0 68px;width:560px;color:#999;padding:10px 0 0 120px;border:#ddd solid 1px;text-align:center;background:url(../img/qzone.gif) left center no-repeat;height:91px;text-align:left;line-height:30px;}
+.regmain .opents strong{font-size:14px;font-size:22px;}
+.regmain .opents a{color:#ff6600;}
+.regmain .bdcap{float:left;margin:10px 0 15px 134px;width:680px;_margin:10px 0 15px 68px;height:30px;}
+.regmain .bdcap li{float:left;padding:9px 0 0 0;text-align:center;height:21px;}
+.regmain .bdcap .l0{width:120px;border-bottom:#ddd solid 1px;padding:10px 0 0 0;}
+.regmain .bdcap .l00{width:6px;border-bottom:#ddd solid 1px;padding:10px 0 0 0;}
+.regmain .bdcap .l1{width:100px;border:#ddd solid 1px;border-bottom:#fff solid 1px;cursor:pointer;font-weight:700;}
+.regmain .bdcap .l2{width:100px;border:#ddd solid 1px;background-color:#F6F6F6;cursor:pointer;}
+.regmain .bdcap .l3{width:268px;border-bottom:#ddd solid 1px;padding:10px 0 0 0;}
+.regmain .u1{float:left;width:948px;height:50px;font-family:Arial, Helvetica, sans-serif;margin:1px 0 0 0;}
+.regmain .u1 li{float:left;}
+.regmain .u1 .l1{text-align:right;width:270px;font-size:14px;padding:19px 0 0 0;}
+.regmain .u1 .l2{width:200px;text-align:left;padding:10px 0 0 0;}
+.regmain .u1 .l21{width:200px;text-align:left;padding:14px 0 0 0;}
+.regmain .u1 .l3{width:478px;text-align:left;padding:19px 0 0 0;color:#CCCCCC;}
+.regmain .u1 .l4{width:110px;text-align:left;padding:10px 0 0 0;}
+.regmain .u1 .l5{width:90px;text-align:left;padding:12px 0 0 0;}
+.regmain .u2{background-color:#E6F6FF;}
+.regmain .u2 .l3{color:#666666;}
+.regmain .err{color:red;background:url(../img/err.gif) no-repeat;padding:2px 0 0 20px;}
+.regmain .u3{background-color:#FFE6E6;}
+
+.loginmain{float:left;width:948px;border:#DDDDDD solid 1px;border-top:0;margin:0 0 0 5px;_margin:0 0 0 2px;padding:15px 0;}
+.loginmain .loginleft{float:left;width:630px;}
+.loginmain .loginleft .u1{float:left;width:630px;height:50px;font-family:Arial, Helvetica, sans-serif;margin:1px 0 0 0;}
+.loginmain .loginleft .u1 li{float:left;}
+.loginmain .loginleft .u1 .l1{text-align:right;width:125px;font-size:14px;padding:19px 0 0 0;}
+.loginmain .loginleft .u1 .l2{width:200px;text-align:left;padding:10px 0 0 0;}
+.loginmain .loginleft .u1 .l3{width:305px;text-align:left;padding:19px 0 0 0;color:#CCCCCC;}
+.loginmain .loginleft .u1 .l3 a{color:#247FBD;}
+.loginmain .loginleft .u1 .l3 a:hover{text-decoration:none;color:#ff6600;}
+.loginmain .loginleft .u1 .l4{width:505px;text-align:left;padding:10px 0 0 0;}
+.loginmain .loginleft #err{float:left;width:430px;background:url(../img/err.gif) no-repeat;padding:10px 0 0 30px;height:20px;background-color:#FFEEEE;margin:0 0 0 80px;_margin:0 0 0 40px;background-position:10px 9px;text-align:left;color:#FF0000;}
+.loginmain .loginmiddle{float:left;border-left:#CCCCCC dotted 1px;margin:16px 0 0 0;height:200px;padding:20px 0 0 40px;line-height:25px;text-align:left;color:#666;}
+.loginmain .loginmiddle strong{font-size:14px;color:#333;}
+
+.getpassword{float:left;width:950px;background:url(../img/bg950x30.gif) left top no-repeat;height:30px;margin:30px 0 0 5px;}
+.getpassword .u1{float:left;width:950px;height:30px;}
+.getpassword .u1 li{float:left;}
+.getpassword .u1 .l1{font-size:14px;font-weight:700;text-align:left;padding:8px 0 0 10px;width:390px;}
+.getpassword .u1 .l2{padding:8px 0 0 0;text-align:right;width:540px;}
+.getpassword .u1 .l2 strong{font-size:14px;color:#ff6600;}
+
+.getpwdmain{float:left;width:948px;border:#DDDDDD solid 1px;border-top:0;margin:0 0 0 5px;_margin:0 0 0 2px;padding:15px 0;}
+.getpwdmain .u1{float:left;width:948px;height:50px;font-family:Arial, Helvetica, sans-serif;margin:1px 0 0 0;}
+.getpwdmain .u1 li{float:left;}
+.getpwdmain .u1 .l1{text-align:right;width:270px;font-size:14px;padding:19px 0 0 0;}
+.getpwdmain .u1 .l2{width:200px;text-align:left;padding:10px 0 0 0;}
+.getpwdmain .u1 .l2 .btn{background:url(../img/btnbg.gif) left top no-repeat;width:96px;height:30px;border:0;color:#fff;font-weight:700;cursor:pointer;}
+.getpwdmain .u1 .l3{width:478px;text-align:left;padding:19px 0 0 0;color:#CCCCCC;}
+.getpwdmain .u1 .l4{width:110px;text-align:left;padding:10px 0 0 0;}
+.getpwdmain .u1 .l5{width:90px;text-align:left;padding:12px 0 0 0;}
+
+.clear{ clear:both} 

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:img="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title><%$name%></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.
+">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
+
+    <!-- battery -->
+    <link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/battery.css">
+</head>
+<style>
+    b {color: #23527C;}
+</style>
+
+<body>
+	
+<h2 style="text-align:center;font-size:25px" >温度异常处理</h2>
+<form class="form-horizontal"  method="post">
+<div class="weui-cells weui-cells_radio">
+  <label class="weui-cell weui-check__label" for="x11">
+    <div class="weui-cell__bd">
+      <p>正常(忽略)</p>
+    </div>
+    <div class="weui-cell__ft">
+      <input type="radio" class="weui-check" name="radio1" id="x11" checked="checked" value="1">
+      <span class="weui-icon-checked"></span>
+    </div>
+  </label>
+  <label class="weui-cell weui-check__label" for="x12">
+
+    <div class="weui-cell__bd">
+      <p>治疗(请输入详情)</p>
+    </div>
+    <div class="weui-cell__ft">
+      <input type="radio" name="radio1" class="weui-check" id="x12" value="2">
+      <span class="weui-icon-checked"></span>
+    </div>
+  </label>
+</div>
+<div class="weui-cells weui-cells_form">
+	<div class="weui-cell">
+    <div class="weui-cell__hd"><img src=""></div>
+    <div class="weui-cell__bd">
+      治疗详情：
+    </div>
+  </div>
+  <div class="weui-cell">
+    <div class="weui-cell__bd">
+      <textarea class="weui-textarea" id="msg" placeholder="请输入文本" rows="4" name="msg"></textarea>
+      <div class="weui-textarea-counter"><span id="text-count">80</span>/80</div>
+    </div>
+  </div>
+ 
+  <div class="weui-btn-area">
+    <button class="weui-btn weui-btn_primary" type="submit">提交</button>
+  </div>
+</div>
+		<input type='hidden' name='devid' value="<% $devid %>">
+</form>
+
+<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4.js"></script>
+<script src="<%$smarty.const.AJS_URL%>fastclick.js"></script>
+<script src="<%$smarty.const.AJS_URL%>jquery-weui.js"></script>
+<script>
+    $(function() {
+        FastClick.attach(document.body);
+    });
+
+    $("#msg").on("input propertychange", function () {
+        var $this = $(this),
+                _val = $this.val(),
+                count = "";
+        if (_val.length > 80) {
+            $this.val(_val.substring(0, 80));
+        }
+        count = 80 - $this.val().length;
+        $("#text-count").text(count);
+
+});
+</script>
+</body>
+</html>

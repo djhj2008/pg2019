@@ -1,0 +1,4 @@
+[ 2017-07-06T15:52:38+08:00 ] 124.207.250.66 http://124.207.250.67:80/base/index.php/home/datapush/push
+ERR: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it.
+
+

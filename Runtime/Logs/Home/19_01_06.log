@@ -1,0 +1,3 @@
+[ 2019-01-06T13:32:41+08:00 ] 61.151.178.177 /pg/index.php/value/temp?devid=7
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time BETWEEN 1546704000 AND 1546707600 ) LIMIT 0,1' at line 1
+

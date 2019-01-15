@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>add</title>
+	<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script>
+	
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+	<!--<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css">-->
+				<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
+        <!-- DataTables -->
+        <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <!-- Responsive datatable examples -->
+        <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <!-- Buttons examples -->
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.buttons.min.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jszip.min.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/pdfmake.min.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/vfs_fonts.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.html5.min.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.print.min.js"></script>
+        <!-- Responsive examples -->
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
+				<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+				<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+		
+  <style>
+    b {color: #23527C;}
+  </style>
+</head>
+<body>
+<div class="header" >
+ 	<div class="container" >
+ 	<div class="navbar navbar-default navbar-fixed-left" >
+		<ul class="nav navbar-nav" >
+			<li><a href="<%$smarty.const.__APP__%>/devselect/select"><b >首页</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/acadd/checkrssi"><b>基站RSSI</b></a></li>
+			</ul>
+		</div>
+		</div>
+
+<div class="container">
+
+  <form class="form-horizontal" name="f1"      action=""   method="post" >
+    <fieldset>
+    <div class="control-group" >
+	      <label class="control-label" >设备ID</label>
+	      <div class="controls"  style="margin-top: 10px">
+	      <input name="devid"  type="text" value="<%$id%>">
+	      </div>
+	      <label class="control-label" style="margin-top: 5px">日期开始</label>
+	      <div class="controls"  style="margin-top: 10px">
+	      <input name="time" type="date"  value="<%$date%>">
+				</div>
+				<label class="control-label" style="margin-top: 5px">日期结束</label>
+				<div class="controls"  style="margin-top: 10px">
+				<input name="time2" type="date"  value="<%$date2%>">
+				</div>
+		</div>
+    </fieldset>
+  <div class="form-actions"  style="margin-top: 10px">
+    <button type="submit" class="btn btn-primary">查询</button>
+  </div>
+  </form>
+
+ </div>
+    <div class="container">
+     <%if !empty($selectSql)%>
+     <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
+     <thead>
+     <tr>
+        <th>DevId</th>
+        <th>温度</th>
+        <th>温度</th>
+        <th>温度</th>
+        <th>延迟</th>
+        <th>信号</th>
+        <th>频点</th>
+        <th>丢失</th>
+        <th>棚内</th>
+        <th>棚内</th>
+        <th>运动场</th>
+        <th>运动场</th>          
+        <!--th>奶厅温度</th>
+        <th>奶厅湿度</th-->        
+        <th>时间</th>
+     </tr>
+     </thead>
+     <tbody>
+    <%foreach $selectSql as $v%>
+    <tr>
+      <td><%$v.devid%></td>
+      <td><%$v.temp1%></td>
+      <td><%$v.temp2%></td>
+      <%if $v.env_temp eq 255 %>
+      <td>空</td>
+      <%else%>
+      <td><%$v.env_temp%></td>
+      <%/if%>
+      <td><%$v.delay%></td>
+      <td><%$v.sign%></td>
+      <td><%$v.cindex%></td>
+      <td><%$v.lcount%></td>
+      <%if $v.env_temp1 eq 255 %>
+      <td>空</td>
+      <%else%>
+      <td><%$v.env_temp1%></td>
+      <%/if%>
+      <%if $v.env_temp2 eq 255 %>
+      <td>空</td>
+      <%else%>
+      <td><%$v.env_temp2%></td>
+      <%/if%>
+      <%if $v.env_temp3 eq 255 %>
+      <td>空</td>
+      <%else%>
+      <td><%$v.env_temp3%></td>
+      <%/if%>
+      <%if $v.env_temp4 eq 255 %>
+      <td>空</td>
+      <%else%>
+      <td><%$v.env_temp4%></td>
+      <%/if%>
+      <!--td><%$v.env_temp5%></td>
+      <td><%$v.env_temp6%></td-->
+      <td><%date("Y-m-d H:i:s",$v.time)%></td>
+    </tr>
+    <%/foreach%>
+     </tbody>
+    </table>
+    <%/if%>
+    </div>
+</div>
+</body>
+    <!-- jQuery  -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/popper.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/bootstrap.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/metisMenu.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/waves.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.slimscroll.js"></script>
+
+    <!-- Required datatable js -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.js"></script>
+    <!-- Buttons examples -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.buttons.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jszip.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/pdfmake.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/vfs_fonts.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.html5.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.print.min.js"></script>
+    <!-- Responsive examples -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/responsive.bootstrap4.min.js"></script>
+
+    <!-- App js -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.core.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.app.js"></script>
+<script type="text/javascript">
+            $(document).ready(function() {
+                //Buttons examples
+                var table = $('#datatable-buttons').DataTable({
+                    lengthChange: true,
+                    iDisplayLength: 25,
+                    info: false,
+                    buttons: ['excel','pdf'],
+                    language: {
+                        "sProcessing": "处理中...",
+                        "sLengthMenu": "显示 _MENU_ 项结果",
+                        "sZeroRecords": "没有匹配结果",
+                        "sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                        "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                        "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
+                        "sInfoPostFix": "",
+                        "sSearch": "搜索:",
+                        "sUrl": "",
+                        "sEmptyTable": "表中数据为空",
+                        "sLoadingRecords": "载入中...",
+                        "sInfoThousands": ",",
+                        "oPaginate": {
+                            "sFirst": "首页",
+                            "sPrevious": "上页",
+                            "sNext": "下页",
+                            "sLast": "末页"
+                        },
+                        "oAria": {
+                            "sSortAscending": ": 以升序排列此列",
+                            "sSortDescending": ": 以降序排列此列"
+                        }
+                    }
+                });
+
+                table.buttons().container()
+                        .appendTo('#datatable-buttons_wrapper .col-md-6:eq(0)');
+            } );
+        function getLocalTime(nS) {  
+            return new Date(parseInt(nS) * 1000).Format("yyyy-MM-dd hh:mm:ss");  
+        } 
+</script>
+</html>

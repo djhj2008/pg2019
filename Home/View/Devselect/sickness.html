@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:img="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title><%$name%></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.
+">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
+
+    <!-- battery -->
+    <link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/battery.css">
+</head>
+<style>
+    b {color: #23527C;}
+</style>
+<body>
+<!--
+<div id="overview">
+    <p style="text-align:right">总头数:</p>
+</div>
+-->
+<div id="SickQuantity">
+		<p id="sicktitle" style="text-align:right;font-size:16px">总数量:<%$devcount%>&nbsp;&nbsp;&nbsp;&nbsp;</p>
+    <p id="sicktitle1" style="text-align:center;font-size:60px"><%count($devSelect1)%></p>
+    <p id="sicktitle2" style="text-align:center;font-size:60px;display:none"><%count($devSelect2)%></p>
+    <p id="sicktitle3" style="text-align:center;font-size:60px;display:none"><%count($devSelect3)%></p>
+    <p id="tab1sick" style="text-align:center;color:orange">生病数量</p>
+    <p id="tab2recover" style="text-align:center;color:green;display:none">治疗数量</p>
+    <p id="tab3recycle" style="text-align:center;color:red;display:none">死亡或脱落</p>
+</div>
+
+<div class="weui-tab">
+    <div class="weui-tab__bd">
+        <div class="weui-navbar">
+            <a class="weui-navbar__item weui-bar__item_on" href="#tab1"> 温度异常 </a>
+            <a class="weui-navbar__item" href="#tab2"> 治疗中 </a>
+            <a class="weui-navbar__item" href="#tab3"> 低温异常 </a>
+        </div>
+        <div class="weui-tab__panel">
+            <div id="tab1" class="weui_tab_bd_item weui_tab_bd_item_active" style="display">
+                <%foreach $devSelect1 as $value%>
+                <a href="<%$smarty.const.__APP__%>/devselect/setting?devid=<%$value['devid']%>&temp1=<%$value['temp1']%>&psnid=<%$value['psnid']%>"
+                   class="weui-media-box weui-media-box_appmsg">
+                    <table style="width: 100%;" cellspacing="1" cellpadding="1" border="0"
+                           align="left">
+                        <tbody>
+                        <tr>
+                            <td style="font-size:larger;font-weight:bold;"><%$value['psnid']%>厂<%$value['shed']%>棚<%$value['fold']%>栏
+                            </td>
+                            <td style="font-size:larger">ID:<%$value['devid']%></td>
+                            <td>
+                                <div id="battery"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                        		<%if $value["level"] eq 2  %>
+                            <td>
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:darkorange;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                            </td>
+                            <%else if $value["level"] eq 1%>
+                            <td>
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:gold;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                            </td>
+                            <%else%>
+                            <td>
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:lightgreen;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                            </td>                            
+                            <%/if%>
+                            <td style="font-weight:bold;">异常:<%$value['days']%>天</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>
+                            	<div style="height:25px;margin-top:10px;">
+                            	<label class="weui-form-preview__label"><%$value['date']%></label>
+                            	</div>
+                            </td>
+                            
+                            <td>&nbsp;</td>
+                            <td>
+                                <button id="TableOperate" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
+                                    处理
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </a>
+                <%/foreach%>
+               	 <p style="text-align:center">已到达底部</p>
+            </div>
+            <div id="tab2" class="weui_tab_bd_item" style="display:none">
+                <%foreach $devSelect2 as $value%>
+                <a href="<%$smarty.const.__APP__%>/devselect/setting2?devid=<%$value['devid']%>&temp1=<%$value['temp1']%>&psnid=<%$value['psnid']%>"
+                   class="weui-media-box weui-media-box_appmsg">
+                    <table style="width: 100%;" cellspacing="1" cellpadding="1" border="0"
+                           align="left">
+                        <tbody>
+                        <tr>
+                           	<td style="font-size:larger;font-weight:bold;"><%$value['psnid']%>厂<%$value['shed']%>棚<%$value['fold']%>栏
+                            </td>
+                            <td style="font-size:larger">ID:<%$value['devid']%></td>
+                            <td>
+                                <div id="battery"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                        		<%if $value["level"] eq 2  %>
+                            <td>
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:darkorange;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                            </td>
+                            <%else if $value["level"] eq 1%>
+                            <td>
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:gold;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                            </td>
+                            <%else%>
+                            <td>
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:lightgreen;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                            </td>                            
+                            <%/if%>
+                            <td style="font-weight:bold;">异常:<%$value['days']%>天</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>
+                            	<div style="height:25px;margin-top:10px;">
+                            	<label class="weui-form-preview__label"><%$value['date']%></label>
+                            	</div>
+                            </td>
+                            
+                            <td>&nbsp;</td>
+                            <td>
+                                <button id="TableOperate" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
+                                    处理
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </a>
+                <%/foreach%>
+                <p style="text-align:center">已到达底部</p>
+            </div>
+            <div id="tab3" class="weui_tab_bd_item" style="display:none">
+                <%foreach $devSelect3 as $value%>
+                <a href="<%$smarty.const.__APP__%>/devselect/setting3?devid=<%$value['devid']%>&temp1=<%$value['temp1']%>&psnid=<%$value['psnid']%>"
+                   class="weui-media-box weui-media-box_appmsg">
+                    <table style="width: 100%;" cellspacing="1" cellpadding="1" border="0"
+                           align="left">
+                        <tbody>
+                        <tr>
+                           	<td style="font-size:larger;font-weight:bold;"><%$value['psnid']%>厂<%$value['shed']%>棚<%$value['fold']%>栏
+                            </td>
+                            <td style="font-size:larger">ID:<%$value['devid']%></td>
+                            <td>
+                                <div id="battery"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                        		<%if $value["level"] eq 2  %>
+                            <td>
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:lightblue;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                            </td>
+                            <%else if $value["level"] eq 1 %>
+                            <td>
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:lightgray;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                            </td>
+                            <%else%>
+                            <td>
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:lightgreen;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                            </td>                     
+                            <%/if%>
+                            <td style="font-weight:bold;">异常:<%$value['days']%>天</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>
+                            	<div style="height:25px;margin-top:10px;">
+                            	<label class="weui-form-preview__label"><%$value['date']%></label>
+                            	</div>
+                            </td>
+                            
+                            <td>&nbsp;</td>
+                            <td>
+                                <button id="TableOperate" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
+                                    回收
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </a>
+                <%/foreach%>
+                <p style="text-align:center">已到达底部</p>
+            </div>
+        </div>
+    </div>
+    <!--div class="weui-tabbar">
+        <a href="<%$smarty.const.__APP__%>/devselect/sickness"
+           class="weui-tabbar__item weui-bar__item--on">
+
+            <div class="weui-tabbar__icon">
+                <img src="<%$smarty.const.IMG_URL%>/icon_nav_button.png" alt="">
+            </div>
+            <p class="weui-tabbar__label">首页</p>
+        </a>
+        <a href="<%$smarty.const.__APP__%>/add/deviceTab" class="weui-tabbar__item">
+            <div class="weui-tabbar__icon">
+                <img src="<%$smarty.const.IMG_URL%>/icon_nav_msg.png" alt="">
+            </div>
+            <p class="weui-tabbar__label">设备</p>
+        </a>
+        <a href="<%$smarty.const.__APP__%>/acadd/acTab" class="weui-tabbar__item">
+            <div class="weui-tabbar__icon">
+                <img src="<%$smarty.const.IMG_URL%>/icon_nav_article.png" alt="">
+            </div>
+            <p class="weui-tabbar__label">温度</p>
+        </a>
+        <a href="<%$smarty.const.__APP__%>/Mine/mineTab" class="weui-tabbar__item">
+            <div class="weui-tabbar__icon">
+                <img src="<%$smarty.const.IMG_URL%>/icon_nav_cell.png" alt="">
+            </div>
+            <p class="weui-tabbar__label">我的</p>
+        </a>
+    </div-->
+</div>
+
+<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4.js"></script>
+<script src="<%$smarty.const.AJS_URL%>fastclick.js"></script>
+<script src="<%$smarty.const.AJS_URL%>jquery-weui.js"></script>
+<script>
+		$(document).ready(function (){
+			 
+		});
+	
+    $(function() {
+        FastClick.attach(document.body);
+    });
+
+    $(function(){
+        $('.weui-navbar__item').on('click', function () {
+            $(this).addClass('weui-bar__item_on').siblings('.weui-bar__item_on').removeClass('weui-bar__item_on');
+            $(".weui-tab__panel .weui_tab_bd_item_active").css("display","none");
+            $(".weui-tab__panel .weui_tab_bd_item_active").removeClass('weui_tab_bd_item_active');
+            var data_toggle =jQuery(this).attr("href");
+            console.log("data_toggle: ",data_toggle);
+            $(data_toggle).addClass("weui_tab_bd_item_active");
+            $(data_toggle).css("display","");
+            if(data_toggle=="#tab2"){
+                //console.log("tab2recover");
+                $("#sicktitle1").css("display","none");
+                $("#sicktitle2").css("display","");
+                $("#sicktitle3").css("display","none");
+                $("#tab1sick").css("display","none");
+                $("#tab2recover").css("display","");
+                $("#tab3recycle").css("display","none");
+            }else if(data_toggle=="#tab3"){
+                //console.log("tab3recycle");
+                $("#sicktitle1").css("display","none");
+                $("#sicktitle2").css("display","none");
+                $("#sicktitle3").css("display","");
+                $("#tab1sick").css("display","none");
+                $("#tab2recover").css("display","none");
+                $("#tab3recycle").css("display","");
+            }else{
+                //console.log("other");
+                //console.log("data_toggle: ",data_toggle);
+                $("#sicktitle1").css("display","");
+                $("#sicktitle2").css("display","none");
+                $("#sicktitle3").css("display","none");
+                $("#tab1sick").css("display","");
+                $("#tab2recover").css("display","none");
+                $("#tab3recycle").css("display","none");
+            }
+        });
+    });
+
+    var ret = '<%$ret%>';
+    if (ret=="20000001"){
+        $.toptip('暂无查询数据');
+    }
+
+    function OperateSelect(){
+        console.log("Charge: ",charge);
+        //$.toptip('TODO');
+    }
+    var charge = default_charge = 100;
+    $("#battery").onload=function(){
+        batUpdate();
+    };
+
+    function batUpdate(){
+        console.log("Charge: ",charge);
+        if(charge<20){
+            // Red - Danger!
+            col = ["#750900","#c6462b", "#b74424", "#df0a00", "#590700"];
+        }else if(charge<40){
+            // Yellow - Might wanna charge soon...
+            col = ["#754f00","#f2bb00", "#dbb300", "#df8f00", "#593c00"];
+        }else{
+            // Green - All good!
+            col = ["#316d08","#60b939", "#51aa31", "#64ce11", "#255405"];
+        }
+        $("#battery").css("background-image","linear-gradient(to right, transparent 5%, "+col[0]+" 5%, "+col[0]+" 7%, "+col[1]+" 8%, "+col[1]+" 10%, "+col[2]+" 11%, "+col[2]+" "+ (charge-3) +"%, "+col[3]+" "+ (charge-2) +"%, "+col[3]+" "+ charge +"%, "+col[4]+" "+ charge +"%, black "+ (charge+5) +"%, black 95%, transparent 95%), linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.4) 4%, rgba(255,255,255,0.2) 7%, rgba(255,255,255,0.2) 14%, rgba(255,255,255,0.8) 14%, rgba(255,255,255,0.2) 40%, rgba(255,255,255,0) 41%, rgba(255,255,255,0) 80%, rgba(255,255,255,0.2) 80%, rgba(255,255,255,0.4) 86%, rgba(255,255,255,0.6) 90%, rgba(255,255,255,0.1) 92%, rgba(255,255,255,0.1) 95%, rgba(255,255,255,0.5) 98%)");
+    }
+    /*
+    $(document.body).css({
+       "overflow-x":"hidden",
+       "overflow-y":"hidden"
+     });
+     */
+    $(document.body).toggleClass("html-body-overflow");
+    /*
+        document.querySelector('body').addEventListener('touchmove', function(e) {
+            if (!document.querySelector('ul').contains(e.target)) {
+                e.preventDefault();
+            }
+        });
+    */
+
+    var overscroll = function(el) {
+        el.addEventListener('touchstart', function() {
+            var top = el.scrollTop
+            ,totalScroll = el.scrollHeight
+            ,currentScroll = top + el.offsetHeight;
+            if(top === 0) {
+                el.scrollTop = 1;
+            }else if(currentScroll === totalScroll) {
+                el.scrollTop = top - 1;
+            }
+        });
+
+        el.addEventListener('touchmove', function(evt) {
+        if(el.offsetHeight < el.scrollHeight)
+            evt._isScroller = true;
+        });
+    }
+
+    overscroll(document.querySelector('.scroll'));
+    document.body.addEventListener('touchmove', function(evt) {
+        if(!evt._isScroller) {
+            evt.preventDefault();
+        }
+    });
+
+</script>
+</body>
+<!-- Required datatable js -->
+<!--<script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jquery.dataTables.min.js"></script>-->
+<!--<script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.js"></script>-->
+<!--<script type="text/javascript">-->
+<!--</script>-->
+</html>

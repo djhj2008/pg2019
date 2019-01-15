@@ -1,0 +1,4 @@
+[ 2019-01-04T12:07:17+08:00 ] 61.148.245.175 http://124.207.250.67:16000/pg/index.php/home/datapush/pushnewsub10?sid=8195
+ERR: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it.
+
+

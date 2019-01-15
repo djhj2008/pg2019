@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<title>用户注册</title>
+<!--<link href="<%$smarty.const.ACSS_URL%>basic.css" rel="stylesheet" type="text/css">
+<link href="<%$smarty.const.ACSS_URL%>index.css" rel="stylesheet" type="text/css">-->
+<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script>
+<script src="<%$smarty.const.AJS_URL%>region_select.js"></script>
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css">
+<!--<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">-->
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="header">
+
+<br><br>
+<div class="container">
+
+<div class="col-lg-2">
+	<div class="panel panel-primary"> 
+	    <div class="panel-heading"></div> 
+	    <div class="panel-body"><h1>用户注册</h1></div> 
+	    <div class="panel-footer"></div> 
+	</div>
+</div>
+<br><br><br>
+  <form class="form-horizontal" name="f1"  onsubmit="return emp()" id="form1"   action=""   method="post" >
+    <fieldset>   
+    
+    <div class="control-group" >
+      <label class="control-label" for="susername">用户名:</label>
+      <div class="controls">
+      <input name="name"  id="name_id"  type="text">
+      <p class="help-block" id="ts5">请输入您想要注册的用户名</p>
+      </div>
+    </div>
+
+    <div class="control-group" >
+      <label class="control-label" for="password">密码：</label>
+      <div class="controls">
+      <input name="pwd" class="inp" id='pawd'  type="password">
+      <p class="help-block" id="pw">密码可以由英文字母、数字、符号组成，长度6-20位</p>
+      </div>
+    </div>
+
+
+
+     <input type='hidden' name='aip' value="pc">
+
+  </fieldset>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">注册</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a class="btn btn-default" href="<%$smarty.const.__CONTROLLER__%>/login">登录</a>
+  </div>
+  </form>
+ </div>
+</div>
+</body>
+</html>
+
+
+
+
+
+
+
+<script type="text/javascript">
+    function emp(){
+        var user=document.getElementById("name_id")
+        if(user.value==''){
+        alert('用户名不能为空！');
+        return false;
+        }
+        var pawd=document.getElementById("pawd")
+        if(pawd.value==''){
+        alert('密码不能为空！');
+        return false;
+        }
+        if(pawd.value.length<6){
+        alert('密码至少为6位，请重新输入！');
+        return false;
+        }
+
+        
+
+
+        
+
+        return true;
+   }
+
+    
+    </script>
+
+
+
+
+
+
+

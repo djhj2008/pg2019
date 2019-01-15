@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:img="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title><%$name%></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.
+">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
+
+    <!-- battery -->
+    <link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/battery.css">
+</head>
+<style>
+    b {color: #23527C;}
+</style>
+
+<body>
+	
+<h2 style="text-align:center;font-size:25px" >温度异常处理</h2>
+<form class="form-horizontal"  method="post">
+<div class="weui-cells weui-cells_form">
+	<div class="weui-cell">
+    <div class="weui-cell__hd"><img src=""></div>
+    <div class="weui-cell__bd">
+      设备详情：
+    </div>
+  </div>
+  <div class="weui-cell">
+    <div class="weui-cell__bd">
+      <textarea class="weui-textarea" id="msg" placeholder="请输入文本" rows="4" name="msg"></textarea>
+      <div class="weui-textarea-counter"><span id="text-count">80</span>/80</div>
+    </div>
+  </div>
+ 
+  <div class="weui-btn-area">
+    <button class="weui-btn weui-btn_primary" type="submit">提交</button>
+  </div>
+</div>
+		<input type='hidden' name='devid' value="<% $devid %>">
+</form>
+<div class="weui-panel weui-panel_access">
+  <div class="weui-panel__hd">处理记录</div>
+  <div class="weui-panel__bd">
+  	<%foreach $recovery as $value%>
+    <a href="javascript:void(0);" class="weui-media-box weui-media-box_appmsg">
+      <div class="weui-media-box__hd">
+        <button id="temp" type="button"
+                class="btn btn-lg btn-primary"
+                style="font-size:larger;background-color:lightblue;height:35px;color:White;border-radius:3px;">
+           <%number_format($value["temp1"],2)%>℃
+        </button>
+      </div>
+      <div class="weui-media-box__bd">
+        <!--h4 class="weui-media-box__title">病历</h4-->
+        <p class="weui-media-box__desc"> <%$value["msg"]%></p>
+        <p class="weui-media-box__desc"> <%$value["time"]%></p>
+      </div>
+    </a>
+		<%/foreach%>
+  </div>
+
+</div>
+<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4.js"></script>
+<script src="<%$smarty.const.AJS_URL%>fastclick.js"></script>
+<script src="<%$smarty.const.AJS_URL%>jquery-weui.js"></script>
+<script>
+    $(function() {
+        FastClick.attach(document.body);
+    });
+
+    $("#msg").on("input propertychange", function () {
+        var $this = $(this),
+                _val = $this.val(),
+                count = "";
+        if (_val.length > 80) {
+            $this.val(_val.substring(0, 80));
+        }
+        count = 80 - $this.val().length;
+        $("#text-count").text(count);
+
+});
+</script>
+</body>
+</html>

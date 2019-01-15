@@ -1,0 +1,54 @@
+[ 2019-01-09T14:50:39+08:00 ] 124.207.250.66 /pg/index.php/devselect/factoryfail?psnid=1
+ERR: 模板不存在:E:/amp/Apache24/htdocs/pg/Home/View/Devselect/factoryfail.html
+
+[ 2019-01-09T17:15:10+08:00 ] 124.207.250.66 /pg/index.php/manager/login?code=061x5dFH02z2Oe2f31FH0ukqFH0x5dFv&state=123
+ERR: SQLSTATE[HY000]: General error: 1364 Field 'id' doesn't have a default value
+
+[ 2019-01-09T17:16:12+08:00 ] 124.207.250.66 /pg/index.php/manager/login?code=021gR7c218sfoQ1XkHc21hdcc21gR7cf&state=123
+ERR: SQLSTATE[HY000]: General error: 1364 Field 'id' doesn't have a default value
+
+[ 2019-01-09T17:33:07+08:00 ] 124.207.250.66 /pg/index.php/manager/login
+ERR: 模板不存在:E:/amp/Apache24/htdocs/pg/Home/View/Manager/login.html
+
+[ 2019-01-09T17:34:02+08:00 ] 124.207.250.66 /pg/index.php/manager/login
+ERR: 模板不存在:E:/amp/Apache24/htdocs/pg/Home/View/Manager/login.html
+
+[ 2019-01-09T17:37:07+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/weui.min.css
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T17:37:07+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/demos.css?v=01.01.5
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T17:37:07+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/jquery-weui.css
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T17:38:04+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/weui.min.css
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T17:38:04+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/jquery-weui.css
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T17:38:04+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/demos.css?v=01.01.5
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T17:38:28+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/demos.css?v=01.01.5
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T17:38:28+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/jquery-weui.css
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T17:38:28+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/weui.min.css
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T17:38:33+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/weui.min.css
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T17:38:33+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/demos.css?v=01.01.5
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T17:38:33+08:00 ] 124.207.250.66 /pg/index.php/manager/WEUI_URL/jquery-weui.css
+ERR: 非法操作:WEUI_URL
+
+[ 2019-01-09T18:39:59+08:00 ] 124.207.250.66 /pg/index.php/devselect/factoryfail?psnid=2
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time < ) AND `devid` = 103 AND `psn` = 2 ORDER BY devid asc LIMIT 0,1' at line 1
+

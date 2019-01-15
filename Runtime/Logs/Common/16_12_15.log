@@ -1,0 +1,6 @@
+[ 2016-12-15T09:44:46+08:00 ] 127.0.0.1 /base/index.php/Admin/Manager/login
+ERR: 无法加载模块:Admin
+
+[ 2016-12-15T09:45:01+08:00 ] 127.0.0.1 /base/index.php/Admin/Manager/login
+ERR: 无法加载模块:Admin
+

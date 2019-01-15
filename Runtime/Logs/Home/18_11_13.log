@@ -1,0 +1,15 @@
+[ 2018-11-13T06:44:06+08:00 ] 221.218.169.52 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and psn= 2 and time >= 1542038400 and time <= 1542124800 ) ORDER BY id asc' at line 1
+
+[ 2018-11-13T06:44:16+08:00 ] 221.218.169.52 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and psn= 2 and time >= 1542038400 and time <= 1542124800 ) ORDER BY id asc' at line 1
+
+[ 2018-11-13T06:46:00+08:00 ] 125.39.132.94 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and psn= 1 and time >= 1542038400 and time <= 1542124800 ) ORDER BY id asc' at line 1
+
+[ 2018-11-13T09:25:25+08:00 ] 124.207.250.66 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and psn= 1 and time >= 1542038400 and time <= 1542124800 ) ORDER BY id asc' at line 1
+
+[ 2018-11-13T09:29:33+08:00 ] 124.207.250.66 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and psn= 1 and time >= 1542038400 and time <= 1542124800 ) ORDER BY id asc' at line 1
+

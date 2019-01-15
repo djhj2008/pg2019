@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>曲线图</title>
+	<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script> 
+	<script src="<%$smarty.const.AJS_URL%>highcharts.js"></script>
+    <link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+<script src="<%$smarty.const.AJS_URL%>exporting.js"></script>
+</head>
+<style>
+	b {color: #23527C;}
+</style>
+<body>
+ 	<div class="container" >
+ 	<div class="navbar navbar-default navbar-fixed-left" >
+		<ul class="nav navbar-nav" >
+			<li class="active"><a href="<%$smarty.const.__APP__%>/devselect/select"><b >首页</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/add/add"><b>添加设备</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/add/move"><b>移动设备</b></a></li>
+				<li><a href="<%$smarty.const.__APP__%>/add/saveinfo"><b>修改设备信息</b></a></li>
+				<li><a href="<%$smarty.const.__APP__%>/add/select"><b>查询设备信息</b></a></li>
+	      <!--<li><a href="<%$smarty.const.__APP__%>/acadd/add"><b>温度输入</b></a></li>-->
+	      <li><a href="<%$smarty.const.__APP__%>/acadd/select"><b>查询温度情况</b></a></li>
+	      <!--<li><a href="<%$smarty.const.__APP__%>/acadd/save"><b>修改温度记录</b></a></li>-->
+	      <li><a href="<%$smarty.const.__APP__%>/manager/login"><b>退出登陆</b></a></li>
+			</ul>
+		</div>
+		</div>
+
+    <div class="container" >
+	<div id="container0" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+     <input type="hidden" id='input_1' value="<%$temp1_1%>">
+     <input type="hidden" id='input_2' value="<%$temp2_1%>">
+     <input type="hidden" id='input_1_1' value="<%$time%>">
+
+    <div id="container1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+    <div id="container2" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+    </div>
+</body>
+</html>
+<script>
+	$(function () {
+        var cosPoints = $("#input_1").val();
+            cosPoints=eval(cosPoints);
+				var cosPoints2 = $("#input_2").val();
+						cosPoints2=eval(cosPoints2)
+        var time    = $("#input_1_1").val();
+            time    = eval(time);
+            //alert(time);
+    Highcharts.chart('container0', {
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: '温度图1'
+        },
+        subtitle: {
+            text: '每日一图 1'
+        },
+        xAxis: {
+            type: 'datetime',
+            labels: {
+                overflow: 'justify'
+            }
+        },
+        yAxis: {
+            title: {
+                text: '摄氏度'
+            },
+            minorGridLineWidth: 0,
+            gridLineWidth: 0,
+            alternateGridColor: null,
+            plotBands: [{ // Light air
+                from: 0.3,
+                to: 1.5,
+                color: 'rgba(68, 170, 213, 0.1)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // Light breeze
+                from: 1.5,
+                to: 3.3,
+                color: 'rgba(0, 0, 0, 0)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // Gentle breeze
+                from: 3.3,
+                to: 5.5,
+                color: 'rgba(68, 170, 213, 0.1)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // Moderate breeze
+                from: 5.5,
+                to: 8,
+                color: 'rgba(0, 0, 0, 0)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // Fresh breeze
+                from: 8,
+                to: 11,
+                color: 'rgba(68, 170, 213, 0.1)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // Strong breeze
+                from: 11,
+                to: 14,
+                color: 'rgba(0, 0, 0, 0)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // High wind
+                from: 14,
+                to: 15,
+                color: 'rgba(68, 170, 213, 0.1)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }]
+        },
+        tooltip: {
+            valueSuffix: ' 摄氏度'
+        },
+        plotOptions: {
+            spline: {
+                lineWidth: 3,
+                states: {
+                    hover: {
+                        lineWidth: 5
+                    }
+                },
+                marker: {
+                    enabled: false
+                },
+                pointInterval: 3600000, // one hour,毫秒数
+                pointStart: Date.UTC(time[0],time[1],time[2],time[3],time[4],time[5])
+            }
+        },
+        series: [{
+            name: 'Your device',
+            data: cosPoints
+
+        }],
+        navigation: {
+            menuItemStyle: {
+                fontSize: '20px'
+            }
+        }
+    });
+
+
+
+    Highcharts.chart('container1', {
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: '温度图2'
+        },
+        subtitle: {
+            text: '每日一图 2'
+        },
+        xAxis: {
+            type: 'datetime',
+            labels: {
+                overflow: 'justify'
+            }
+        },
+        yAxis: {
+            title: {
+                text: '摄氏度'
+            },
+            minorGridLineWidth: 0,
+            gridLineWidth: 0,
+            alternateGridColor: null,
+            plotBands: [{ // Light air
+                from: 0.3,
+                to: 1.5,
+                color: 'rgba(68, 170, 213, 0.1)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // Light breeze
+                from: 1.5,
+                to: 3.3,
+                color: 'rgba(0, 0, 0, 0)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // Gentle breeze
+                from: 3.3,
+                to: 5.5,
+                color: 'rgba(68, 170, 213, 0.1)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // Moderate breeze
+                from: 5.5,
+                to: 8,
+                color: 'rgba(0, 0, 0, 0)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // Fresh breeze
+                from: 8,
+                to: 11,
+                color: 'rgba(68, 170, 213, 0.1)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // Strong breeze
+                from: 11,
+                to: 14,
+                color: 'rgba(0, 0, 0, 0)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }, { // High wind
+                from: 14,
+                to: 15,
+                color: 'rgba(68, 170, 213, 0.1)',
+                label: {
+                    text: '',
+                    style: {
+                        color: '#606060'
+                    }
+                }
+            }]
+        },
+        tooltip: {
+            valueSuffix: ' 摄氏度'
+        },
+        plotOptions: {
+            spline: {
+                lineWidth: 3,
+                states: {
+                    hover: {
+                        lineWidth: 5
+                    }
+                },
+                marker: {
+                    enabled: false
+                },
+                pointInterval: 3600000, // one hour,毫秒数
+                pointStart: Date.UTC(time[0],time[1],time[2],time[3],time[4],time[5])
+            }
+        },
+        series: [{
+            name: 'Your device',
+            data: cosPoints2
+
+        }],
+        navigation: {
+            menuItemStyle: {
+                fontSize: '20px'
+            }
+        }
+    });
+
+
+
+
+
+});
+</script>

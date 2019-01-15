@@ -1,0 +1,6 @@
+[ 2018-09-13T09:15:58+08:00 ] 192.55.54.39 /base/index.php/Home/time/accesskey
+ERR: 非法操作:accesskey
+
+[ 2018-09-13T17:06:19+08:00 ] 58.247.212.207 /base/index.php/home/datapush/pushnew?sid=0
+ERR: 非法操作:pushnew
+

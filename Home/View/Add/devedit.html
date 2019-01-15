@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:img="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title><%$name%></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.
+">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
+
+    <!-- battery -->
+    <link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/battery.css">
+</head>
+<style>
+    b {color: #23527C;}
+</style>
+
+<body>
+	
+<h2 style="text-align:center;font-size:25px" >修改SN编码</h2>
+<form class="form-horizontal"  method="post">
+<div class="weui-cells">
+		<div class="weui-cell weui-cell_select weui-cell_select-after">
+		  <div class="weui-cell__hd">
+		      <label for="" class="weui-label">区域</label>
+		  </div>
+		  <div class="weui-cell__bd">
+		      <select class="weui-select" name="psn" id="psn">
+		          <option value=<%$psnid%>><%$psninfo%></option>
+		      </select>
+		  </div>
+		</div>
+    <div class="weui-cell">
+        <div class="weui-cell__hd"><label class="weui-label">设备ID</label></div>
+        <div class="weui-cell__bd">
+            <input class="weui-input" pattern="[0-9]*" type="number" value="<%$devid%>" id="devid" name="devid" readonly="readonly">
+        </div>
+    </div>
+    <div class="weui-cell">
+        <div class="weui-cell__hd"><label class="weui-label">SN编码</label></div>
+        <div class="weui-cell__bd">
+            <input class="weui-input" pattern="[0-9]*" type="number" value="<%$sn%>" id="sn" name="sn">
+        </div>
+    </div>
+    <div class="weui-cell weui-cell_switch">
+        <div class="weui-cell__bd">状态</div>
+        <div class="weui-cell__ft">
+            <input class="weui-switch" type="checkbox" id="flag" name="flag">
+        </div>
+    </div>
+	  <div class="weui-btn-area">
+	    <button class="weui-btn weui-btn_primary" type="submit" id="btn">提交</button>
+	  </div>
+</div>
+</form>
+
+<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4.js"></script>
+<script src="<%$smarty.const.AJS_URL%>fastclick.js"></script>
+<script src="<%$smarty.const.AJS_URL%>jquery-weui.js"></script>
+<script>
+    $(function() {
+        FastClick.attach(document.body);
+    });
+    
+    var flag='<%$flag%>';
+		if(flag=="1"){
+			$("#flag").attr("checked", true);
+		}else{
+			$("#flag").attr("checked", false);
+		}
+		
+    var ret='<%$errcode%>';
+    //$.toptip(ret);
+    if(ret=="2001"){
+	     	$.toptip('修改失败.');
+    }
+  
+</script>
+</body>
+</html>

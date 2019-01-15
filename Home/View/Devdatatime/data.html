@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>查询设备记录</title>
+	<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script>
+	
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+	<!--<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css">-->
+	<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+	<style>
+	  b {color: #23527C;}
+	</style>
+</head>
+<body>
+<div class="header" style="padding-top: 3%">
+<div class="container">
+    <div class="navbar navbar-default navbar-fixed-top">
+    <ul class="nav navbar-nav" style="margin-left: 12%">
+      <li><a href="<%$smarty.const.__APP__%>/devselect/select"><b>首页</b></a></li>
+      <li><a href="<%$smarty.const.__APP__%>/add/add"><b>添加设备</b></a></li>
+      <li><a href="<%$smarty.const.__APP__%>/acadd/select"><b>查询温度情况</b></a></li>
+      <li><a href="javascript:void"><b>导航一</b></a></li>
+      <li><a href="javascript:void"><b>导航一</b></a></li>
+    </ul>
+    </div>
+</div>
+
+<div class="container">
+
+  <form class="form-horizontal" name="f1"   id="form1"   action=""   method="post" >
+    <fieldset>
+    <div class="control-group" >
+      <label class="control-label" >DEVID</label>
+      <div class="controls">
+      <input name="devid"  type="text">
+     
+      </div>
+    
+    <div class="control-group" >
+      <label class="control-label" >开始时间</label>
+      <div class="controls">
+      <input name="startTime"  type="text">
+    </div>
+
+    <div class="control-group" >
+      <label class="control-label" >结束时间</label>
+      <div class="controls">
+      <input name="endTime"  type="text">
+    </div>
+	<input type='hidden' name='aip' value="pc">
+    </fieldset>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">查询</button>
+  </div>
+  </form>
+
+ </div>
+    
+</div>
+<br><br><br><br>
+<%if $data%>
+	<table class="table table-bordered table-hover"  >
+		<tr>
+			<th>id</th>
+			<th>temp1</th>
+			<th>temp2</th>
+			<th>time</th>
+			<th>devid</th>
+		</tr>
+		<%foreach $data as $value%>
+		<tr>
+			<td><%$value['id']%></td>
+			<td><%$value['temp1']%></td>
+			<td><%$value['temp2']%></td>
+			<td><%$value['time']%></td>
+			<td><%$value['devid']%></td>
+		</tr>
+		<%/foreach%>
+	</table>
+	<!-- <br><br><br><br>
+	<div class="container">
+
+        <%foreach $data as $v%>
+        <div class="control-group" >
+          <label class="control-label" >id</label>
+          <div class="controls">
+          <p><%$v.id%></p>
+         
+          </div>
+        </div>
+
+        <div class="control-group" >
+          <label class="control-label" >temp1</label>
+          <div class="controls">
+          <p><%$v.temp1%></p>
+          
+          </div>
+        </div>
+
+        <div class="control-group" >
+          <label class="control-label">temp2</label>
+          <div class="controls">
+          <p><%$v.temp2%></p>
+        
+          </div>
+        </div>
+
+        <div class="control-group" >
+          <label class="control-label">time</label>
+          <div class="controls">
+          <p><%$v.time%></p>
+        
+          </div>
+        </div>
+
+        <div class="control-group" >
+          <label class="control-label">DEVID</label>
+          <div class="controls">
+              <p><%$v.devid%></p>
+          </div>
+        </div>
+<br><br><br><br>
+        
+
+        <%/foreach%>
+
+     </div> -->
+<%/if%>		
+</body>
+</html>

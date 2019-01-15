@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+    <script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css">
+    <script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+
+
+	<script src="http://libs.baidu.com/jquery/1.8.2/jquery.min.js"></script>  
+	<link href="<%$smarty.const.JQPLOT%>jquery.jqplot.min.css" rel="stylesheet" />
+<!-- <script src="js/jquery.min.js"></script> -->
+<script src="<%$smarty.const.JQPLOT%>/jquery.jqplot.min.js"></script>
+    
+<!--[if lt IE 9]>
+<script src="js/excanvas.min.js"></script>
+<![endif]-->
+
+
+
+</head>
+<body>
+ <div id="chart" style="width:800px;height:500px;" ></div>
+ <input type="hidden" id='input_1' value="<%$ajarr%>">
+</body>
+</html>
+
+
+<script>
+ 
+
+
+
+
+    $(function () {
+            var cosPoints = $("#input_1").val();
+            cosPoints=eval(cosPoints);
+            
+            for (var i = 0; i < 2 * Math.PI; i += 0.2) {
+                cosPoints.push([i, Math.cos(i)]);
+            }
+            $.jqplot("chart", [cosPoints], {
+                series: [{ showMarker: false }],
+                axes: {
+                    xaxis: {
+                        label: "Angle(radians)",
+                        labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                        labelOptions: {
+                            fontFamily: 'Georgia, Serif',
+                            fontSize: '12pt'
+                        }
+                    },
+                    yaxis: {
+                        label: "Cosine",
+                        labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                        labelOptions: {
+                            fontFamily: 'Georgia, Serif',
+                            fontSize: '12pt'
+                        }
+                    }
+                }
+            });
+        });   
+</script>

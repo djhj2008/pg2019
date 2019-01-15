@@ -1,0 +1,21 @@
+[ 2017-08-25T10:46:14+08:00 ] 124.207.250.66 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
+
+[ 2017-08-25T13:56:36+08:00 ] 124.207.250.66 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
+
+[ 2017-08-25T15:13:51+08:00 ] 124.207.250.66 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
+
+[ 2017-08-25T15:44:17+08:00 ] 124.207.250.66 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
+
+[ 2017-08-25T15:51:12+08:00 ] 124.207.250.66 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
+
+[ 2017-08-25T15:54:02+08:00 ] 124.207.250.66 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
+
+[ 2017-08-25T15:54:03+08:00 ] 124.207.250.66 /base/index.php/acadd/select
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
+

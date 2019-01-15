@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:img="http://www.w3.org/1999/html">
+<head>
+	<meta charset="UTF-8">
+	<title>设备展示</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.
+">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
+
+
+</head>
+<style>
+	b {color: #23527C;}
+
+</style>
+<body>
+
+<div class="weui-tab">
+        <div class="weui-tab__bd">
+            <div id="tab1" class="weui_tab_bd_item weui_tab_bd_item_active">
+                <div class="weui-panel weui-panel_access">
+		                <div class="weui-search-bar" id="searchBar">
+		                    <form class="weui-search-bar__form" action="<%$smarty.const.__APP__%>/add/devlist" id="serchForm"  method="post">
+		                        <div class="weui-search-bar__box">
+		                            <i class="weui-icon-search"></i>
+		                            <input type="search" class="weui-search-bar__input" id="searchInput" placeholder="搜索" required="" name="devid">
+		                            <a href="javascript:" class="weui-icon-clear" id="searchClear"></a>
+		                        </div>
+		                        <label class="weui-search-bar__label" id="searchText" style="transform-origin: 0px 0px 0px; opacity: 1; transform: scale(1, 1);">
+		                            <i class="weui-icon-search"></i>
+		                            <span>搜索</span>
+		                        </label>
+		                    </form>
+		                    <a href="javascript:" class="weui-search-bar__cancel-btn" id="searchCancel">取消</a>
+		                </div>
+                    <div class="weui-panel__bd">
+								        <a class="weui-cell weui-cell_access" href="<%$smarty.const.__APP__%>/add/adddev">
+								            <div class="weui-cell__hd"></div>
+								            <div class="weui-cell__bd">
+								                <p>添加设备</p>
+								            </div>
+								            <div class="weui-cell__ft">进入添加设备</div>
+								        </a>
+                        <%foreach $devSelect as $value%>
+                        <a href="<%$smarty.const.__APP__%>/add/devedit?devid=<%$value['devid']%>&psnid=<%$value['psn']%>" class="weui-media-box weui-media-box_appmsg">
+                        <table style="width: 100%;" cellspacing="1" cellpadding="1" border="0"align="left">
+                           <tbody>
+                        	 <tr>
+                        	 <%if $value['flag'] eq 1 %>	
+                           <td style="font-size:larger">设备ID:<%$value['devid']%></td>
+                           <td style="color:blue">已激活</td>
+                           <%else%>
+                           <td style="font-size:larger">设备ID:<%$value['devid']%></td>
+                           <td style="color:gray">未使用</td>
+                           <%/if%>
+                           </tr>
+                           <%if !empty($value['sn']) %>
+                           <tr>
+                           <%if $value['flag'] eq 1 %>	
+                           <td style="font-size:larger;color:blue">SN编码:<%$value['sn']%></td>
+                           <%else%>
+                           <td style="font-size:larger;color:gray">SN编码:<%$value['sn']%></td>
+                           <%/if%>
+                           </tr>
+                           <%/if%>
+                        	 <tr>
+                           <td>
+                            	<div style="height:25px;margin-top:10px;">
+                            	<label class="weui-form-preview__label"><%$value['time']%></label>
+                            	</div>
+                           </td>
+                        	 </tr>
+		                       </tbody>
+		                    </table>
+                        </a>
+                        <%/foreach%>
+
+
+
+                    </div>
+                </div>
+                <div class="afterLine" style="height: 90px">
+
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+
+    <script src="<%$smarty.const.AJS_URL%>jquery-2.1.4.js"></script>
+    <script src="<%$smarty.const.AJS_URL%>jquery-weui.js"></script>
+    <script src="<%$smarty.const.AJS_URL%>fastclick.js"></script>
+    <script>
+        $(function() {
+            FastClick.attach(document.body);
+        });
+        var ret = '<%$ret%>';
+        if (ret=="2001"){
+            $.toptip('该设备不存在.');
+        }
+
+    </script>
+
+
+
+
+
+
+
+
+</body>
+<!-- Required datatable js -->
+
+
+<!--<script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jquery.dataTables.min.js"></script>-->
+<!--<script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.js"></script>-->
+<!--<script type="text/javascript">-->
+
+<!--</script>-->
+</html>

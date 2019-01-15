@@ -1,0 +1,3 @@
+[ 2017-11-19T11:21:49+08:00 ] 223.104.7.32 /base/index.php/acadd/select?nsukey=cbAWlg83J7%2FBlaJAGS0pkuwhn4FON1JkPMn8JhHpto81plCsTE05A0WDr%2BES4T7ySeYUdb8SumFax4Y08xnurRgsLv172N2SbdEDDwtanfbL2mAQ%2B7UzRP7I9ymM%2FWFRqTTg2ajW5oqY6tUr2fZPkDJU6c2tv05HvsjnicTvfBsK%2Fr8n4dXFVKlUkFQJzzGA%2F1sb0Mo%2FhRsmc7TXApgJGA%3D%3D
+ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
+

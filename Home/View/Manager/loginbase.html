@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>登录</title>
+<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script>
+<script src="<%$smarty.const.AJS_URL%>region_select.js"></script>
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css">
+<!--<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">-->
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+</head>
+<body>
+  
+<div class="container">
+  <h1 class="page-header">登录</h1>
+  <form class="form-horizontal" action="" onSubmit="return chkinput(this)" method="post">
+  <fieldset>   
+    <div class="control-group">
+      <label class="control-label">用户名</label>
+      <div class="controls">
+        <input type="text"   id="admin_user" name="name">
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">密码</label>
+      <div class="controls">
+        <input type="password"  id="admin_psd" name="pwd">
+        <input type='hidden' name='aip' value="pc">
+
+      </div>
+    </div>
+  <fieldset>     
+    <div class="form-actions">
+    <button type="submit" class="btn btn-primary">登录</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <!--a class="btn btn-default" href="<%$smarty.const.__CONTROLLER__%>/register">注册</a-->
+    </div>
+
+  </form>
+</div>
+</body>
+</html>
+<script>
+  function chkinput(form){
+    if(form.name.value==""){
+      alert('请输入用户名');
+      form.name.select();
+      return(false);
+    }
+
+    if(form.pwd.value==""){
+      alert('请输入密码');
+      form.pwd.select();
+      return(false);
+    }
+    return(true);
+  }
+</script>

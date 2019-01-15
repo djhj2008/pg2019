@@ -1,0 +1,77 @@
+[ 2016-09-26T12:05:54+08:00 ] 127.0.0.1 /base/index.php
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000032s ]
+INFO: [ app_init ] --END-- [ RunTime:0.000115s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.000659s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.000716s ]
+INFO: [ view_parse ] --START--
+INFO: [ template_filter ] --START--
+INFO: Run Behavior\ContentReplaceBehavior [ RunTime:0.000037s ]
+INFO: [ template_filter ] --END-- [ RunTime:0.000097s ]
+INFO: Run Behavior\ParseTemplateBehavior [ RunTime:0.006047s ]
+INFO: [ view_parse ] --END-- [ RunTime:0.006118s ]
+INFO: [ view_filter ] --START--
+INFO: Run Behavior\WriteHtmlCacheBehavior [ RunTime:0.000642s ]
+INFO: [ view_filter ] --END-- [ RunTime:0.000697s ]
+INFO: [ app_end ] --START--
+INFO: Run Behavior\ShowPageTraceBehavior [ RunTime:0.000708s ]
+INFO: [ app_end ] --END-- [ RunTime:0.000762s ]
+
+[ 2016-09-26T12:13:20+08:00 ] 127.0.0.1 /base/index.php
+ERR: Unkown resource type '; margin'
+
+[ 2016-09-26T12:14:16+08:00 ] 127.0.0.1 /base/index.php/home/index/index
+ERR: Unkown resource type '; margin'
+
+[ 2016-09-26T12:15:11+08:00 ] 127.0.0.1 /base/index.php/home/index/index
+ERR: Unkown resource type '; margin'
+
+[ 2016-09-26T12:18:23+08:00 ] 127.0.0.1 /base/index.php/home/index/index
+ERR: Unkown resource type '; margin'
+
+[ 2016-09-26T12:40:23+08:00 ] 127.0.0.1 /base/index.php/home/index/index
+ERR: Unkown resource type '; margin'
+
+[ 2016-09-26T15:34:34+08:00 ] 127.0.0.1 /base/index.php/home/add/select
+ERR: Think\Controller:assage方法不存在！
+
+[ 2016-09-26T15:36:48+08:00 ] 127.0.0.1 /base/index.php/home/add/select
+ERR: Syntax Error in template "D:/amp/apache/htdocs/base/Home/View\Add\select.html"  on line 40 "&lt;%php%&gt;echo $v;&lt;%/php%&gt;" unknown tag "php"
+
+[ 2016-09-26T16:26:17+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: 无法加载控制器:Acadd
+
+[ 2016-09-26T16:27:48+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: 无法加载控制器:Acadd
+
+[ 2016-09-26T16:27:51+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: 无法加载控制器:Acadd
+
+[ 2016-09-26T16:28:03+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: 无法加载控制器:Acadd
+
+[ 2016-09-26T16:28:18+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: SQLSTATE[HY000]: General error: 1364 Field 'shed' doesn't have a default value
+
+[ 2016-09-26T16:28:49+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: SQLSTATE[HY000]: General error: 1364 Field 'shed' doesn't have a default value
+
+[ 2016-09-26T16:28:50+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: SQLSTATE[HY000]: General error: 1364 Field 'shed' doesn't have a default value
+
+[ 2016-09-26T16:29:12+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: SQLSTATE[HY000]: General error: 1364 Field 'shed' doesn't have a default value
+
+[ 2016-09-26T16:29:58+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: SQLSTATE[HY000]: General error: 1364 Field 'time' doesn't have a default value
+
+[ 2016-09-26T16:30:26+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'temp' cannot be null
+
+[ 2016-09-26T16:30:48+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'temp' cannot be null
+
+[ 2016-09-26T16:31:20+08:00 ] 127.0.0.1 /base/index.php/home/acadd/add
+ERR: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'temp' cannot be null
+

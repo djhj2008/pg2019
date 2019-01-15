@@ -1,0 +1,39 @@
+[ 2019-01-14T14:00:07+08:00 ] 117.136.0.133 /pg/index.php/devselect/sickness
+ERR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'psn' in 'where clause'
+
+[ 2019-01-14T15:12:17+08:00 ] 124.207.250.66 /pg/index.php/devselect/start?psnid=1
+ERR: 非法操作:start
+
+[ 2019-01-14T15:13:28+08:00 ] 124.207.250.66 /pg/index.php/devselect/start?psnid=1
+ERR: SQLSTATE[HY000]: General error: 1364 Field 'psnid' doesn't have a default value
+
+[ 2019-01-14T15:47:37+08:00 ] 117.136.0.133 /pg/index.php/add/deviceTab
+ERR: 非法操作:deviceTab
+
+[ 2019-01-14T15:47:37+08:00 ] 117.136.0.133 /pg/index.php/acadd/acTab
+ERR: 非法操作:acTab
+
+[ 2019-01-14T15:55:07+08:00 ] 117.136.0.133 /pg/index.php/Mine/mineTab
+ERR: 无法加载控制器:Mine
+
+[ 2019-01-14T15:59:06+08:00 ] 117.136.0.133 /pg/index.php/add/deviceTab
+ERR: 非法操作:deviceTab
+
+[ 2019-01-14T17:04:37+08:00 ] 117.136.0.133 /pg/index.php/devselect/setting?devid=43&temp1=50
+ERR: SQLSTATE[HY000]: General error: 1364 Field 'psnid' doesn't have a default value
+
+[ 2019-01-14T17:05:37+08:00 ] 117.136.0.133 /pg/index.php/devselect/setting?devid=43&temp1=50
+ERR: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'psnid' cannot be null
+
+[ 2019-01-14T17:05:54+08:00 ] 117.136.0.133 /pg/index.php/devselect/setting?devid=43&temp1=50
+ERR: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'psnid' cannot be null
+
+[ 2019-01-14T17:06:09+08:00 ] 117.136.0.133 /pg/index.php/devselect/setting?devid=43&temp1=50
+ERR: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'psnid' cannot be null
+
+[ 2019-01-14T17:09:41+08:00 ] 117.136.0.133 /pg/index.php/devselect/setting?devid=43&temp1=50&psnid=1
+ERR: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'psnid' cannot be null
+
+[ 2019-01-14T17:17:22+08:00 ] 117.136.0.133 /pg/index.php/devselect/adddev
+ERR: 非法操作:adddev
+
