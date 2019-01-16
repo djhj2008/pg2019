@@ -43,8 +43,8 @@ class DevselectController extends HomeController {
   	}
   	//dump($where);
   	//exit;
-  	$devdount=M('device')->where($where1.' and flag > 0')->count();
-		$devSelect1=M('sickness')->where($where2)->where(array('state'=>1))->order('devid asc')->select();
+  	$devdount=M('device')->where($where1.' and flag > 0 and dev_type=0')->count();
+		$devSelect1=M('sickness')->where($where2)->where(array('state'=>1,))->order('devid asc')->select();
 		$devSelect2=M('sickness')->where($where2)->where(array('flag'=>1))->order('devid asc')->select();
 		$devSelect3=M('sickness')->where($where2)->where(array('state'=>2))->order('devid asc')->select();
 		$this->assign('devcount',$devdount);
@@ -57,7 +57,7 @@ class DevselectController extends HomeController {
 	
 	public function devlist(){
 		$psnid = $_GET['psnid'];
-		$devSelect=M('device')->where(array('flag'=>1,'dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
+		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
 		//dump($dev);
 		$this->assign('devSelect',$devSelect);
 		$this->display();
@@ -324,35 +324,38 @@ class DevselectController extends HomeController {
 					{
         		foreach($sick as $s){
         			$ret=M('access')->where('time >'.$start_time.' and time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$s['devid']))->order('temp1 desc')->limit(0,1)->find();
-        			if(!empty($ret)){        					
-      					$date = date('Y-m-d H:i:s',$ret['time']);
-      					$day1 = strtotime((date('Y-m-d',$ret['time'])));
-      					$day2 = strtotime((date('Y-m-d',$s['time'])));
-      					if($day1-$day2>=86400){
-      						$days=$s['days']+1;
-      					}else{
-      						$days=$s['days'];
-      					}
-      					$temp = $ret['temp1'];
-      					if($temp>=$hlevl2){
-      						$level=2;
-      					}else if($temp>=$hlevl1){
-      						$level=1;
-      					}else{
-      						$level=0;
-      					}
+							$dev=M('device')->where(array('psn'=>$psn,'devid'=>$s['devid']))->find();
+        			if(!empty($ret)&&!empty($dev)){    
+        				$flag=$dev['flag'];
+        				if($flag==1){				
+	      					$date = date('Y-m-d H:i:s',$ret['time']);
+	      					$day1 = strtotime((date('Y-m-d',$ret['time'])));
+	      					$day2 = strtotime((date('Y-m-d',$s['time'])));
+	      					if($day1-$day2>=86400){
+	      						$days=$s['days']+1;
+	      					}else{
+	      						$days=$s['days'];
+	      					}
+	      					$temp = $ret['temp1'];
+	      					if($temp>=$hlevl2){
+	      						$level=2;
+	      					}else if($temp>=$hlevl1){
+	      						$level=1;
+	      					}else{
+	      						$level=0;
+	      					}
 
-      					$sk=array(
-							  		'temp1'=>$ret['temp1'],
-										'time'=>$ret['time'],
-										'date'=>$date,
-										'level'=>$level,
-										'state'=>1,
-										'days'=>$days,
-							  		);
-							  $saveSql=D('sickness')->where(array('devid'=>$s['devid'],'psn'=>$s['psn']))->save($sk);
-      					dump($sk);
-        					
+	      					$sk=array(
+								  		'temp1'=>$ret['temp1'],
+											'time'=>$ret['time'],
+											'date'=>$date,
+											'level'=>$level,
+											'state'=>1,
+											'days'=>$days,
+								  		);
+								  $saveSql=D('sickness')->where(array('devid'=>$s['devid'],'psn'=>$s['psn']))->save($sk);
+	      					dump($sk);
+        				}
         			}
         		}
  
@@ -368,29 +371,32 @@ class DevselectController extends HomeController {
 		        		$date = date('Y-m-d H:i:s',$acs['time']);
 		        		$dev = M('device')->where(array('psn'=>$acs['psn'],'devid'=>$acs['devid']))->find();
 		        		if(!empty($dev)){
-	      					$temp = $acs['temp1'];
-	      					if($temp>=$hlevl2){
-	      						$level=2;
-	      					}else if($temp>=$hlevl1){
-	      						$level=1;
-	      					}else{
-	      						$level=0;
-	      					}
-				        	$sk=array(
-							   	  'psnid'=>$acs['psn'],
-							  		'devid'=>$acs['devid'],
-							  		'shed'=>$dev['shed'],
-							  		'fold'=>$dev['fold'],
-							  		'temp1'=>$acs['temp1'],
-										'time'=>$acs['time'],
-										'level'=>$level,
-										'date'=>$date,
-										'state'=>1,
-										'days'=>1,
-							  		);
-							  	echo "add:";
-							  	dump($sk);
-		  			  	 	$saveSql=D('sickness')->add($sk);
+		        			$flag=$dev['flag'];
+		        			if($flag==1){
+		      					$temp = $acs['temp1'];
+		      					if($temp>=$hlevl2){
+		      						$level=2;
+		      					}else if($temp>=$hlevl1){
+		      						$level=1;
+		      					}else{
+		      						$level=0;
+		      					}
+					        	$sk=array(
+								   	  'psnid'=>$acs['psn'],
+								  		'devid'=>$acs['devid'],
+								  		'shed'=>$dev['shed'],
+								  		'fold'=>$dev['fold'],
+								  		'temp1'=>$acs['temp1'],
+											'time'=>$acs['time'],
+											'level'=>$level,
+											'date'=>$date,
+											'state'=>1,
+											'days'=>1,
+								  		);
+								  	echo "add:";
+								  	dump($sk);
+			  			  	 	$saveSql=D('sickness')->add($sk);
+		  			  		}
 	  			  		}
 	      			}
       			}	
@@ -404,7 +410,10 @@ class DevselectController extends HomeController {
 					{
         		foreach($sick3 as $s){
         			$ret=M('access')->where('time >'.$start_time.' and time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$s['devid']))->order('temp1 asc')->limit(0,1)->find();
-        			if(!empty($ret)){
+							$dev=M('device')->where(array('psn'=>$psn,'devid'=>$s['devid']))->find();
+        			if(!empty($ret)&&!empty($dev)){
+        				$flag=$dev['flag'];
+        				if($flag==1){				
         					$date = date('Y-m-d H:i:s',$ret['time']);
         					$day1 = strtotime((date('Y-m-d',$ret['time'])));
         					$day2 = strtotime((date('Y-m-d',$s['time'])));
@@ -431,7 +440,7 @@ class DevselectController extends HomeController {
 								  		);
 								  $saveSql=D('sickness')->where(array('devid'=>$s['devid'],'psn'=>$s['psn']))->save($sk);
         					dump($sk);
-        				
+        				}
         			}
         		}
  
@@ -447,29 +456,32 @@ class DevselectController extends HomeController {
 		        		$date = date('Y-m-d H:i:s',$acs['time']);
 		        		$dev = M('device')->where(array('psn'=>$acs['psn'],'devid'=>$acs['devid']))->find();
 		        		if(!empty($dev)){
-		        			$temp = $acs['temp1'];
-	      					if($temp<=$llevl2){
-	      						$level=2;
-	      					}else if($temp<=$llevl1){
-	      						$level=1;
-	      					}else{
-	      						$level=0;
-	      					}
-				        	$sk=array(
-							   	  'psnid'=>$acs['psn'],
-							  		'devid'=>$acs['devid'],
-										'shed'=>$dev['shed'],
-										'fold'=>$dev['fold'],
-							  		'temp1'=>$temp,
-										'time'=>$acs['time'],
-										'date'=>$date,
-										'level'=>$level,
-										'state'=>2,
-										'days'=>1,
-							  		);
-							  	echo "add:";
-							  	dump($sk);
-		  			  	 	$saveSql=D('sickness')->add($sk);
+			        		$flag=$dev['flag'];
+	        				if($flag==1){		
+			        			$temp = $acs['temp1'];
+		      					if($temp<=$llevl2){
+		      						$level=2;
+		      					}else if($temp<=$llevl1){
+		      						$level=1;
+		      					}else{
+		      						$level=0;
+		      					}
+					        	$sk=array(
+								   	  'psnid'=>$acs['psn'],
+								  		'devid'=>$acs['devid'],
+											'shed'=>$dev['shed'],
+											'fold'=>$dev['fold'],
+								  		'temp1'=>$temp,
+											'time'=>$acs['time'],
+											'date'=>$date,
+											'level'=>$level,
+											'state'=>2,
+											'days'=>1,
+								  		);
+								  	echo "add:";
+								  	dump($sk);
+			  			  	 	$saveSql=D('sickness')->add($sk);
+			  			  	}
 		  			  	}
 	      			}
       			}	
@@ -481,23 +493,23 @@ class DevselectController extends HomeController {
 		$devid = $_GET['devid'];
   	$psn= $_GET['psnid'];
 		$temp = $_GET['temp1'];
-  	$state = $_POST['radio1'];
+  	$state =(int)$_POST['radio1'];
     $msg = $_POST['msg'];
   	$name=$_SESSION['name'];
   	$this->assign('name',$name);
-  	
-    if(empty($state)||empty($msg)){
+
+    if(empty($state)&&empty($msg)){
     		$this->display();
     		exit;
     }
-    
+    var_dump($state);
     if($state==1){
-    	/*
+    	 var_dump($state);
        $sk=array(
 					'state'=>0,
 		  		);
 		   $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psn))->save($sk);
-		   */
+		   
     }else{
        $sk=array(
 					'flag'=>1,
@@ -558,7 +570,7 @@ class DevselectController extends HomeController {
 						'msg'=>$msg,
 					);
 			$rd = D('recovery')->add($rec);	
-			$this ->redirect('Devselect/select',array(),0,'');
+			$this ->redirect('Devselect/sickness',array(),0,'');
 			exit;
 		}
 		
