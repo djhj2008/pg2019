@@ -46,7 +46,7 @@
 								            <div class="weui-cell__ft">进入添加设备</div>
 								        </a>
                         <%foreach $devSelect as $value%>
-                        <a href="<%$smarty.const.__APP__%>/add/devedit?devid=<%$value['devid']%>&psnid=<%$value['psn']%>" class="weui-media-box weui-media-box_appmsg">
+                        <a class="weui-media-box weui-media-box_appmsg">
                         <table style="width: 100%;" cellspacing="1" cellpadding="1" border="0"align="left">
                            <tbody>
                         	 <tr>
@@ -72,6 +72,24 @@
                             	<div style="height:25px;margin-top:10px;">
                             	<label class="weui-form-preview__label"><%$value['time']%></label>
                             	</div>
+                           </td>
+                           <td>
+                           	<%if $value['flag'] eq 1 %>	
+                              <a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">
+                              <button id="TableOperate" type="button"
+                                      class="btn btn-lg btn-primary" onclick=""
+                                      style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
+                                  温度
+                              </button>
+                              </a>
+                             <%/if%>
+                              <a href="<%$smarty.const.__APP__%>/add/devedit?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">
+                              <button id="TableOperate" type="button"
+                                      class="btn btn-lg btn-primary" onclick=""
+                                      style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
+                                  编辑
+                              </button>
+                              </a>
                            </td>
                         	 </tr>
 		                       </tbody>

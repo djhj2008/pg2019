@@ -1214,7 +1214,7 @@ class DatapushController extends Controller {
 				$brssisignstr= substr($brssistr, $i*($BRSSI_SN_LEN+$BRSSI_SIGN_LEN)*2+$BRSSI_SN_LEN*2,$BRSSI_SIGN_LEN*2);
 				$brssisign = hexdec($brssisignstr);
 				//var_dump($brssisign);
-				if(($brssisign&0x80)==0x80){
+				if(($brssisign&0x08)==0x08){
 					$bsign[$i] = 0-$brssisign;
 				}else{
 					$bsign[$i] = $brssisign;
@@ -1385,10 +1385,12 @@ class DatapushController extends Controller {
 				    	$temp2str1 = substr($tempstr,4,1);
 				  		$temp2str2 = substr($tempstr,5,1);
 				    	$temp2str3 = substr($tempstr,2,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
 				    	
 				    	$temp3str1 = substr($tempstr,9,1);
 				  		$temp3str2 = substr($tempstr,6,1);
 				    	$temp3str3 = substr($tempstr,7,1);
+				    	$temp3int =base_convert($temp3str1,16,10);
 			    	}else if($j==1){
 			    		$temp1str1 = substr($tempstr,10,1);
 				  		$temp1str2 = substr($tempstr,11,1);
@@ -1397,11 +1399,13 @@ class DatapushController extends Controller {
 				    	
 				    	$temp2str1 = substr($tempstr,15,1);
 				  		$temp2str2 = substr($tempstr,12,1);
-				    	$temp2str3 = substr($tempstr,13,1);	
+				    	$temp2str3 = substr($tempstr,13,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
 				    	
 				    	$temp3str1 = substr($tempstr,16,1);
 				  		$temp3str2 = substr($tempstr,17,1);
-				    	$temp3str3 = substr($tempstr,14,1);	
+				    	$temp3str3 = substr($tempstr,14,1);
+				    	$temp3int =base_convert($temp3str1,16,10);
 			    	}else if($j==2){
 					    $temp1str1 = substr($tempstr,21,1);
 				  		$temp1str2 = substr($tempstr,18,1);
@@ -1411,10 +1415,12 @@ class DatapushController extends Controller {
 				    	$temp2str1 = substr($tempstr,22,1);
 				  		$temp2str2 = substr($tempstr,23,1);
 				    	$temp2str3 = substr($tempstr,20,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
 				    	
 				    	$temp3str1 = substr($tempstr,27,1);
 				  		$temp3str2 = substr($tempstr,24,1);
-				    	$temp3str3 = substr($tempstr,25,1);					    	
+				    	$temp3str3 = substr($tempstr,25,1);
+				    	$temp3int =base_convert($temp3str1,16,10);			    	
 			    	}else if($j==3){
 			    		$temp1str1 = substr($tempstr,28,1);
 				  		$temp1str2 = substr($tempstr,29,1);
@@ -1423,28 +1429,22 @@ class DatapushController extends Controller {
 
 				    	$temp2str1 = substr($tempstr,33,1);
 				  		$temp2str2 = substr($tempstr,30,1);
-				    	$temp2str3 = substr($tempstr,31,1);	
+				    	$temp2str3 = substr($tempstr,31,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
 
 				    	$temp3str1 = substr($tempstr,34,1);
 				  		$temp3str2 = substr($tempstr,35,1);
-				    	$temp3str3 = substr($tempstr,32,1);						    	
+				    	$temp3str3 = substr($tempstr,32,1);
+				    	$temp3int =base_convert($temp3str1,16,10);					    	
 			    	}
 	    		
-		    	if(($temp1int&0x08)==0x08){
-		    		if($type==1&&$j==1){
-			    		if($temp1str1==0){
-			    			$temp1 = $temp1str2.".".$temp1str3;
-			    		}else{
-			    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
-			    		}	
-		    		}else{
-			    		$temp1str1=$temp1int&0x07;
-			    		if($temp1str1==0){
-			    			$temp1 = '-'.$temp1str2.".".$temp1str3;
-			    		}else{
-			    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
-			    		}
-		    		}
+		    if(($temp1int&0x08)==0x08){
+	    		$temp1str1=$temp1int&0x07;
+	    		if($temp1str1==0){
+	    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+	    		}else{
+	    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+	    		}
 	    	}else{
 		    		if($temp1str1==0){
 		    			$temp1 = $temp1str2.".".$temp1str3;
@@ -1454,17 +1454,37 @@ class DatapushController extends Controller {
 	    	}
 
 			  //var_dump('temp1:'.$temp1);
-				if($temp2str1 == 0){
-			    $temp2 = $temp2str2.".".$temp2str3;
-		 	 	}else{
-		 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
-		 	 	}
+			  if(($temp2int&0x08)==0x08){
+			  	$temp2str1=$temp2int&0x07;
+					if($temp2str1 == 0){
+				    $temp2 = '-'.$temp2str2.".".$temp2str3;
+			 	 	}else{
+			 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
+			 	 	}
+		 		}else{
+		 			if($temp2str1 == 0){
+				    $temp2 = $temp2str2.".".$temp2str3;
+			 	 	}else{
+			 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+			 	 	}
+		 			
+		 		}
+		 	
 		    //var_dump('temp2:'.$temp2);
-		    if($temp3str1 == 0){
-			    $temp3 = $temp3str2.".".$temp3str3;
-		 	 	}else{
-		 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
-		 	 	}
+		    if(($temp3int&0x08)==0x08){
+		    	$temp3str1=$temp3int&0x07;
+			    if($temp3str1 == 0){
+				    $temp3 = '-'.$temp3str2.".".$temp3str3;
+			 	 	}else{
+			 	 	 	$temp3 = '-'.$temp3str1.$temp3str2.".".$temp3str3;
+			 	 	}
+		 		}else{
+		 			if($temp3str1 == 0){
+				    $temp3 = $temp3str2.".".$temp3str3;
+			 	 	}else{
+			 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
+			 	 	}
+		 		}
 		    //var_dump('temp3:'.$temp3);
 		    	
 		    	$acc_value=D('access')->where(array('time'=>$up_time,'psn'=>$psnid,'devid'=>$snint))->find();
@@ -1544,21 +1564,13 @@ class DatapushController extends Controller {
 				    	$temp3str3 = substr($tempstr,32,1);						    	
 			    	}
 
-		    	if(($temp1int&0x08)==0x08){
-		    		if($type==1&&$j==1){
-			    		if($temp1str1==0){
-			    			$temp1 = $temp1str2.".".$temp1str3;
-			    		}else{
-			    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
-			    		}	
-		    		}else{
-			    		$temp1str1=$temp1int&0x07;
-			    		if($temp1str1==0){
-			    			$temp1 = '-'.$temp1str2.".".$temp1str3;
-			    		}else{
-			    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
-			    		}
-		    		}
+		    if(($temp1int&0x08)==0x08){
+	    		$temp1str1=$temp1int&0x07;
+	    		if($temp1str1==0){
+	    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+	    		}else{
+	    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+	    		}
 	    	}else{
 		    		if($temp1str1==0){
 		    			$temp1 = $temp1str2.".".$temp1str3;
@@ -1680,7 +1692,7 @@ class DatapushController extends Controller {
     $strarr    =unpack("H*", $post);//unpack() 函数从二进制字符串对数据进行解包。
     $str       =implode("", $strarr);
 
-		$str = "32303139303131353033303430303231303836373536333030000020030150000000000000000000fd000020025621040102266222266220065220ffffffffffffffffff000020034a21040002264222257220056220ffffffffffffffffff000020044721041e033672233832222342220342200402ffffffff000020054421040102266222263220033220ffffffffffffffffff000020084c21040202243222234220044220ffffffffffffffffff0000200a3e210c0002857116004017500100ffffffffffffffffff0000200b4d21040302246222254220065220ffffffffffffffffff0000200c7a21040302277222275220055220ffffffffffffffffff0000201476210c0102894115001017310100ffffffffffffffffff000020154e21040302833118832117733117ffffffffffffffffff000020164b21040002844118846117766117ffffffffffffffffff000020174e21040102855118879117791118ffffffffffffffffff000020184c21040102844118830118798117ffffffffffffffffff000020194b21040102865118862118812118ffffffffffffffffff0000201a4a21040102862118842118780118ffffffffffffffffff0000201b4b21040102843118860118791118ffffffffffffffffff0000201c4921040102854118879117792118ffffffffffffffffff0000201d4821040002856118878117790118ffffffffffffffffff0000201e4621040102845118854117745117ffffffffffffffffff000020204e21040102844118863117745117ffffffffffffffffff000020214d21040102867118878117799117ffffffffffffffffff000020224c21040102856118880118802118ffffffffffffffffff000020234b21040302855118860118801118ffffffffffffffffff000020244a21040102877118853118831118ffffffffffffffffff000020254a21040102865118862118812118ffffffffffffffffff000020264c21040102845118869117801118ffffffffffffffffff000020284821040102855118868117789117ffffffffffffffffff000020294821040102844118874117747117ffffffffffffffffff0000202a4c21041d02835118861117734117ffffffffffffffffff0000202b4421040102008517840150585116ffffffffffffffffff0000202c4a21040102887118861118810118ffffffffffffffffff0000202d4a21040102876118861118810118ffffffffffffffffff0000202e4b21040102875118842118809117ffffffffffffffffff0000202f4a21040102866118872118813118ffffffffffffffffff000020304a21040002887118853118820118ffffffffffffffffff000020314821040102866118870118801118ffffffffffffffffff000020334721040102898118891118802118ffffffffffffffffff000020344a21040102855118865117755117ffffffffffffffffff000020354d21040102846118850117731117ffffffffffffffffff000020364b21040102867118876117787117ffffffffffffffffff000020374821040102877118879117798117ffffffffffffffffff000020384821040002855118898117783118ffffffffffffffffff000020394c210401039111199361188681188001188201ffffffff0000203a4a21040102878118851118819117ffffffffffffffffff0000203c4a21141d02876118860118799117ffffffffffffffffff0000203d4921040102867118879117800118ffffffffffffffffff0000203e4b21040102867118867117777117ffffffffffffffffff0000203f4d21040102867118874117756117ffffffffffffffffff000020404c21040102814118836116698116ffffffffffffffffff000020414e21040102843118841117702117ffffffffffffffffff000020424a21040102856118873117746117ffffffffffffffffff000020434a21040102855118854117744117ffffffffffffffffff000020444b21040102855118005517750150ffffffffffffffffff000020454a21040302845118854117755117ffffffffffffffffff000020464c21040102843118874117737117ffffffffffffffffff000020474c21040102844118894117738117ffffffffffffffffff000020484d21040102848104811117378016ffffffffffffffffff000020495121040102813118828116699116ffffffffffffffffff0000204a4d21040102901119908117798117ffffffffffffffffff0000204b4921040102911119912118833118ffffffffffffffffff0000204c4921040102911119925118866118ffffffffffffffffff0000204d4721040302934119949118899118ffffffffffffffffff0000204e4a21040102931119939118879118ffffffffffffffffff0000204f4921040102911119927118879118ffffffffffffffffff000020504721040102933119959118891119ffffffffffffffffff000020514721040102954119930119887118ffffffffffffffffff000020524721040102922119944118846118ffffffffffffffffff000020534221040102920119900118788117ffffffffffffffffff000020544d21040102929118929117770118ffffffffffffffffff000020554a21040102935119924118874118ffffffffffffffffff000020564921040102942119938118878118ffffffffffffffffff000020574821040102954119941119900119ffffffffffffffffff000020584921040102933119920119898118ffffffffffffffffff000020594921040102923119938118890119ffffffffffffffffff0000205a4a21040102955119921119918118ffffffffffffffffff0000205b4a21040302956119950119909118ffffffffffffffffff0000205d4621040302914119954118867118ffffffffffffffffff0000205e4621040102909118920118781118ffffffffffffffffff0000205f4d21040002923119918117808117ffffffffffffffffff000020604921040102956119976118878118ffffffffffffffffff000020614921040102966119969118899118ffffffffffffffffff000020624721040102953119940119889118ffffffffffffffffff000020634921040102951119961119872119ffffffffffffffffff000020644821040102966119961119911119ffffffffffffffffff000020654921040102945119949118909118ffffffffffffffffff000020664821040102955119960119890119ffffffffffffffffff000020674721040102945119946118876118ffffffffffffffffff000020684821040102942119944118813118ffffffffffffffffff0000206a4c21040102898118915117746117ffffffffffffffffff0000206b4821040102932119921118821118ffffffffffffffffff0000206d4821040102947119955118886118ffffffffffffffffff0000206e4721040102934119935118866118ffffffffffffffffff0000206f4a21040102943119937118866118ffffffffffffffffff000020704921040102934119926118875118ffffffffffffffffff000020714821040102933119926118865118ffffffffffffffffff000020724821040102933119945118846118ffffffffffffffffff000020734a21040102953119945118834118ffffffffffffffffff000020744721040102911119919117788117ffffffffffffffffff000020754e21040102866118899116702117ffffffffffffffffff000020764921040102880119934117769117ffffffffffffffffff000020774921040102922119929117790118ffffffffffffffffff000020784921040102913119930118812118ffffffffffffffffff000020794921040102911119900118809117ffffffffffffffffff0000207a4821040102909118909117789117ffffffffffffffffff0000207b4921040102912119910118810118ffffffffffffffffff0000207c4a21040102929118929117760118ffffffffffffffffff0000207d4a21040102888118915117747117ffffffffffffffffff0000207e4a21040302888118873117721117ffffffffffffffffff0000207f4921040102943119971118804118ffffffffffffffffff000020804821040102966119968118887118ffffffffffffffffff000020814621040302989119982119942119ffffffffffffffffff000020824721040102009219996119955119ffffffffffffffffff000020834621040202990120986119975119ffffffffffffffffff000020854521040102008219996119944119ffffffffffffffffff000020864221040102989119983119933119ffffffffffffffffff000020874221040102009219972119908118ffffffffffffffffff000020884221040102921119910118788117ffffffffffffffffff000020894621040102956119941118841118ffffffffffffffffff0000208a4621040102990120990119920119ffffffffffffffffff0000208b4521040302998119993119934119ffffffffffffffffff0000208c4621040102019219987119954119ffffffffffffffffff0000208e4521040102009219017219957119ffffffffffffffffff0000208f4821040102990120995119955119ffffffffffffffffff000020904721040102999119994119933119ffffffffffffffffff000020914721040102986119000219881119ffffffffffffffffff000020934221040102954119953118813118ffffffffffffffffff000020944821040102936119948117820118ffffffffffffffffff000020954821040102990120989118908118ffffffffffffffffff000020964721040102990120012219944119ffffffffffffffffff000020974521040102011220025219966119ffffffffffffffffff000020994621040102987119983119924119ffffffffffffffffff0000209a4521040102011220036219978119ffffffffffffffffff0000209b4621040102001220995119963119ffffffffffffffffff0000209c4721040102000220004219933119ffffffffffffffffff0000209e4521040102019219982119909118ffffffffffffffffff0000209f45210401030432200162199431198421188101ffffffff000020a04b210403030112200402199141197351177801ffffffff000020a14721040102977119965118854118ffffffffffffffffff000020a24521040102999119990119909118ffffffffffffffffff000020a34621040102998119000219902119ffffffffffffffffff000020a44621040102988119000219913119ffffffffffffffffff000020a54721040202009219982119910119ffffffffffffffffff000020a64921040102990120981119919118ffffffffffffffffff000020a74821040102968119977118888118ffffffffffffffffff000020a84221040102003a189001a0662117ffffffffffffffffff000020af4821040102953119921118798117ffffffffffffffffff000020b04c21040102867118868116698116ffffffffffffffffff000020b14821040102939118937117748117ffffffffffffffffff000020b24721040302933119959117791118ffffffffffffffffff000020b34821040102945119951118832118ffffffffffffffffff000020b54721040102933119961118814118ffffffffffffffffff000020b64721040102944119932118811118ffffffffffffffffff000020b74a21040102944119952118813118ffffffffffffffffff000020b84921040102944119930118809117ffffffffffffffffff000020b94c21040302943119949117789117ffffffffffffffffff000020ba4821141d02899118913117735117ffffffffffffffffff000020bb4921040102969119983118865118ffffffffffffffffff000020bc4821040102033220034219955119ffffffffffffffffff000020bd4421040102044220048219998119ffffffffffffffffff000020be4521040102044220020220997119ffffffffffffffffff000020bf4421040102032220059219981120ffffffffffffffffff000020c04521040102033220029219997119ffffffffffffffffff000020c14721040202913120056218989119ffffffffffffffffff000020c24421040102033220057219967119ffffffffffffffffff000020c34221040102009219980119888118ffffffffffffffffff000020c44421040102932119950118781118ffffffffffffffffff000020c54721040102988119995118856118ffffffffffffffffff000020c64a21040102012214002219342119ffffffffffffffffff000020c74221040102054220048219987119ffffffffffffffffff000020c84621040102064220051220990120ffffffffffffffffff000020c94221040102055220031220008219ffffffffffffffffff000020ca4621040302065220061220001220ffffffffffffffffff000020cb4621040202043220049219978119ffffffffffffffffff000020cc4221040102054220058219978119ffffffffffffffffff000020cd4021040102031220033219923119ffffffffffffffffff000020ce4121040102943119971118803118ffffffffffffffffff000020cf4821040102988119014218846118ffffffffffffffffff000020d04621040102010220030219913119ffffffffffffffffff000020d14421040102055220037219976119ffffffffffffffffff000020d24621040102033220066219979119ffffffffffffffffff000020d346210401030552200452200542209991199801ffffffff000020d44621040102056220079219001220ffffffffffffffffff000020d54821040302023219046219878119ffffffffffffffffff000020d64821040302044220056219967119ffffffffffffffffff000020d74421040102033220023219932119ffffffffffffffffff000020d84421040202996119996118836118ffffffffffffffffff000020da4721040102999119996118877118ffffffffffffffffff000020db4621040102022220041219913119ffffffffffffffffff000020dc4521040102023220033219944119ffffffffffffffffff000020dd4621040102033220044219945119ffffffffffffffffff000020de4721040302011220042219925119ffffffffffffffffff000020df4821040102021220032219923119ffffffffffffffffff000020e04b21040102001220040219904119ffffffffffffffffff000020e14b21040102011220038218880119ffffffffffffffffff000020e24821040202953119950118780118ffffffffffffffffff000020e34b21040102888118899117800118ffffffffffffffffff000020e44721040102008219988118877118ffffffffffffffffff000020e54421040102955119950118801118ffffffffffffffffff000020e64021040102008219966118853118ffffffffffffffffff000020e75121040102899118898117788117ffffffffffffffffff000020e84d21040102898118878117776117ffffffffffffffffff000020e94121040102880119907117789117ffffffffffffffffff000020ea4a21040102902119893117752117ffffffffffffffffff000020ec4621040102932119937117767117ffffffffffffffffff000020ed4721040102956119940118818117ffffffffffffffffff000020ee4721040102957119931118828117ffffffffffffffffff000020ef4721040102967119972118832118ffffffffffffffffff000020f04721040102956119952118820118ffffffffffffffffff000020f14721040202978119944118840118ffffffffffffffffff000020f24621040102955119952118821118ffffffffffffffffff000020f34221040102977119983118834118ffffffffffffffffff000020f44621040102957119982118835118ffffffffffffffffff000020f54521040102968119972118843118ffffffffffffffffff000020f64421040102945119940118810118ffffffffffffffffff000020f74421040102946119970118823118ffffffffffffffffff000020f84721040202935119969117802118ffffffffffffffffff000020f94621040102976119942118819117ffffffffffffffffff000020fa4621040102945119979117801118ffffffffffffffffff000020fb4521040102924119936117787117ffffffffffffffffff000020fc4921040102912119914117765117ffffffffffffffffff000020fd4521040102878118910117703117ffffffffffffffffff000020fe4621040302845118886116669116ffffffffffffffffff000020ff4a21040102931118907117653117ffffffffffffffffff000021004221040102945119959117809117ffffffffffffffffff000021014521141d02009219976118852118ffffffffffffffffff000021024721040302991120006218877118ffffffffffffffffff000021034621040302012220979118894118ffffffffffffffffff000021044521040102981120006218897118ffffffffffffffffff000021054521040102012220999118907118ffffffffffffffffff0000210645210401030902210912200222208901199001ffffffff000021074221040102992120007218908118ffffffffffffffffff000021094521040102002220018218909118ffffffffffffffffff0000210a4221040102011220999118897118ffffffffffffffffff0000210b4421040102994119987118826118ffffffffffffffffff0000210d4521040102989119985118866118ffffffffffffffffff0000210e4721040202999119006218867118ffffffffffffffffff0000210f4221040102990120006218876118ffffffffffffffffff000021104721040102999119985118854118ffffffffffffffffff000021114521040202965119992118804118ffffffffffffffffff000021124521040102944119938117788117ffffffffffffffffff000021134721040102900119923117735117ffffffffffffffffff000021144121040102886118880117680117ffffffffffffffffff000021154721040202921119885117741117ffffffffffffffffff000021164121040102965119960118799117ffffffffffffffffff000021174521040102956119950118810118ffffffffffffffffff000021184621040302009219996118855118ffffffffffffffffff000021194421040102979119004218857118ffffffffffffffffff0000211a4221040102989119975118864118ffffffffffffffffff0000211b4521040202000220017218878118ffffffffffffffffff0000211c4521040102000220007218877118ffffffffffffffffff0000211d5221041e02900339900339900339ffffffffffffffffff0000211e4b21040102879338907338899338ffffffffffffffffff0000211f5b21040102900339909338900339ffffffffffffffffff00004b4d";
+		$str = "32303139303131383037303430303231303836373536333030000020010150000000000000000000b20000200a28210c8202115895001082470900ffffffffffffffffff000020146a210c8202549878008086330700ffffffffffffffffff000020155121040002052332102230213321ffffffffffffffffff000020164b21148202190332040232219319ffffffffffffffffff000020175221048202201332022231126318ffffffffffffffffff000020185e21148202212332017231145321ffffffffffffffffff000020195221048402436334133233382320ffffffffffffffffff0000201a5a21048202419332135233221318ffffffffffffffffff0000201b4e21048202258333117231326319ffffffffffffffffff0000201c5121048202333333117232259318ffffffffffffffffff0000201d5821048202332333067232263318ffffffffffffffffff0000201e5121048202454333309233263320ffffffffffffffffff000020205721048202237333023231289317ffffffffffffffffff000020215721048202259331904132187318ffffffffffffffffff000020225521048302430333149233285320ffffffffffffffffff000020254e21148102335333204232255320ffffffffffffffffff000020265921048202420334278233354320ffffffffffffffffff000020284b21048202196331091231065316ffffffffffffffffff000020295221048202021332232229142321ffffffffffffffffff0000202a5821048202302333045232265319ffffffffffffffffff0000202c5221048402087332909130273320ffffffffffffffffff0000202d5421048202439333297233320322ffffffffffffffffff0000202e4e21048202328333279231290321ffffffffffffffffff0000202f5421048202446333399232170320ffffffffffffffffff000020304e21048202067332864129182317ffffffffffffffffff000020315d21048202141331965130023317ffffffffffffffffff000020336421048202111333905130273318ffffffffffffffffff000020345421048202297331004232078317ffffffffffffffffff000020355b21048302056332144229182318ffffffffffffffffff000020365421048302126332497228072317ffffffffffffffffff000020375c21048202317332143232187317ffffffffffffffffff000020384b21048202091333043229219317ffffffffffffffffff0000203951210482038572309051302503238382308601ffffffff0000203a5d21048202199333089230301320ffffffffffffffffff0000203c5a21048102251333061232303319ffffffffffffffffff0000203d5e21048102094333110232436323ffffffffffffffffff0000203e5621048202207333012231316318ffffffffffffffffff0000203f5221048202307332351232161320ffffffffffffffffff000020405521048202178333046230296317ffffffffffffffffff000020415821148202266333227231289318ffffffffffffffffff000020424e21048202132333083229177318ffffffffffffffffff000020436221048202128331869130153316ffffffffffffffffff000020445e21048202459332006534300350ffffffffffffffffff000020455721040002391335500234523324ffffffffffffffffff000020465a21048202265333472232342324ffffffffffffffffff000020475e21148202373333472234375325ffffffffffffffffff000020486721048102339316066232601118ffffffffffffffffff000020495b21048202485334463233285320ffffffffffffffffff0000204a5b21048202350335574233510325ffffffffffffffffff0000204b5521048202121330025231027319ffffffffffffffffff0000204d5521040102350333515233317324ffffffffffffffffff0000204e5421048202636334712236456326ffffffffffffffffff0000204f5b21048202368333513234431326ffffffffffffffffff000020506421048202443335611234511326ffffffffffffffffff000020515621048102145332116229108317ffffffffffffffffff000020525521048202111332896129072316ffffffffffffffffff000020535221048102773230025225876214ffffffffffffffffff000020545121048202232333158232370321ffffffffffffffffff000020555921048202199330914131027317ffffffffffffffffff000020564d21148202060332754129103313ffffffffffffffffff000020576821048102290334345232366322ffffffffffffffffff000020585a21048402367334555233460325ffffffffffffffffff000020595921048202065332400231241323ffffffffffffffffff0000205a5c21048402475334977233370325ffffffffffffffffff0000205b5c21040002363333379233354322ffffffffffffffffff0000205d5d21040002373334407233448323ffffffffffffffffff000020605821048102241334446232426324ffffffffffffffffff000020614921048202278332128231181318ffffffffffffffffff000020623f21048102478333381231993216ffffffffffffffffff000020634a21048202145330114230961218ffffffffffffffffff000020644121148102279331005231075317ffffffffffffffffff000020654a21048202572335314332163321ffffffffffffffffff000020664521048202376334568231291319ffffffffffffffffff000020673c21048202448226134121485207ffffffffffffffffff000020684d21048202264332186231158318ffffffffffffffffff0000206a4521048202301334080232346317ffffffffffffffffff0000206b4621048402181333082231277319ffffffffffffffffff0000206d5021048202130331958130044319ffffffffffffffffff0000206e4621048202264332027231115318ffffffffffffffffff0000206f4e21048202202331377230994218ffffffffffffffffff000020704621048202257332157233420324ffffffffffffffffff000020714721148202159332051227888214ffffffffffffffffff000020724821048202082332024229109317ffffffffffffffffff000020734f21048202249331119231149318ffffffffffffffffff000020745521048202348332108234445322ffffffffffffffffff000020764721048402124331048229986217ffffffffffffffffff000020774621048402145333981131346318ffffffffffffffffff000020784c21048102227333153231304317ffffffffffffffffff000020794821048202016332112229175318ffffffffffffffffff0000207a3b21048202073330027230051317ffffffffffffffffff000020815121740102358334493232378321ffffffffffffffffff0000207b4921148202925232781133566328ffffffffffffffffff0000207c4c21048202109331236231246322ffffffffffffffffff0000207e5721040002313332283233264323ffffffffffffffffff0000207f4421048102320334307232366321ffffffffffffffffff000020805821048302344334384233441323ffffffffffffffffff000020825221048202158333300234582329ffffffffffffffffff000020835b21048102184332051232263322ffffffffffffffffff000020845221048202137332127231318322ffffffffffffffffff000020865021048202377333400234360325ffffffffffffffffff000020875921048102303333256234502327ffffffffffffffffff000020885721048302417334377233428321ffffffffffffffffff000020895921048202314334438232419323ffffffffffffffffff0000208a5921048202347332282233253322ffffffffffffffffff0000208b5a21040002488333326234373323ffffffffffffffffff0000208c4e21048202071331040231129321ffffffffffffffffff0000208e4f21048202256333423232344323ffffffffffffffffff0000208f5921048202310333238232269321ffffffffffffffffff000020905421148102260334380232348322ffffffffffffffffff000020915a21048202343332366234329327ffffffffffffffffff000020935821148202264332298233392324ffffffffffffffffff000020945921048202127332327232388324ffffffffffffffffff000020955721048202344333336234484324ffffffffffffffffff000020965121048202227331262232176322ffffffffffffffffff000020975821048202255333422231232322ffffffffffffffffff000020995221048402138332262231266321ffffffffffffffffff0000209a5421048202323333318232313322ffffffffffffffffff0000209b5b21048102293333409232340324ffffffffffffffffff0000209c5b21048202259332188232315321ffffffffffffffffff0000209e5421048302355332279233306322ffffffffffffffffff0000209f57210482032623342762335213262843345002ffffffff000020a051210400034153344042312983221373322102ffffffff000020a14f21148202238223475131371321ffffffffffffffffff000020a24a21048202245330006232098320ffffffffffffffffff000020a35421048202277332324232221322ffffffffffffffffff000020a45421048302237331272234326329ffffffffffffffffff000020a56921048202305333295232287321ffffffffffffffffff000020a65421148202278332426232272323ffffffffffffffffff000020a75921048202183331265231101321ffffffffffffffffff000020af4e21148102292332143233264322ffffffffffffffffff000020b04f21048202608226692113620109ffffffffffffffffff000020b15d21048102394334223234474322ffffffffffffffffff000020b25021040002308333376232336321ffffffffffffffffff000020b35821048202294334185232448320ffffffffffffffffff000020b55821048202312332379232238322ffffffffffffffffff000020b65a21048202919233030229368319ffffffffffffffffff000020b76121048202347332129234465323ffffffffffffffffff000020b85c21048202478334523234421323ffffffffffffffffff000020b95a21040002338332235233267321ffffffffffffffffff000020ba5121048302282334352232341321ffffffffffffffffff000020bb5b21048202060330869128762216ffffffffffffffffff000020bc5021048202025328904130855219ffffffffffffffffff000020bd5521048202661228580126759216ffffffffffffffffff000020be5e21048202021330934130141320ffffffffffffffffff000020bf4a21148102911228850127626216ffffffffffffffffff000020c05221148202116331436227864213ffffffffffffffffff000020c14c21048202945231820129118317ffffffffffffffffff000020c24f21048202633229756126982219ffffffffffffffffff000020c35521048202336334198233504323ffffffffffffffffff000020c45021048302238332394229087317ffffffffffffffffff000020c55521048202730229721126812215ffffffffffffffffff000020c65521048202001324871128200215ffffffffffffffffff000020c75c21048202029331850129132316ffffffffffffffffff000020c85221048102994230959128967216ffffffffffffffffff000020c94b21048202070330008226601213ffffffffffffffffff000020cb4d21040002855228492127723213ffffffffffffffffff000020cc4921048102005328774128684215ffffffffffffffffff000020cd5021048202118331940130118316ffffffffffffffffff000020ce4e21048202010331862129018316ffffffffffffffffff000020cf5121048202022330306228871218ffffffffffffffffff000020d04a21048202874229784130135320ffffffffffffffffff000020d14c21148102985229774128809214ffffffffffffffffff000020d25421048202115330842130987216ffffffffffffffffff000020d352210482039232308721290253170563300502ffffffff000020d44b21048202004329860129853213ffffffffffffffffff000020d55121040002096331701130069315ffffffffffffffffff000020d64f21040002903229712128894215ffffffffffffffffff000020d94b21048202118331904130112317ffffffffffffffffff000020db5421048202116330896130979215ffffffffffffffffff000020dc4c21048102157330908130969216ffffffffffffffffff000020dd4d21048202036330919129014318ffffffffffffffffff000020de5121040002782229703126799214ffffffffffffffffff000020df4f21048202366332038233289321ffffffffffffffffff000020e04d21048102258333298231316321ffffffffffffffffff000020e15021048402115331098230136319ffffffffffffffffff000020e25b21048202303333209234473322ffffffffffffffffff000020e34b21048102140333067230235318ffffffffffffffffff000020e45421048202223333358231272323ffffffffffffffffff0000ab39";
 		
 		if(strlen($str) < $CDATA_START){
     	echo "OKF".date('YmdHis')."00101";
@@ -1771,7 +1783,11 @@ class DatapushController extends Controller {
 				$brssisignstr= substr($brssistr, $i*($BRSSI_SN_LEN+$BRSSI_SIGN_LEN)*2+$BRSSI_SN_LEN*2,$BRSSI_SIGN_LEN*2);
 				$brssisign = hexdec($brssisignstr);
 				//var_dump($brssisign);
-				$bsign[$i] = 0-$brssisign;
+				if(($brssisign&0x08)==0x08){
+					$bsign[$i] = 0-($brssisign&0x07);
+				}else{
+					$bsign[$i] = $brssisign;
+				}
 			}else{
 				$bsign[$i]=0;
 			}
@@ -1791,8 +1807,8 @@ class DatapushController extends Controller {
 						'time'=>time(),
 						);
 	 	//$saveRssi=D('brssi')->add($rssi);
-	 	//var_dump($rssi);
-	 	//var_dump($bsign);
+	 	var_dump($rssi);
+	 	var_dump($bsign);
 	 	//exit;
 		//var_dump($bvs);
     $bdevinfo    =D('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->find();
@@ -1938,10 +1954,12 @@ class DatapushController extends Controller {
 				    	$temp2str1 = substr($tempstr,4,1);
 				  		$temp2str2 = substr($tempstr,5,1);
 				    	$temp2str3 = substr($tempstr,2,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
 				    	
 				    	$temp3str1 = substr($tempstr,9,1);
 				  		$temp3str2 = substr($tempstr,6,1);
 				    	$temp3str3 = substr($tempstr,7,1);
+				    	$temp3int =base_convert($temp3str1,16,10);
 			    	}else if($j==1){
 			    		$temp1str1 = substr($tempstr,10,1);
 				  		$temp1str2 = substr($tempstr,11,1);
@@ -1950,11 +1968,13 @@ class DatapushController extends Controller {
 				    	
 				    	$temp2str1 = substr($tempstr,15,1);
 				  		$temp2str2 = substr($tempstr,12,1);
-				    	$temp2str3 = substr($tempstr,13,1);	
+				    	$temp2str3 = substr($tempstr,13,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
 				    	
 				    	$temp3str1 = substr($tempstr,16,1);
 				  		$temp3str2 = substr($tempstr,17,1);
-				    	$temp3str3 = substr($tempstr,14,1);	
+				    	$temp3str3 = substr($tempstr,14,1);
+				    	$temp3int =base_convert($temp3str1,16,10);
 			    	}else if($j==2){
 					    $temp1str1 = substr($tempstr,21,1);
 				  		$temp1str2 = substr($tempstr,18,1);
@@ -1964,10 +1984,12 @@ class DatapushController extends Controller {
 				    	$temp2str1 = substr($tempstr,22,1);
 				  		$temp2str2 = substr($tempstr,23,1);
 				    	$temp2str3 = substr($tempstr,20,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
 				    	
 				    	$temp3str1 = substr($tempstr,27,1);
 				  		$temp3str2 = substr($tempstr,24,1);
-				    	$temp3str3 = substr($tempstr,25,1);					    	
+				    	$temp3str3 = substr($tempstr,25,1);
+				    	$temp3int =base_convert($temp3str1,16,10);			    	
 			    	}else if($j==3){
 			    		$temp1str1 = substr($tempstr,28,1);
 				  		$temp1str2 = substr($tempstr,29,1);
@@ -1976,28 +1998,22 @@ class DatapushController extends Controller {
 
 				    	$temp2str1 = substr($tempstr,33,1);
 				  		$temp2str2 = substr($tempstr,30,1);
-				    	$temp2str3 = substr($tempstr,31,1);	
+				    	$temp2str3 = substr($tempstr,31,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
 
 				    	$temp3str1 = substr($tempstr,34,1);
 				  		$temp3str2 = substr($tempstr,35,1);
-				    	$temp3str3 = substr($tempstr,32,1);						    	
+				    	$temp3str3 = substr($tempstr,32,1);
+				    	$temp3int =base_convert($temp3str1,16,10);					    	
 			    	}
 	    		
-		    	if(($temp1int&0x08)==0x08){
-		    		if($type==1&&$j==1){
-			    		if($temp1str1==0){
-			    			$temp1 = $temp1str2.".".$temp1str3;
-			    		}else{
-			    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
-			    		}	
-		    		}else{
-			    		$temp1str1=$temp1int&0x07;
-			    		if($temp1str1==0){
-			    			$temp1 = '-'.$temp1str2.".".$temp1str3;
-			    		}else{
-			    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
-			    		}
-		    		}
+		    if(($temp1int&0x08)==0x08){
+	    		$temp1str1=$temp1int&0x07;
+	    		if($temp1str1==0){
+	    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+	    		}else{
+	    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+	    		}
 	    	}else{
 		    		if($temp1str1==0){
 		    			$temp1 = $temp1str2.".".$temp1str3;
@@ -2006,40 +2022,39 @@ class DatapushController extends Controller {
 		    		}
 	    	}
 
-			  var_dump('temp1:'.$temp1);
-				if($temp2str1 == 0){
-			    $temp2 = $temp2str2.".".$temp2str3;
-		 	 	}else{
-		 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
-		 	 	}
-		    var_dump('temp2:'.$temp2);
-		    if($temp3str1 == 0){
-			    $temp3 = $temp3str2.".".$temp3str3;
-		 	 	}else{
-		 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
-		 	 	}
-		    	var_dump('temp3:'.$temp3);
-		    	var_dump('time:'.$up_time);	
-		    	$acc_value=D('access2')->where(array('time'=>$up_time,'psn'=>$psnid,'devid'=>$snint))->find();
-		    	//var_dump($acc_value);
-		    	//sleep(1);
-		    	if(empty($acc_value)){
-		    			$access=D('access2')->add(array(
-			  				'psn'=>$psnid,
-					  		'devid'=>$snint,
-					  		'temp1'=>$temp1,
-					  		'temp2'=>$temp2,
-					  		'env_temp'=>$temp3,
-					  		'sign'=>$sign,
-					  		'cindex'=>$cindex,
-					  		'lcount'=>$lcount,
-					  		'delay'=>$delay,
-					  		'time' =>$up_time,
-					  	));
-					  	if(!empty($access)){
-		    				var_dump($access);
-		    			}
-		    	}
+			  //var_dump('temp1:'.$temp1);
+			  if(($temp2int&0x08)==0x08){
+			  	$temp2str1=$temp2int&0x07;
+					if($temp2str1 == 0){
+				    $temp2 = '-'.$temp2str2.".".$temp2str3;
+			 	 	}else{
+			 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
+			 	 	}
+		 		}else{
+		 			if($temp2str1 == 0){
+				    $temp2 = $temp2str2.".".$temp2str3;
+			 	 	}else{
+			 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+			 	 	}
+		 			
+		 		}
+		 	
+		    //var_dump('temp2:'.$temp2);
+		    if(($temp3int&0x08)==0x08){
+		    	$temp3str1=$temp3int&0x07;
+			    if($temp3str1 == 0){
+				    $temp3 = '-'.$temp3str2.".".$temp3str3;
+			 	 	}else{
+			 	 	 	$temp3 = '-'.$temp3str1.$temp3str2.".".$temp3str3;
+			 	 	}
+		 		}else{
+		 			if($temp3str1 == 0){
+				    $temp3 = $temp3str2.".".$temp3str3;
+			 	 	}else{
+			 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
+			 	 	}
+		 		}
+		    //var_dump('temp3:'.$temp3);
 
 				}else{
 						if($j==0){
@@ -2096,21 +2111,13 @@ class DatapushController extends Controller {
 				    	$temp3str3 = substr($tempstr,32,1);						    	
 			    	}
 
-		    	if(($temp1int&0x08)==0x08){
-		    		if($type==1&&$j==1){
-			    		if($temp1str1==0){
-			    			$temp1 = $temp1str2.".".$temp1str3;
-			    		}else{
-			    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
-			    		}	
-		    		}else{
-			    		$temp1str1=$temp1int&0x07;
-			    		if($temp1str1==0){
-			    			$temp1 = '-'.$temp1str2.".".$temp1str3;
-			    		}else{
-			    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
-			    		}
-		    		}
+		    if(($temp1int&0x08)==0x08){
+	    		$temp1str1=$temp1int&0x07;
+	    		if($temp1str1==0){
+	    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+	    		}else{
+	    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+	    		}
 	    	}else{
 		    		if($temp1str1==0){
 		    			$temp1 = $temp1str2.".".$temp1str3;
@@ -2119,23 +2126,19 @@ class DatapushController extends Controller {
 		    		}
 	    	}
 
-			  //var_dump('temp1:'.$temp1);
+			  var_dump('temp1:'.$temp1);
 				if($temp2str1 == 0){
 			    $temp2 = $temp2str2.".".$temp2str3;
 		 	 	}else{
 		 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
 		 	 	}
-		    //var_dump('temp2:'.$temp2);
+		    var_dump('temp2:'.$temp2);
 		    if($temp3str1 == 0){
 			    $temp3 = $temp3str2.".".$temp3str3;
 		 	 	}else{
 		 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
 		 	 	}
-		    //var_dump('temp3:'.$temp3);
-		    
-					//$tacc_value=D('taccess')->where(array('time'=>$up_time,'psn'=>$psnid,'devid'=>$snint))->find();
-		    	//var_dump($tacc_value);
-
+		    var_dump('temp3:'.$temp3);
 				}
 			}
 			//var_dump($temp1);

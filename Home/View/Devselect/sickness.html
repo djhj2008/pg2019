@@ -28,7 +28,7 @@
     <p id="sicktitle1" style="text-align:center;font-size:60px"><%count($devSelect1)%></p>
     <p id="sicktitle2" style="text-align:center;font-size:60px;display:none"><%count($devSelect2)%></p>
     <p id="sicktitle3" style="text-align:center;font-size:60px;display:none"><%count($devSelect3)%></p>
-    <p id="tab1sick" style="text-align:center;color:orange">生病数量</p>
+    <p id="tab1sick" style="text-align:center;color:orange">异常数量</p>
     <p id="tab2recover" style="text-align:center;color:green;display:none">治疗数量</p>
     <p id="tab3recycle" style="text-align:center;color:red;display:none">死亡或脱落</p>
 </div>
@@ -42,14 +42,16 @@
         </div>
         <div class="weui-tab__panel">
             <div id="tab1" class="weui_tab_bd_item weui_tab_bd_item_active" style="display">
+            		<p id="sicktitle" style="text-align:left;font-size:16px">(舍内)温度:<%$temp1['temp1']%>  湿度:<%$temp1['temp2']%></p>
+								<p id="sicktitle" style="text-align:left;font-size:16px">(舍外)温度:<%$temp2['temp1']%>  湿度:<%$temp1['temp2']%></p>
                 <%foreach $devSelect1 as $value%>
-                <a href="<%$smarty.const.__APP__%>/devselect/setting?devid=<%$value['devid']%>&temp1=<%$value['temp1']%>&psnid=<%$value['psnid']%>"
+                <a 
                    class="weui-media-box weui-media-box_appmsg">
                     <table style="width: 100%;" cellspacing="1" cellpadding="1" border="0"
                            align="left">
                         <tbody>
                         <tr>
-                            <td style="font-size:larger;font-weight:bold;"><%$value['psnid']%>厂<%$value['shed']%>棚<%$value['fold']%>栏
+                            <td style="font-size:larger;font-weight:bold;">SN:<%$value['sn']%>
                             </td>
                             <td style="font-size:larger">ID:<%$value['devid']%></td>
                             <td>
@@ -59,27 +61,33 @@
                         <tr>
                         		<%if $value["level"] eq 2  %>
                             <td>
+                            	<a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
                             	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:darkorange;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["temp1"],2)%>℃
                                 </button>
+                               </a>
                             </td>
                             <%else if $value["level"] eq 1%>
                             <td>
+                            	<a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
                             	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:gold;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["temp1"],2)%>℃
                                 </button>
+                              </a>
                             </td>
                             <%else%>
                             <td>
+                            	<a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
                             	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:lightgreen;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["temp1"],2)%>℃
                                 </button>
+                              </a>
                             </td>                            
                             <%/if%>
                             <td style="font-weight:bold;">异常:<%$value['days']%>天</td>
@@ -94,11 +102,13 @@
                             
                             <td>&nbsp;</td>
                             <td>
+                            	<a href="<%$smarty.const.__APP__%>/devselect/setting?devid=<%$value['devid']%>&temp1=<%$value['temp1']%>&psnid=<%$value['psnid']%>">
                                 <button id="TableOperate" type="button"
-                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        class="btn btn-lg btn-primary" onclick=""
                                         style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
                                     处理
                                 </button>
+                                </a>
                             </td>
                         </tr>
                         </tbody>
@@ -115,7 +125,7 @@
                            align="left">
                         <tbody>
                         <tr>
-                           	<td style="font-size:larger;font-weight:bold;"><%$value['psnid']%>厂<%$value['shed']%>棚<%$value['fold']%>栏
+                           	<td style="font-size:larger;font-weight:bold;">SN:<%$value['sn']%>
                             </td>
                             <td style="font-size:larger">ID:<%$value['devid']%></td>
                             <td>
@@ -181,7 +191,7 @@
                            align="left">
                         <tbody>
                         <tr>
-                           	<td style="font-size:larger;font-weight:bold;"><%$value['psnid']%>厂<%$value['shed']%>棚<%$value['fold']%>栏
+                           	<td style="font-size:larger;font-weight:bold;">SN:<%$value['sn']%>
                             </td>
                             <td style="font-size:larger">ID:<%$value['devid']%></td>
                             <td>

@@ -165,7 +165,7 @@ class AcaddController extends HomeController {
             $shed = $dev['shed'];
             //var_dump($dev);
 
-            $devSelect=M('device')->where(array('flag'=>1,'dev_type'=>1,'psn'=>$psn,'shed'=>$shed))->find();
+            $devSelect=M('device')->where(array('flag'=>1,'dev_type'=>1,'psn'=>$psn))->find();
             if($devSelect!=NULL){
                 $devid=$devSelect['devid'];
                 //var_dump($devid);
