@@ -211,7 +211,6 @@ class AcaddController extends HomeController {
 							//var_dump($tmpSql3);
 						}
 						
-						
             if($selectSql=M('access')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
                 $this->assign('devid',$id);
                 $this->assign('date',$time);

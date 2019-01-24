@@ -33,17 +33,35 @@
                         <tbody>
                         <tr>
                             <td>温度:
+                            	<%if $value["ntemp"] gt 39.5 %>
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:gold;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["ntemp"],2)%>℃
+                                </button>
+                              <%else%>
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:lightgreen;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["ntemp"],2)%>℃
+                                </button>
+                             <%/if%>
+                            </td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>温度:
                             	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:lightgreen;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["temp1"],2)%>℃
                                 </button>
-                                <button id="checktemp" type="button"
+                            	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:lightgreen;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["temp2"],2)%>℃
                                 </button>
-                                <button id="checktemp" type="button"
+                            	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:lightgreen;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["env_temp"],2)%>℃

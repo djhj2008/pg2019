@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <meta name="description" content="Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.
+">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
+    <link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.07">
+    <title>今日温度</title>
+</head>
+<body style="height: 100%; margin: 0">
+
+<div class="weui-tab" >
+    <div class="weui-tab__bd">
+        <div id="tab1" class="weui-tab__bd-item weui-tab__bd-item--active">
+            <div style="position: relative;margin-top: 30px;width: 100%" class="demos-title" id="title">
+            </div>
+            <div id="main" style="height:400px;"></div>
+        </div>
+              
+    </div>
+    </div>
+
+<script src="<%$smarty.const.AJS_URL%>echarts.min.js?v=01.01.01"></script>
+<script src="<%$smarty.const.AJS_URL%>macarons.js?"></script>
+<script src="<%$smarty.const.AJS_URL%>jquery-3.2.1.min.js"></script>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'),'macarons');
+    $(document).ready(function() {
+        var C1=window.location.href.split("?")[1];
+        var time=C1.split("=")[2];
+       // console.log(time);
+        var uptime=  time.substring(5,10);
+        document.getElementById("title").innerHTML=uptime;
+
+       var date = JSON.parse('<%$dateArr%>');
+       var temp1 = JSON.parse('<%$temp1Arr%>');
+       var temp2 = JSON.parse('<%$temp2Arr%>');
+       var min1 = Math.min.apply(null, temp1);
+       var min2 = Math.min.apply(null, temp2);
+
+       var min;
+       if (min1<min2){
+           min = min1;
+       }else {
+           min = min2;
+       }
+
+      //  console.log(date,temp1,temp2);
+        var option = {
+            tooltip: {
+                trigger: 'axis',
+        axisPointer: {
+            type: 'cross',
+            label: {
+                backgroundColor: '#283b56'
+            }
+        }
+            },
+            legend: {
+                data:['体温']
+            },
+    toolbox: {
+        show: true,
+        feature: {
+            dataView: {readOnly: false},
+            magicType: {type: ['line', 'bar']},
+            restore: {},
+        }
+    },
+            xAxis:  {
+                type: 'category',
+                boundaryGap: false,
+                data:date,
+            },
+            dataZoom: [{
+                type: 'inside',
+                start: 0,
+                end: 100
+            }, {
+                start:0,
+                end: 100,
+                handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                handleSize: '80%',
+                handleStyle: {
+                    color: '#fff',
+                    shadowBlur: 3,
+                    shadowColor: 'rgba(0, 0, 0, 0.6)',
+                    shadowOffsetX: 2,
+                    shadowOffsetY: 2
+                }
+            }],
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    formatter: '{value}°C'
+                },
+                min:36,
+                max:42,
+            },
+            series: [
+                {
+                    name:'体温',
+                    type:'line',
+                    data:temp1,
+                    markPoint: {
+										data: [
+											{type: 'max', name: '最大值'},
+											{type: 'min', name: '最小值'}
+											]
+										},
+										markLine: {
+										data: [
+											{type: 'average', name: '平均值'}
+											]
+										}
+
+                }
+            ]
+        };
+        myChart.setOption(option);
+    });
+    // 使用刚指定的配置项和数据显示图表。
+
+</script>
+</body>
+</html>

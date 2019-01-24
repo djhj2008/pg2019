@@ -51,19 +51,19 @@
                            <tbody>
                         	 <tr>
                         	 <%if $value['flag'] eq 1 %>	
-                           <td style="font-size:larger">设备ID:<%$value['devid']%></td>
+                           <td style="font-size:larger">设备:<%$value['devid']%></td>
                            <td style="color:blue">已激活</td>
                            <%else%>
-                           <td style="font-size:larger">设备ID:<%$value['devid']%></td>
+                           <td style="font-size:larger">设备:<%$value['devid']%></td>
                            <td style="color:gray">未使用</td>
                            <%/if%>
                            </tr>
                            <%if !empty($value['sn']) %>
                            <tr>
                            <%if $value['flag'] eq 1 %>	
-                           <td style="font-size:larger;color:blue">SN编码:<%$value['sn']%></td>
+                           <td style="font-size:larger;color:blue">编码:<%$value['sn']%></td>
                            <%else%>
-                           <td style="font-size:larger;color:gray">SN编码:<%$value['sn']%></td>
+                           <td style="font-size:larger;color:gray">编码:<%$value['sn']%></td>
                            <%/if%>
                            </tr>
                            <%/if%>
@@ -75,11 +75,18 @@
                            </td>
                            <td>
                            	<%if $value['flag'] eq 1 %>	
-                              <a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">
+                              <!--a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">
                               <button id="TableOperate" type="button"
                                       class="btn btn-lg btn-primary" onclick=""
                                       style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
                                   温度
+                              </button>
+                              </a-->
+                              <a href="<%$smarty.const.__APP__%>/devselect/todayValue?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">
+                              <button id="TableOperate" type="button"
+                                      class="btn btn-lg btn-primary" onclick=""
+                                      style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
+                                  曲线
                               </button>
                               </a>
                              <%/if%>

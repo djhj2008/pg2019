@@ -73,6 +73,7 @@ class DevselectController extends HomeController {
 	public function checktmp(){
 		$psn=$_GET['psnid'];
 		$id=$_GET['devid'];
+		$btemp=39.00;
 		$now = time();
 	  $time =date('Y-m-d ',$now);
 		$time2 =date('Y-m-d ',$now).'24:00:00';
@@ -81,8 +82,15 @@ class DevselectController extends HomeController {
 		
     $dev=M('device')->where(array('devid'=>$id,'psn'=>$psn))->find();
     if($dev==NULL){
-        echo "<script type='text/javascript'>alert('设备不存在.');distory.back();</script>";
+        //echo "<script type='text/javascript'>alert('设备不存在.');distory.back();</script>";
         $this->display();
+        exit;
+    }
+    $avg=(float)$dev['avg_temp'];
+    //var_dump($avg);
+    if($avg==0){
+    		//echo "<script type='text/javascript'>alert('学习中.');distory.back();</script>";
+    	  $this->display();
         exit;
     }
     //var_dump($dev);
@@ -120,12 +128,20 @@ class DevselectController extends HomeController {
 		}
 		
 		
-    if($selectSql=M('access')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
+    if($selectSql=M('access')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('id desc')->select()){
         $this->assign('devid',$id);
         $this->assign('date',$time);
         $this->assign('date2',$time2);
         $this->assign('id',$id);
         for($i=0;$i<count($selectSql);$i++){
+        		$temp1=$selectSql[$i]['temp1'];
+        		$temp2=$selectSql[$i]['temp2'];
+        		$temp3=$selectSql[$i]['env_temp'];
+						$a=array($temp1,$temp2);
+						$t=max($a);
+						$vt=(float)$t;
+        		$ntemp= round($btemp+($vt-$avg)*0.25,2);
+        		$selectSql[$i]['ntemp']=$ntemp;
             if($tmpSql!=NULL){
             		$max=count($tmpSql)-1;
                 for($j=0;$j<count($tmpSql);$j++){
@@ -224,25 +240,88 @@ class DevselectController extends HomeController {
 	public function querytoday(){
 				$psnid=$_GET['psnid'];
 				$now = time();
-			  $time =date('Y-m-d ',$now).'00:00:00';
-  			$time2 =date('Y-m-d ',$now).'24:00:00';
-				$start_time = strtotime($time);
-				$end_time = strtotime($time2)+86400;
+			  $time =date('Y-m-d',$now);
+				$start_time = strtotime($time)-86400+3600*18;
+				$end_time = strtotime($time)+86400;
+				$max_count=6;
+				$btemp=39;
 				
-				$accSelect=M('access')->group('devid')->where('time >='.$start_time.' and time <'.$end_time)->where(array('psn'=>$psnid))->order('devid asc')->limit(0,4)->select();
+				$devs=M('device')->where(array('flag'=>1,'psn'=>$psnid,'dev_type'=>0))->select();
 				
-				foreach($accSelect as $acc){
-					var_dump($acc['devid']);
+				foreach($devs as $dev){
+					$devid=$dev['devid'];
+					var_dump($devid);
+					$accss=M('access')->where('time >='.$start_time.' and time <='.$end_time)
+															->where(array('devid'=>$devid,'psn'=>$psnid))->group('time')->order('time asc')->limit(0,$max_count)
+															->select();
+					$temp=NULL;
+					//var_dump(count($accss));
+					if(count($accss)!=$max_count){
+						continue;
+					}
+					$sum=0;
+					for($i=0;$i< $max_count;$i++){
+						$acc=$accss[$i];
+						$temp1=$acc['temp1'];
+						$temp2=$acc['temp2'];
+						$temp3=$acc['env_temp'];
+						$time=date('Y-m-d H:s:i',$acc['time']);
+						//var_dump($time);
+						//var_dump($temp3);
+						if($temp==NULL){
+							$temp=$temp3;
+							$a=array($temp1,$temp2);
+							$t=max($a);
+							$vt=(float)$t;
+						}else{
+							$v=($temp3-$temp)*0.4;
+							$a=array($temp1,$temp2);
+							$m=max($a);
+							$vt=$t+$v;
+							$a=array($m,$vt);
+							$vt=(float)max($a);
+							$temp=$temp3;
+						}
+						$sum+=$vt;
+						$accss[$i]['vtemp']=$vt;
+						//var_dump($acc);
+					}
+					//var_dump($accss);
+					$avg= round($sum/$max_count,2);
+					var_dump($avg);
+				  $devSave=M('device')->where(array('psn'=>$psnid,'devid'=>$devid))->save(array('avg_temp'=>$avg));
+				  //exit;
+					/*
+					$accss=M('access')->where('time <='.$end_time)
+										->where(array('devid'=>$devid,'psn'=>$psnid))->group('time')->order('time desc')->limit(0,16)
+										->select();
+										
+					foreach($accss as $acc){
+						$temp1=$acc['temp1'];
+						$temp2=$acc['temp2'];
+						$temp3=$acc['env_temp'];
+						$time=date('Y-m-d H:s:i',$acc['time']);
+
+						$a=array($temp1,$temp2);
+						$vt=max($a);
+						
+						$ntemp= round($btemp+($vt-$avg)*0.2,2);
+						var_dump($time);
+						var_dump($ntemp);
+					}
+					//var_dump($accss);
+					exit;
+					*/
 				}
 				exit;
-				
 	}
 		
 	public function querytemp(){
 		if(empty($_POST['time'])||empty($_POST['time2'])){
 			  $now = time();
-			  $time =date('Y-m-d');
-  			$time2 =$time;
+			  $v = strtotime(date('Y-m-d',$now))-86400;
+			  $time =date('Y-m-d',$v);
+  			$time2 =date('Y-m-d',$now);
 		}else{
 		  	$time =  $_POST['time'];
 		  	$time2 =  $_POST['time2'];
@@ -255,11 +334,14 @@ class DevselectController extends HomeController {
 		$psnid = $_GET['psnid'];
 		$sql = 'devid ='.$id.' and psn= '.$psnid.' and time >= '.$start_time.' and time < '.$end_time;
 		//var_dump($sql);
-		$selectSql=M('access')->where($sql)->order('id desc')->select();
+		$selectSql=M('access')->where($sql)->group('time')->order('time desc')->select();
 		if(empty($selectSql)){
-				$date = date("Y-m-d");
+				$now = time();
+				$v = strtotime(date('Y-m-d',$now))-86400;
+				$date = date("Y-m-d",$v);
+				$date2 = date("Y-m-d",$now);
         $this->assign('date',$date);
-        $this->assign('date2',$date);
+        $this->assign('date2',$date2);
 		}else{
 			  $this->assign('date',$time);
         $this->assign('date2',$time2);
@@ -323,7 +405,7 @@ class DevselectController extends HomeController {
 				$delay_sub = 2*3600;
  
       	$now = time();
-  			$start_time = strtotime(date('Y-m-d',$now).' 00:00:00');
+  			$start_time = strtotime(date('Y-m-d',$now));
       	//var_dump($start_time);
       	$yes_time = $start_time-86400;
       	$end_time = $start_time+86400;
@@ -338,37 +420,43 @@ class DevselectController extends HomeController {
 				foreach($devlist as $dev){
 					$devid = $dev['devid'];
 					$psnid = $dev['psnid'];
-					$accSelect=M('access')->group('time')->where('time >='.$yes_time.' and time <'.$end_time)->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,4)->select();
-					$accsize=count($accSelect);
-					if($accsize<4){
-						$stateSave=array('state'=>3);
-						if($accsize==0){
-      		  		$stateSave=array('state'=>4);
-      			}
-      			$ret=M('factory')->where(array('devid'=>$devid,'psnid'=>$psnid))->save($stateSave);
-      		  //var_dump($devid);
-      		  //var_dump($psnid);
-      			continue;
-      		}
-	      	for($i=0;$i < 4;$i++){
-	      		$time=(int)$accSelect[$i]['time'];
-	      		//$time = date('Y-m-d H:s:i',$time);
-	      		$right_time=$first_time-$i*$delay_sub;
-	      		//echo "devid:";
-	      		//var_dump($devid);
-	      		//var_dump($time);
-	      		//var_dump($right_time);
-	      		if($time!=$right_time){
-	      			$ret=M('factory')->where(array('devid'=>$devid,'psnid'=>$psnid))->save(array('state'=>3));
-	      			break;
+					$dev=M('device')->where(array('devid'=>$devid,'psn'=>$psnid,'flag'=>1))->order('id asc')->find();
+					//var_dump($dev);
+					if(!empty($dev)){
+						$accSelect=M('access')->group('time')->where('time >='.$yes_time.' and time <'.$end_time)->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,4)->select();
+						$accsize=count($accSelect);
+						if($accsize<4){
+							$stateSave=array('state'=>3);
+							if($accsize==0){
+	      		  		$stateSave=array('state'=>4);
+	      			}
+	      			$ret=M('factory')->where(array('devid'=>$devid,'psnid'=>$psnid))->save($stateSave);
+	      		  //var_dump($devid);
+	      		  //var_dump($psnid);
+	      			continue;
 	      		}
-	      		$ret=M('factory')->where(array('devid'=>$devid,'psnid'=>$psnid))->save(array('state'=>2));
-	      	}
+		      	for($i=0;$i < 4;$i++){
+		      		$time=(int)$accSelect[$i]['time'];
+		      		//$time = date('Y-m-d H:s:i',$time);
+		      		$right_time=$first_time-$i*$delay_sub;
+		      		//echo "devid:";
+		      		//var_dump($devid);
+		      		//var_dump($time);
+		      		//var_dump($right_time);
+		      		if($time!=$right_time){
+		      			$ret=M('factory')->where(array('devid'=>$devid,'psnid'=>$psnid))->save(array('state'=>3));
+		      			break;
+		      		}
+		      		$ret=M('factory')->where(array('devid'=>$devid,'psnid'=>$psnid))->save(array('state'=>2));
+		      	}
+		      }else{
+		      	//echo "devid:";
+		      	//var_dump($devid);
+		      	$ret=M('factory')->where(array('devid'=>$devid,'psnid'=>$psnid))->save(array('state'=>0));
+		      }
 				}
-				$devSelect=M('factory')->where(array('state'=>4))->where(array('psnid'=>$psnid))->order('devid asc')->select();
+				$devSelect=M('factory')->where(array('state'=>2))->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
 				$this->assign('devSelect',$devSelect);
-				//var_dump($devSelect);
-				//exit;
 				$this->display();
 	}
 
@@ -432,6 +520,37 @@ class DevselectController extends HomeController {
 				//var_dump($devSelect);
 				$this->assign('devSelect',$devSelect);
 				$this->display();
+	}
+	
+	public function factorynone(){
+			$psnid=$_GET['psnid'];
+			$devSelect=M('factory')->where(array('state'=>4))->where(array('psnid'=>$psnid))->order('devid asc')->select();
+			
+			$devcount=count($devSelect);
+			for($i=0; $i< $devcount; $i++){
+				$devid = $devSelect[$i]['devid'];
+				$accSelect=M('access')->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,1)->select();
+				//echo "devid:";
+				//var_dump($devid);
+				foreach($accSelect as $acc){
+					$temp1=(float)$acc['temp1'];
+					$temp2=(float)$acc['temp2'];
+					$temp3=(float)$acc['env_temp'];
+					//var_dump($temp1);
+					//var_dump($temp2);
+					//var_dump($temp3);
+					if($temp1==-20||$temp2==0||$temp3==0)
+					{
+						$devSelect[$i]['err']=1;
+					}else{
+						$devSelect[$i]['err']=0;
+					}
+				}
+			}
+			//exit;
+			//var_dump($devSelect);
+			$this->assign('devSelect',$devSelect);
+			$this->display();
 	}
 	
 	public function autoadd(){
@@ -730,4 +849,110 @@ class DevselectController extends HomeController {
     $this->assign('recovery',$record);
     $this->display();
 	}
+	
+	public function calendar(){
+      $devid=$_GET["devid"];
+
+      $postArr=array();
+      $postArr['devid']=$devid;
+      $accSelect=M('access')->where($postArr)->order('time asc')->select();
+      $first = reset($accSelect);
+      $end = end($accSelect);
+
+      $firstDay = substr($first[cur_time],0,strpos($first[cur_time],' '));//开始日期
+      $endDay = substr($end[cur_time],0,strpos($end[cur_time],' '));//最后日期
+
+      $days = (strtotime($endDay)-strtotime($firstDay))/86400+1;//天数
+      $startStr = $firstDay . '00:00:00';
+      $endStr = $firstDay .  '23:59:59';
+
+      $startTime = strtotime($startStr);
+      $endTime = strtotime($endStr);
+
+      $jarr = array();
+      $jsArr = array();
+      for($i=0;$i<$days;$i++){
+            $start = $startTime+86400*$i;
+            $end = $endTime+86400*$i;
+            $postArr['time']=array('between',array($start,$end));
+            if($selectSql=M('access')->where($postArr)->order('time desc')->select()){
+                  $curtime=($selectSql[0][cur_time]);
+                  $day= substr($curtime,0,strpos($curtime,' '));
+                  $jarr= array('day'=>$day,"price"=>$selectSql[0][temp1]);
+                  array_push($jsArr,$jarr);
+
+            }
+
+      };
+      $this->assign('data',json_encode($jsArr));
+      $this->assign('date',$date);
+      $this->display();
+	}
+	public function todayValue(){
+        $devid = $_GET["devid"];
+        $psnid=$_GET["psnid"];
+        $btemp =39.00;
+        $now = time();
+        $postArr = array();
+        $postArr['devid'] = $devid;
+        $postArr['psn'] = $psnid;
+        
+				$now = time();
+				$time =date('Y-m-d',$now);
+				
+				$start_time = strtotime($time)-86400;
+				$end_time = strtotime($time)+86400;
+        //var_dump($start_time);
+        //var_dump($end_time);
+        
+        $dateArr = array();
+        $temp1Arr = array();
+        $temp2Arr = array();
+        
+				$dev=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->find();
+				if($dev==NULL){
+					//echo "<script type='text/javascript'>alert('设备不存在.');distory.back();</script>";
+					$this->display();
+					exit;
+				}
+        $avg=(float)$dev['avg_temp'];
+        $postArr['time']=array('between',array($start,$end));
+        if($selectSql=M('access')->where('devid ='.$devid.' and psn= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)
+													        ->group('time')
+													        ->order('id desc')
+													        ->select())
+        {
+           $todayData = array_slice($selectSql,0,24);
+           $dataCount= count($todayData);
+         
+           for($j=0;$j< $dataCount;$j++){
+							$time=($todayData[$j][time]);
+							$date=date('m-d H:i',$time);
+							$temp1=$todayData[$j]['temp1'];
+							$temp2=$todayData[$j]['temp2'];
+							$temp3=$todayData[$j]['env_temp'];
+							$a=array($temp1,$temp2);
+							$t=max($a);
+							$vt=(float)$t;
+							$ntemp= round($btemp+($vt-$avg)*0.25,2);
+							$selectSql[$j]['ntemp']=$ntemp;
+							//var_dump($date);
+							//var_dump($vt);
+							//var_dump($avg);
+							array_push($dateArr,$date);
+							array_push($temp1Arr,$ntemp);
+							array_push($temp2Arr,$todayData[$j]['env_temp']);
+           }
+           
+				}
+      $this->assign('temp1Arr',json_encode(array_reverse($temp1Arr)));
+      $this->assign('temp2Arr',json_encode(array_reverse($temp2Arr)));
+      $this->assign('dateArr',json_encode(array_reverse($dateArr)));
+
+      $this->display();
+
+	}
+	
+	
+	
 }
