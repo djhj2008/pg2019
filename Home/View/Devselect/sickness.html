@@ -30,7 +30,7 @@
     <p id="sicktitle3" style="text-align:center;font-size:60px;display:none"><%count($devSelect3)%></p>
     <p id="tab1sick" style="text-align:center;color:orange">异常数量</p>
     <p id="tab2recover" style="text-align:center;color:green;display:none">治疗数量</p>
-    <p id="tab3recycle" style="text-align:center;color:red;display:none">死亡或脱落</p>
+    <p id="tab3recycle" style="text-align:center;color:red;display:none">异常数量</p>
 </div>
 
 <div class="weui-tab">
@@ -119,7 +119,7 @@
             </div>
             <div id="tab2" class="weui_tab_bd_item" style="display:none">
                 <%foreach $devSelect2 as $value%>
-                <a href="<%$smarty.const.__APP__%>/devselect/setting2?devid=<%$value['devid']%>&temp1=<%$value['temp1']%>&psnid=<%$value['psnid']%>"
+                <a
                    class="weui-media-box weui-media-box_appmsg">
                     <table style="width: 100%;" cellspacing="1" cellpadding="1" border="0"
                            align="left">
@@ -135,27 +135,33 @@
                         <tr>
                         		<%if $value["level"] eq 2  %>
                             <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
                             	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:darkorange;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["temp1"],2)%>℃
                                 </button>
+                                </a>
                             </td>
                             <%else if $value["level"] eq 1%>
                             <td>
+																<a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
                             	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:gold;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["temp1"],2)%>℃
                                 </button>
+                                </a>
                             </td>
                             <%else%>
                             <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
                             	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:lightgreen;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["temp1"],2)%>℃
                                 </button>
+                                </a>
                             </td>                            
                             <%/if%>
                             <td style="font-weight:bold;">异常:<%$value['days']%>天</td>
@@ -170,11 +176,13 @@
                             
                             <td>&nbsp;</td>
                             <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/setting2?devid=<%$value['devid']%>&temp1=<%$value['temp1']%>&psnid=<%$value['psnid']%>">
                                 <button id="TableOperate" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
                                     处理
                                 </button>
+                                </a>
                             </td>
                         </tr>
                         </tbody>
@@ -185,7 +193,7 @@
             </div>
             <div id="tab3" class="weui_tab_bd_item" style="display:none">
                 <%foreach $devSelect3 as $value%>
-                <a href="<%$smarty.const.__APP__%>/devselect/setting3?devid=<%$value['devid']%>&temp1=<%$value['temp1']%>&psnid=<%$value['psnid']%>"
+                <a
                    class="weui-media-box weui-media-box_appmsg">
                     <table style="width: 100%;" cellspacing="1" cellpadding="1" border="0"
                            align="left">
@@ -201,27 +209,33 @@
                         <tr>
                         		<%if $value["level"] eq 2  %>
                             <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
                             	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:lightblue;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["temp1"],2)%>℃
                                 </button>
+                                </a>
                             </td>
                             <%else if $value["level"] eq 1 %>
                             <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
                             	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:lightgray;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["temp1"],2)%>℃
                                 </button>
+                                </a>
                             </td>
                             <%else%>
                             <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/checktmp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
                             	  <button id="checktemp" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="font-size:larger;background-color:lightgreen;height:35px;color:White;border-radius:3px;">
                                    <%number_format($value["temp1"],2)%>℃
                                 </button>
+                                </a>
                             </td>                     
                             <%/if%>
                             <td style="font-weight:bold;">异常:<%$value['days']%>天</td>
@@ -236,11 +250,13 @@
                             
                             <td>&nbsp;</td>
                             <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/setting3?devid=<%$value['devid']%>&temp1=<%$value['temp1']%>&psnid=<%$value['psnid']%>">
                                 <button id="TableOperate" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
                                     回收
                                 </button>
+                                </a>
                             </td>
                         </tr>
                         </tbody>

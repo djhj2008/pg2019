@@ -50,20 +50,37 @@
                         <table style="width: 100%;" cellspacing="1" cellpadding="1" border="0"align="left">
                            <tbody>
                         	 <tr>
-                        	 <%if $value['flag'] eq 1 %>	
-                           <td style="font-size:larger">设备:<%$value['devid']%></td>
+                           <td style="font-size:larger">设备:                          	  
+	                           	<button id="checktemp" type="button"
+	                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+	                                        style="font-size:larger;background-color:lightgray;height:35px;color:White;border-radius:1px;">
+	                                   <%$value["devid"]%>
+	                            </button>
+                           </td>
+                           <%if $value['flag'] eq 1 %>	
                            <td style="color:blue">已激活</td>
                            <%else%>
-                           <td style="font-size:larger">设备:<%$value['devid']%></td>
                            <td style="color:gray">未使用</td>
                            <%/if%>
                            </tr>
                            <%if !empty($value['sn']) %>
                            <tr>
                            <%if $value['flag'] eq 1 %>	
-                           <td style="font-size:larger;color:blue">编码:<%$value['sn']%></td>
+                           <td style="font-size:larger">编码:
+	                           	<button id="checktemp" type="button"
+	                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+	                                        style="font-size:larger;background-color:lightgray;height:35px;color:White;border-radius:1px;">
+	                                   <%$value["sn"]%>
+	                            </button>
+                           </td>
                            <%else%>
-                           <td style="font-size:larger;color:gray">编码:<%$value['sn']%></td>
+                           <td style="font-size:larger">编码:
+	                           	<button id="checktemp" type="button"
+	                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+	                                        style="font-size:larger;background-color:lightgray;height:35px;color:White;border-radius:1px;">
+	                                   <%$value["sn"]%>
+	                            </button>
+                           </td>
                            <%/if%>
                            </tr>
                            <%/if%>
@@ -86,7 +103,7 @@
                               <button id="TableOperate" type="button"
                                       class="btn btn-lg btn-primary" onclick=""
                                       style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
-                                  曲线
+                                  体温
                               </button>
                               </a>
                              <%/if%>

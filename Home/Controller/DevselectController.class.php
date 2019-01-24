@@ -237,85 +237,6 @@ class DevselectController extends HomeController {
 		$this->display();
 	}
 	
-	public function querytoday(){
-				$psnid=$_GET['psnid'];
-				$now = time();
-			  $time =date('Y-m-d',$now);
-				$start_time = strtotime($time)-86400+3600*18;
-				$end_time = strtotime($time)+86400;
-				$max_count=6;
-				$btemp=39;
-				
-				$devs=M('device')->where(array('flag'=>1,'psn'=>$psnid,'dev_type'=>0))->select();
-				
-				foreach($devs as $dev){
-					$devid=$dev['devid'];
-					var_dump($devid);
-					$accss=M('access')->where('time >='.$start_time.' and time <='.$end_time)
-															->where(array('devid'=>$devid,'psn'=>$psnid))->group('time')->order('time asc')->limit(0,$max_count)
-															->select();
-					$temp=NULL;
-					//var_dump(count($accss));
-					if(count($accss)!=$max_count){
-						continue;
-					}
-					$sum=0;
-					for($i=0;$i< $max_count;$i++){
-						$acc=$accss[$i];
-						$temp1=$acc['temp1'];
-						$temp2=$acc['temp2'];
-						$temp3=$acc['env_temp'];
-						$time=date('Y-m-d H:s:i',$acc['time']);
-						//var_dump($time);
-						//var_dump($temp3);
-						if($temp==NULL){
-							$temp=$temp3;
-							$a=array($temp1,$temp2);
-							$t=max($a);
-							$vt=(float)$t;
-						}else{
-							$v=($temp3-$temp)*0.4;
-							$a=array($temp1,$temp2);
-							$m=max($a);
-							$vt=$t+$v;
-							$a=array($m,$vt);
-							$vt=(float)max($a);
-							$temp=$temp3;
-						}
-						$sum+=$vt;
-						$accss[$i]['vtemp']=$vt;
-						//var_dump($acc);
-					}
-					//var_dump($accss);
-					$avg= round($sum/$max_count,2);
-					var_dump($avg);
-				  $devSave=M('device')->where(array('psn'=>$psnid,'devid'=>$devid))->save(array('avg_temp'=>$avg));
-				  //exit;
-					/*
-					$accss=M('access')->where('time <='.$end_time)
-										->where(array('devid'=>$devid,'psn'=>$psnid))->group('time')->order('time desc')->limit(0,16)
-										->select();
-										
-					foreach($accss as $acc){
-						$temp1=$acc['temp1'];
-						$temp2=$acc['temp2'];
-						$temp3=$acc['env_temp'];
-						$time=date('Y-m-d H:s:i',$acc['time']);
-
-						$a=array($temp1,$temp2);
-						$vt=max($a);
-						
-						$ntemp= round($btemp+($vt-$avg)*0.2,2);
-						var_dump($time);
-						var_dump($ntemp);
-					}
-					//var_dump($accss);
-					exit;
-					*/
-				}
-				exit;
-	}
-		
 	public function querytemp(){
 		if(empty($_POST['time'])||empty($_POST['time2'])){
 			  $now = time();
@@ -574,190 +495,347 @@ class DevselectController extends HomeController {
   		exit;
 	}
 	
-	public function start(){
-        	$psn= $_GET['psnid'];
-        	$now = time();
-    			$start_time = strtotime(date('Y-m-d',$now).'00:00:00');
-        	dump($start_time);
-        	$end_time = $start_time+86400;
-        	$hlevl1=37.5;
-        	$hlevl2=38.5;
-        	$llevl1=10;
-        	$llevl2=0;
+	public function avgtoday(){
+			$psnid=$_GET['psnid'];
+			$now = time();
+		  $time =date('Y-m-d',$now);
+			$start_time = strtotime($time)-86400*2+3600*18;
+			$end_time = strtotime($time)+86400;
+			$max_count=6;
+			$env_check=0.4;
+			
+			$devs=M('device')->where(array('flag'=>1,'psn'=>$psnid,'dev_type'=>0))->select();
+			
+			foreach($devs as $dev){
+				$devid=$dev['devid'];
+				var_dump($devid);
+				$accss=M('access')->where('time >='.$start_time.' and time <='.$end_time)
+														->where(array('devid'=>$devid,'psn'=>$psnid))->group('time')->order('time asc')->limit(0,$max_count)
+														->select();
+				$temp=NULL;
+				var_dump(count($accss));
+				if(count($accss)!=$max_count){
+					continue;
+				}
+				$sum=0;
+				for($i=0;$i< $max_count;$i++){
+					$acc=$accss[$i];
+					$temp1=$acc['temp1'];
+					$temp2=$acc['temp2'];
+					$temp3=$acc['env_temp'];
+					$time=date('Y-m-d H:s:i',$acc['time']);
+					var_dump($time);
+					var_dump($temp3);
+					if($temp==NULL){
+						$temp=$temp3;
+						$a=array($temp1,$temp2);
+						$t=max($a);
+						$vt=(float)$t;
+					}else{
+						$v=($temp3-$temp)*$env_check;
+						$a=array($temp1,$temp2);
+						$m=max($a);
+						$vt=$t+$v;
+						$a=array($m,$vt);
+						$vt=(float)max($a);
+						$temp=$temp3;
+					}
+					$sum+=$vt;
+					$accss[$i]['vtemp']=$vt;
+					//var_dump($acc);
+				}
+				//var_dump($accss);
+				$avg= round($sum/$max_count,2);
+				var_dump($avg);
+			  $devSave=M('device')->where(array('psn'=>$psnid,'devid'=>$devid))->save(array('avg_temp'=>$avg));
 
-        	$acss=M('access')->group('devid')->order('temp1 desc')->where('temp1 >= '.$hlevl1.' and time >'.$start_time.' and time <'.$end_time)->where(array('psn'=>$psn))->select();
-        	
-        	$sick=M('sickness')->where(array('psnid'=>$psn,'state'=>1))->select();
-        	echo "sick:";
-        	dump($sick);
-					{
-        		foreach($sick as $s){
-        			$ret=M('access')->where('time >'.$start_time.' and time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$s['devid']))->order('temp1 desc')->limit(0,1)->find();
-							$dev=M('device')->where(array('psn'=>$psn,'devid'=>$s['devid']))->find();
-        			if(!empty($ret)&&!empty($dev)){
-        				$flag=$dev['flag'];
-        				if($flag==1){				
-	      					$date = date('Y-m-d H:i:s',$ret['time']);
-	      					$day1 = strtotime((date('Y-m-d',$ret['time'])));
-	      					$day2 = strtotime((date('Y-m-d',$s['time'])));
-	      					$temp = $ret['temp1'];
-	      					if($day1-$day2>=86400&&$temp>=$hlevl1){
-	      						$days=$s['days']+1;
-	      					}else{
-	      						$days=$s['days'];
-	      					}
-	      					if($temp>=$hlevl2){
-	      						$level=2;
-	      					}else if($temp>=$hlevl1){
-	      						$level=1;
-	      					}else{
-	      						$level=0;
-	      					}
+			}
+			exit;
+	}
+	
+	public function startnew(){
+    	$psn= $_GET['psnid'];
+    	$now = time();
+			$start_time = strtotime(date('Y-m-d',$now));
+    	dump($start_time);
+    	$end_time = $start_time+86400;
 
-	      					$sk=array(
-								  		'temp1'=>$ret['temp1'],
-											'time'=>$ret['time'],
-											'date'=>$date,
-											'level'=>$level,
-											'state'=>1,
-											'days'=>$days,
-								  		);
-								  $saveSql=D('sickness')->where(array('devid'=>$s['devid'],'psn'=>$s['psn']))->save($sk);
-	      					dump($sk);
-        				}
-        			}
-        		}
- 
-      			foreach($acss as $acs){
-      				$find = false;
-      				foreach($sick as $s){
-      					if($acs['devid']==$s['devid']){
-      						$find = true;
-      						break;
+			$psnfind = M('psn')->where(array('id'=>$psn))->find();
+			if(empty($psnfind)){
+				echo "PSN NULL.";
+				exit;
+			}
+			$btemp=$psnfind['base_temp'];
+    	$hlevl1=$psnfind['htemplev1'];
+    	$hlevl2=$psnfind['htemplev2'];
+    	$llevl1=$psnfind['ltemplev1'];
+    	$llevl2=$psnfind['ltemplev2'];
+			$temp_value=$psnfind['check_value'];
+
+			dump($btemp);
+			dump($hlevl1);
+			dump($hlevl2);
+			dump($llevl1);
+			dump($llevl2);
+			dump($temp_value);
+
+			$devs = M('device')->where(array('psn'=>$psn,'flag'=>1,'dev_type'=>0))->select();
+			
+			if(empty($devs)){
+				echo "DEV NULL.";
+				exit;
+			}
+			dump('high');
+			foreach($devs as $dev){
+				$devid=$dev['devid'];
+				$ret=M('access')->where('time >='.$start_time.' and time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$devid))->group('time')->order('time desc')->select();
+				$flag=$dev['flag'];
+				$avg=$dev['avg_temp'];
+				$size = count($ret);
+				//dump($devid);
+				
+				if($avg==0){
+					dump($devid);
+					continue;
+				}
+				
+				if($flag==1&&$size>0){
+					$ntemp = 255;
+					$index =0;
+  				for($i=0;$i< $size;$i++){
+  					$date = date('Y-m-d H:i:s',$ret[$i]['time']);
+  					$day1 = strtotime((date('Y-m-d',$ret[$i]['time'])));
+  					$day2 = strtotime((date('Y-m-d',$s['time'])));
+						
+	    			$temp1=$ret[$i]['temp1'];
+						$temp2=$ret[$i]['temp2'];
+						$temp3=$ret[$i]['env_temp'];
+						$a=array($temp1,$temp2);
+						$t=max($a);
+						$vt=(float)$t;
+						$temp= round($btemp+($vt-$avg)*$temp_value,2);
+						
+						//dump($temp);
+						
+						if($ntemp==255){
+							$ntemp=$temp;
+						}else{
+							if($temp>=$ntemp){
+								$ntemp=$temp;
+								$index=$i;
+							}
+						}
+  				}
+  				//var_dump($index);
+  				//var_dump($ntemp);
+  				
+					$temp1=$ret[$index]['temp1'];
+					$temp2=$ret[$index]['temp2'];
+					$temp3=$ret[$index]['env_temp'];
+					$cur_time =$ret[$index]['time']; 
+  				$days=$s['days'];
+  				
+					if($ntemp>=$hlevl1){
+						if(abs($temp1-$temp2)>0.2&&$temp3 < 30){
+							$level=0;
+						}else{
+							if($temp>=$hlevl2){
+								$level=2;
+							}else{
+								$level=1;
+							}
+    					if($day1-$day2>=86400){
+    						$days=$s['days']+1;
+    					}
+						}
+					}else{
+						$level=0;
+					}
+				  $sick=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn,'state'=>1))->find();
+					if(empty($sick)){
+						if($level>0){
+		        	$sk=array(
+					   	  'psnid'=>$psn,
+					  		'devid'=>$devid,
+					  		'sn'=>$dev['sn'],
+					  		'shed'=>$dev['shed'],
+					  		'fold'=>$dev['fold'],
+					  		'temp1'=>$ntemp,
+								'time'=>$cur_time,
+								'level'=>$level,
+								'date'=>$date,
+								'state'=>1,
+								'days'=>1,
+					  		);
+					  	echo "add:";
+						  dump($devid);
+						  dump($psn);
+					  	dump($sk);
+  			  	 	$saveSql=D('sickness')->add($sk);
+  			  	}
+					}else{
+  					if($level==0){
+    					$sk=array(
+						  		'temp1'=>$ntemp,
+									'time'=>$ret[0]['time'],
+									'date'=>$date,
+									'level'=>$level,
+									'state'=>1,
+						  		);
+							  echo "save1:";
+						  	$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
+							  dump($devid);
+							  dump($psn);
+							  dump($sk);
+  					}else{
+  						$day1 = strtotime((date('Y-m-d',$cur_time)));
+  						$day2 = strtotime((date('Y-m-d',$sick['time'])));
+  						dump(date('Y-m-d H:s',$cur_time));
+  						dump(date('Y-m-d H:s',$sick['time']));
+  						dump($ntemp);
+  						if($sick['time']!=$cur_time){
+    						$days=(int)$sick['days'];
+    						if($day1-$day2>=86400){
+      						$days=$days+1;
       					}
-      				}
-      				if($find==false){
-		        		$date = date('Y-m-d H:i:s',$acs['time']);
-		        		$dev = M('device')->where(array('psn'=>$acs['psn'],'devid'=>$acs['devid']))->find();
-		        		if(!empty($dev)){
-		        			$flag=$dev['flag'];
-		        			if($flag==1){
-		      					$temp = $acs['temp1'];
-		      					if($temp>=$hlevl2){
-		      						$level=2;
-		      					}else if($temp>=$hlevl1){
-		      						$level=1;
-		      					}else{
-		      						$level=0;
-		      					}
-					        	$sk=array(
-								   	  'psnid'=>$acs['psn'],
-								  		'devid'=>$acs['devid'],
-								  		'sn'=>$dev['sn'],
-								  		'shed'=>$dev['shed'],
-								  		'fold'=>$dev['fold'],
-								  		'temp1'=>$acs['temp1'],
-											'time'=>$acs['time'],
-											'level'=>$level,
-											'date'=>$date,
-											'state'=>1,
-											'days'=>1,
-								  		);
-								  	echo "add:";
-								  	dump($sk);
-			  			  	 	$saveSql=D('sickness')->add($sk);
-		  			  		}
-	  			  		}
-	      			}
-      			}	
-        	}
-
-        	$acss3=M('access')->group('devid')->order('temp1 desc')->where('temp1 < '.$llevl1.' and time >'.$start_time.' and time <'.$end_time)->where(array('psn'=>$psn))->select();
-        	
-        	$sick3=M('sickness')->where(array('psnid'=>$psn,'state'=>2))->select();
-					echo "sick3:";
-					dump($sick3);
-					{
-        		foreach($sick3 as $s){
-        			$ret=M('access')->where('time >'.$start_time.' and time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$s['devid']))->order('temp1 asc')->limit(0,1)->find();
-							$dev=M('device')->where(array('psn'=>$psn,'devid'=>$s['devid']))->find();
-        			if(!empty($ret)&&!empty($dev)){
-        				$flag=$dev['flag'];
-        				if($flag==1){				
-        					$date = date('Y-m-d H:i:s',$ret['time']);
-        					$day1 = strtotime((date('Y-m-d',$ret['time'])));
-        					$day2 = strtotime((date('Y-m-d',$s['time'])));
-        					if($day1-$day2>=86400){
-        						$days=$s['days']+1;
-        					}else{
-        						$days=$s['days'];
-        					}
-	      					$temp = $ret['temp1'];
-	      					if($temp<=$llevl2){
-	      						$level=2;
-	      					}else if($temp<=$llevl1){
-	      						$level=1;
-	      					}else{
-	      						$level=0;
-	      					}
-        					$sk=array(
-								  		'temp1'=>$temp,
-											'time'=>$ret['time'],
-											'date'=>$date,
-											'level'=>$level,
-											'state'=>2,
-											'days'=>$days,
-								  		);
-								  $saveSql=D('sickness')->where(array('devid'=>$s['devid'],'psn'=>$s['psn']))->save($sk);
-        					dump($sk);
-        				}
-        			}
-        		}
- 
-      			foreach($acss3 as $acs){
-      				$find = false;
-      				foreach($sick3 as $s){
-      					if($acs['devid']==$s['devid']){
-      						$find = true;
-      						break;
+      					$sk=array(
+							  		'temp1'=>$ntemp,
+										'time'=>$cur_time,
+										'date'=>$date,
+										'level'=>$level,
+										'state'=>1,
+										'days'=>$days,
+							  		);
+							  echo "save2:";
+						  	$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
+							  dump($sk);
+						  }
+					  }
+					}
+				}
+			}
+			
+			dump('low');
+			foreach($devs as $dev){
+				$devid=$dev['devid'];
+				$ret=M('access')->where('time >='.$start_time.' and time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$devid))->group('time')->order('time desc')->select();
+				$flag=$dev['flag'];
+				$avg=$dev['avg_temp'];
+				$size = count($ret);
+				//dump($devid);
+				if($avg==0){
+					dump($devid);
+					continue;
+				}
+				
+				if($flag==1&&$size>0){
+					$ntemp = 255;
+					$index =0;
+  				for($i=0;$i< $size;$i++){
+  					$date = date('Y-m-d H:i:s',$ret[$i]['time']);
+						
+	    			$temp1=$ret[$i]['temp1'];
+						$temp2=$ret[$i]['temp2'];
+						$temp3=$ret[$i]['env_temp'];
+						$a=array($temp1,$temp2);
+						$t=max($a);
+						$vt=(float)$t;
+						$temp= round($btemp+($vt-$avg)*$temp_value,2);
+						
+						//dump($temp);
+						
+						if($ntemp==255){
+							$last_temp=$temp;
+							$last_time=$ret[$i]['time'];
+							$ntemp=$temp;
+						}else{
+							if($temp< $ntemp){
+								$ntemp=$temp;
+								$index=$i;
+							}
+						}
+  				}
+  				//var_dump($index);
+  				//var_dump($ntemp);
+  				
+					$temp1=$ret[$index]['temp1'];
+					$temp2=$ret[$index]['temp2'];
+					$temp3=$ret[$index]['env_temp'];
+					$cur_time =$ret[$index]['time'];
+					if($ntemp<=$llevl1){
+							if($temp<=$llevl2){
+								$level=2;
+							}else{
+								$level=1;
+							}
+					}else{
+						$level=0;
+					}
+					
+				  $sick=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn,'state'=>2))->find();
+					if(empty($sick)){
+						if($level>0){
+		        	$sk=array(
+					   	  'psnid'=>$psn,
+					  		'devid'=>$devid,
+					  		'sn'=>$dev['sn'],
+					  		'shed'=>$dev['shed'],
+					  		'fold'=>$dev['fold'],
+					  		'temp1'=>$ntemp,
+								'time'=>$cur_time,
+								'level'=>$level,
+								'date'=>$date,
+								'state'=>2,
+								'days'=>1,
+					  		);
+					  	echo "addl:";
+					  	dump($sk);
+  			  	 	$saveSql=D('sickness')->add($sk);
+  			  	}
+					}else{
+  					if($level==0){
+    					$sk=array(
+						  		'temp1'=>$last_temp,
+									'time'=>$last_time,
+									'date'=>$date,
+									'level'=>$level,
+									'state'=>2,
+						  		);
+						  echo "savel1:";
+						  $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
+						  dump($devid);
+						  dump($psn);
+						  dump($sk);
+  					}else{
+  						$day1 = strtotime((date('Y-m-d',$cur_time)));
+  						$day2 = strtotime((date('Y-m-d',$sick['time'])));
+  						dump(date('Y-m-d H:s',$cur_time));
+  						dump(date('Y-m-d H:s',$sick['time']));
+  						dump($ntemp);
+  						if($sick['time']!=$cur_time){
+    						$days=(int)$sick['days'];
+    						if($day1-$day2>=86400){
+      						$days=$days+1;
       					}
-      				}
-      				if($find==false){
-		        		$date = date('Y-m-d H:i:s',$acs['time']);
-		        		$dev = M('device')->where(array('psn'=>$acs['psn'],'devid'=>$acs['devid']))->find();
-		        		if(!empty($dev)){
-			        		$flag=$dev['flag'];
-	        				if($flag==1){		
-			        			$temp = $acs['temp1'];
-		      					if($temp<=$llevl2){
-		      						$level=2;
-		      					}else if($temp<=$llevl1){
-		      						$level=1;
-		      					}else{
-		      						$level=0;
-		      					}
-					        	$sk=array(
-								   	  'psnid'=>$acs['psn'],
-								  		'devid'=>$acs['devid'],
-								  		'sn'=>$dev['sn'],
-											'shed'=>$dev['shed'],
-											'fold'=>$dev['fold'],
-								  		'temp1'=>$temp,
-											'time'=>$acs['time'],
-											'date'=>$date,
-											'level'=>$level,
-											'state'=>2,
-											'days'=>1,
-								  		);
-								  	echo "add:";
-								  	dump($sk);
-			  			  	 	$saveSql=D('sickness')->add($sk);
-			  			  	}
-		  			  	}
-	      			}
-      			}	
-        	}
-					exit;
+      					$sk=array(
+							  		'temp1'=>$ntemp,
+										'time'=>$cur_time,
+										'date'=>$date,
+										'level'=>$level,
+										'state'=>2,
+										'days'=>$days,
+							  		);
+							  echo "savel2:";
+							  $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
+							  dump($devid);
+							  dump($psn);
+							  dump($sk);
+						  }
+						}
+					}
+				}
+			}
+			exit;
 	}
 	
 	public function setting(){
@@ -888,10 +966,10 @@ class DevselectController extends HomeController {
       $this->assign('date',$date);
       $this->display();
 	}
+	
 	public function todayValue(){
         $devid = $_GET["devid"];
         $psnid=$_GET["psnid"];
-        $btemp =39.00;
         $now = time();
         $postArr = array();
         $postArr['devid'] = $devid;
@@ -903,11 +981,22 @@ class DevselectController extends HomeController {
 				$start_time = strtotime($time)-86400;
 				$end_time = strtotime($time)+86400;
         //var_dump($start_time);
-        //var_dump($end_time);
+        //var_dump($psnid);
         
         $dateArr = array();
         $temp1Arr = array();
         $temp2Arr = array();
+        
+      	$psn = M('psn')->where(array('id'=>$psnid))->find();
+				if(empty($psn)){
+					echo "PSN NULL.";
+					exit;
+				}
+				$btemp=$psn['base_temp'];
+				$temp_value=$psn['check_value'];
+
+				//dump($btemp);
+				//dump($temp_value);
         
 				$dev=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->find();
 				if($dev==NULL){
@@ -934,7 +1023,7 @@ class DevselectController extends HomeController {
 							$a=array($temp1,$temp2);
 							$t=max($a);
 							$vt=(float)$t;
-							$ntemp= round($btemp+($vt-$avg)*0.25,2);
+							$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
 							$selectSql[$j]['ntemp']=$ntemp;
 							//var_dump($date);
 							//var_dump($vt);
@@ -953,6 +1042,10 @@ class DevselectController extends HomeController {
 
 	}
 	
-	
+	public function getpwd(){
+		$pwd=$_GET['pwd'];
+		dump(md5($pwd));
+		exit;
+	}
 	
 }
