@@ -595,7 +595,7 @@ class DevselectController extends HomeController {
 				//dump($devid);
 				
 				if($avg==0){
-					dump($devid);
+					dump('no avg:'.$devid);
 					continue;
 				}
 				

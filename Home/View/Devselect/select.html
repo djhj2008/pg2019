@@ -61,8 +61,11 @@
 				<td><%$value['sn']%></td>
 				<td><a href="<%$smarty.const.__APP__%>/devselect/devlist?psnid=<%$value['id']%>">设备信息</a>
 					<a href="<%$smarty.const.__APP__%>/acadd/select?psnid=<%$value['id']%>">|设备温度</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/station?psnid=<%$value['id']%>">|基站信息</a></td>
-					<td><a href="<%$smarty.const.__APP__%>/devselect/checkfactory?psnid=<%$value['id']%>">重新扫描</a>
+					<a href="<%$smarty.const.__APP__%>/devselect/station?psnid=<%$value['id']%>">|基站信息</a>
+					<a href="<%$smarty.const.__APP__%>/devselect/startnew?psnid=<%$value['id']%>">|高温检测</a>
+					</td>
+					<td>
+					<a href="<%$smarty.const.__APP__%>/devselect/checkfactory?psnid=<%$value['id']%>">重新扫描</a>
 					<a href="<%$smarty.const.__APP__%>/devselect/factoryfail?psnid=<%$value['id']%>">|次数不足</a>
 					<a href="<%$smarty.const.__APP__%>/devselect/factorypass?psnid=<%$value['id']%>">|成功设备</a>
 					<a href="<%$smarty.const.__APP__%>/devselect/factorynone?psnid=<%$value['id']%>">|未上报</a>
