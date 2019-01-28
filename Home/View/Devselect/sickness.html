@@ -30,7 +30,7 @@
     <p id="sicktitle3" style="text-align:center;font-size:60px;display:none"><%count($devSelect3)%></p>
     <p id="tab1sick" style="text-align:center;color:orange">异常数量</p>
     <p id="tab2recover" style="text-align:center;color:green;display:none">治疗数量</p>
-    <p id="tab3recycle" style="text-align:center;color:red;display:none">异常数量</p>
+    <p id="tab3recycle" style="text-align:center;color:blue;display:none">异常数量</p>
 </div>
 
 <div class="weui-tab">
@@ -96,7 +96,7 @@
                         <tr>
                             <td>
                             	<div style="height:25px;margin-top:10px;">
-                            	<label class="weui-form-preview__label"><%$value['date']%></label>
+                            	<label class="weui-form-preview__label"><%date('Y-m-d H:i:s',$value['time'])%></label>
                             	</div>
                             </td>
                             
@@ -170,7 +170,7 @@
                         <tr>
                             <td>
                             	<div style="height:25px;margin-top:10px;">
-                            	<label class="weui-form-preview__label"><%$value['date']%></label>
+                            	<label class="weui-form-preview__label"><%date('Y-m-d H:i:s',$value['time'])%></label>
                             	</div>
                             </td>
                             
@@ -244,7 +244,7 @@
                         <tr>
                             <td>
                             	<div style="height:25px;margin-top:10px;">
-                            	<label class="weui-form-preview__label"><%$value['date']%></label>
+                            	<label class="weui-form-preview__label"><%date('Y-m-d H:i:s',$value['time'])%></label>
                             	</div>
                             </td>
                             

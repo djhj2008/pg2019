@@ -1640,6 +1640,7 @@ class DatapushController extends Controller {
 			//var_dump($value);
 			$sum+=$value;
 		}
+		$sum=$sum&0xffff;
 		//var_dump($sum);
 		if($crc==$sum){
 			echo "OK1".date('YmdHis').$delay_time.$rate.$footer;

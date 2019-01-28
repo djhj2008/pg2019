@@ -103,10 +103,10 @@ class ManagerController extends HomeController {
 				$ret=json_decode($ret,true);
 				//var_dump($ret);
 				$openid=$ret['openid'];
-				//var_dump($openid);
+				dump($openid);
 				$userFind=M('useropenid')->where(array('openid'=>$openid))->find();
 			}
-			//var_dump($userFind);
+			dump($userFind);
 			
 			if(empty($userFind)){
 				
@@ -121,13 +121,13 @@ class ManagerController extends HomeController {
 						'name'=>$name,
 						'pwd' =>md5($pwd)
 					);
-					$userFind=M('user')->where($nameArr)->find();
-					if($userFind){
+					$user=M('user')->where($nameArr)->find();
+					if($user){
 							if($openid){
-								$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$userFind['id']));
+								$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$user['id']));
 							}
-							session('userid',	$userFind['id']);
-							session('name',	$userFind['info']);
+							session('userid',	$user['id']);
+							session('name',	$user['info']);
             	$this ->redirect('/Devselect/sickness',array(),0,'');
             	exit;
               	
@@ -267,10 +267,10 @@ class ManagerController extends HomeController {
 				$ret=json_decode($ret,true);
 				//var_dump($ret);
 				$openid=$ret['openid'];
-				//var_dump($openid);
+				var_dump($openid);
 				$userFind=M('useropenid')->where(array('openid'=>$openid))->find();
 			}
-			//var_dump($userFind);
+			var_dump($userFind);
 					
 			if($_POST['pwd']!=NULL&&$_POST['name']!=NULL){
 				$openid = $_SESSION['openid'];
@@ -283,14 +283,14 @@ class ManagerController extends HomeController {
 					'name'=>$name,
 					'pwd' =>md5($pwd)
 				);
-				$userFind=M('user')->where($nameArr)->find();
-				if($userFind){
+				$user=M('user')->where($nameArr)->find();
+				if($user){
 						if($openid){
 							$userset=M('useropenid')->where(array('openid'=>$openid))->delete();
-							$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$userFind['id']));
+							$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$user['id']));
 						}
-						session('userid',	$userFind['id']);
-						session('name',	$userFind['info']);
+						session('userid',	$user['id']);
+						session('name',	$user['info']);
           	$this ->redirect('/Devselect/sickness',array(),0,'');
           	exit;
             	
