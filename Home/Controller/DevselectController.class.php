@@ -156,7 +156,12 @@ class DevselectController extends HomeController {
 						$a=array($temp1,$temp2);
 						$t=max($a);
 						$vt=(float)$t;
-        		$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
+						if($vt < 20){
+							$ntemp=$vt;
+						}else{
+							$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
+						}
+        		//$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
         		$selectSql[$i]['ntemp']=$ntemp;
             if($tmpSql!=NULL){
             		$max=count($tmpSql)-1;
@@ -781,7 +786,11 @@ class DevselectController extends HomeController {
 						$a=array($temp1,$temp2);
 						$t=max($a);
 						$vt=(float)$t;
-						$temp= round($btemp+($vt-$avg)*$temp_value,2);
+						if($vt < 20){
+							$temp=$vt;
+						}else{
+							$temp= round($btemp+($vt-$avg)*$temp_value,2);
+						}
 						
 						//dump($temp);
 						
@@ -798,7 +807,7 @@ class DevselectController extends HomeController {
 						if($temp<=$llevl1){
 							$lcount++;
 						}else{
-							if($lcount< 2){
+							if($lcount< 4){
 								$lcount=0;
 							}
 						}
@@ -853,12 +862,14 @@ class DevselectController extends HomeController {
 						  //$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
 						  $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->delete();
 						  dump($devid);
+						  dump($lcount);
 						  dump($psn);
 						  dump($sk);
   					}else{
   						$day1 = strtotime((date('Y-m-d',$cur_time)));
   						$day2 = strtotime((date('Y-m-d',$sick['time'])));
   						dump($sick['devid']);
+  						dump($lcount);
   						dump(date('Y-m-d H:s',$cur_time));
   						dump(date('Y-m-d H:s',$sick['time']));
   						dump($ntemp);
@@ -878,6 +889,7 @@ class DevselectController extends HomeController {
 							  echo "savel2:";
 							  $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
 							  dump($devid);
+							  dump($lcount);
 							  dump($psn);
 							  dump($sk);
 						  }
@@ -1073,7 +1085,12 @@ class DevselectController extends HomeController {
 							$a=array($temp1,$temp2);
 							$t=max($a);
 							$vt=(float)$t;
-							$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
+							if($vt< 20){
+								$ntemp=$vt;
+							}else{
+								$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
+							}
+							//$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
 							$selectSql[$j]['ntemp']=$ntemp;
 							//var_dump($date);
 							//var_dump($vt);

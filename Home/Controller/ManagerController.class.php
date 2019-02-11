@@ -267,10 +267,10 @@ class ManagerController extends HomeController {
 				$ret=json_decode($ret,true);
 				//var_dump($ret);
 				$openid=$ret['openid'];
-				var_dump($openid);
+				dump($openid);
 				$userFind=M('useropenid')->where(array('openid'=>$openid))->find();
 			}
-			var_dump($userFind);
+			//var_dump($userFind);
 					
 			if($_POST['pwd']!=NULL&&$_POST['name']!=NULL){
 				$openid = $_SESSION['openid'];
