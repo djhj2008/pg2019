@@ -25,16 +25,22 @@ class DevselectController extends HomeController {
   	$uid= $_SESSION['userid'];
   	//dump($uid);
   	$name=$_SESSION['name'];
+  	$tab= $_GET['tab'];
   	$this->assign('name',$name);
   	
+  	if(empty($tab)==false){
+  		$this->assign('tab',$tab);
+  	}
+  	//dump($tab);
   	
   	$psnSelect=M('psn')->where(array('userid'=>$uid))->select();
-  	$psnsize=count($psnSelect);
   	if(empty($psnSelect)){
   		//dump($psnSelect);
   		//exit;
   	}else{
-  		for($i=0;$i<$psnsize;$i++){
+  		//dump($psnSelect);
+  		$psnsize=count($psnSelect);
+  		for($i=0;$i< $psnsize;$i++){
   				if($i==0){
   					$where1='psn='.$psnSelect[$i]['sn'];
   					$where2='psnid='.$psnSelect[$i]['sn'];
@@ -64,9 +70,9 @@ class DevselectController extends HomeController {
 		$this->assign('temp2',$temp2);
 
   	$devdount=M('device')->where($where1.' and flag > 0 and dev_type=0')->count();
-		$devSelect1=M('sickness')->where($where2)->where(array('state'=>1,))->order('devid asc')->select();
+		$devSelect1=M('sickness')->where($where2)->where(array('state'=>1,'flag'=>0))->order('devid asc')->select();
 		$devSelect2=M('sickness')->where($where2)->where(array('flag'=>1))->order('devid asc')->select();
-		$devSelect3=M('sickness')->where($where2)->where(array('state'=>2))->order('devid asc')->select();
+		$devSelect3=M('sickness')->where($where2)->where(array('state'=>2,'flag'=>0))->order('devid asc')->select();
 		$this->assign('devcount',$devdount);
 		$this->assign('devSelect1',$devSelect1);
 		$this->assign('devSelect2',$devSelect2);
@@ -132,14 +138,15 @@ class DevselectController extends HomeController {
     if($devid==NULL){
     
     }
-    $tmpSql=M('taccess')->where('devid ='.$devid.' and psn= '.$psn.' and time <= '.$end_time)->order('id asc')->limit(0,8)->select();
+    $tmpSql=M('taccess')->where('devid ='.$devid.' and psn= '.$psn.' and time <= '.$end_time)->order('id desc')->limit(0,8)->select();
 
 		if($devid2!=NULL){
-    	$tmpSql2=M('taccess')->where('devid ='.$devid2.' and psn= '.$psn.' and time <= '.$end_time)->order('id asc')->limit(0,8)->select();
+    	$tmpSql2=M('taccess')->where('devid ='.$devid2.' and psn= '.$psn.' and time <= '.$end_time)->order('id desc')->limit(0,8)->select();
+			//var_dump($tmpSql2);
 		}
 
 		if($devid3!=NULL){
-    	$tmpSql3=M('taccess')->where('devid ='.$devid3.' and psn= '.$psn.' and time <= '.$end_time)->order('id asc')->limit(0,8)->select();
+    	$tmpSql3=M('taccess')->where('devid ='.$devid3.' and psn= '.$psn.' and time <= '.$end_time)->order('id desc')->limit(0,8)->select();
 			//var_dump($tmpSql3);
 		}
 		
@@ -258,7 +265,7 @@ class DevselectController extends HomeController {
 		$this->display();
 	}
 	
-	public function querytemp(){
+	public function querytempnew(){
 		if(empty($_POST['time'])||empty($_POST['time2'])){
 			  $now = time();
 			  $v = strtotime(date('Y-m-d',$now))-86400;
@@ -290,6 +297,167 @@ class DevselectController extends HomeController {
 		}
 		//var_dump($selectSql);
 		$this->assign('selectSql',$selectSql);
+		$this->display();
+	}
+	
+	public function querytemp(){
+		if(empty($_POST['time'])||empty($_POST['time2'])){
+			  $now = time();
+			  $v = strtotime(date('Y-m-d',$now))-86400;
+			  $time =date('Y-m-d',$v);
+  			$time2 =date('Y-m-d',$now);
+		}else{
+		  	$time =  $_POST['time'];
+		  	$time2 =  $_POST['time2'];
+		}
+    {
+	  	$psn = $_GET['psnid'];
+	  	$id=$_GET['devid'];
+			$psnid = $_GET['psnid'];
+    	
+    	$start_time = strtotime($time);
+    	$end_time = strtotime($time2)+86400;
+        $dev=M('device')->where(array('devid'=>$id,'psn'=>$psn))->find();
+        if($dev==NULL){
+            $date = date("Y-m-d");
+            $this->assign('date',$date);
+            $this->assign('date2',$date);
+            echo "<script type='text/javascript'>alert('设备不存在.');distory.back();</script>";
+            $this->display();
+            exit;
+        }
+        $psn = $dev['psn'];
+        $shed = $dev['shed'];
+        //var_dump($dev);
+
+        $devSelect=M('device')->where(array('flag'=>1,'dev_type'=>1,'psn'=>$psn))->find();
+        if($devSelect!=NULL){
+            $devid=$devSelect['devid'];
+            //var_dump($devid);
+        }
+        
+        $devSelect2=M('device')->where(array('flag'=>1,'dev_type'=>2,'psn'=>$psn))->find();
+        if($devSelect2!=NULL){
+            $devid2=$devSelect2['devid'];
+            //var_dump($devid2);
+        }
+
+        $devSelect3=M('device')->where(array('flag'=>1,'dev_type'=>3,'psn'=>$psn))->find();
+        if($devSelect3!=NULL){
+            $devid3=$devSelect3['devid'];
+            //var_dump($devid3);
+        }
+        
+        if($devid==NULL){
+            if($selectSql=M('access')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
+                $this->assign('devid',$id);
+                $this->assign('date',$time);
+                $this->assign('date2',$time2);
+                $this->assign('id',$id);
+                $this->assign('selectSql',$selectSql);
+            }else{
+                $date = date("Y-m-d");
+                $this->assign('date',$date);
+                $this->assign('date2',$date);
+                 echo "<script type='text/javascript'>alert('没有查询到结果.');distory.back();</script>"; 
+            }
+            $this->display();
+            exit;
+        }
+        $tmpSql=M('taccess')->where('devid ='.$devid.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id asc')->select();
+
+				if($devid2!=NULL){
+        	$tmpSql2=M('taccess')->where('devid ='.$devid2.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id asc')->select();
+					//var_dump($tmpSql2);
+				}
+				
+				if($devid3!=NULL){
+        	$tmpSql3=M('taccess')->where('devid ='.$devid3.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id asc')->select();
+					//var_dump($tmpSql3);
+				}
+				
+        if($selectSql=M('access')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
+            $this->assign('devid',$id);
+            $this->assign('date',$time);
+            $this->assign('date2',$time2);
+            $this->assign('id',$id);
+            for($i=0;$i<count($selectSql);$i++){
+                if($tmpSql!=NULL){
+                		$max=count($tmpSql)-1;
+                    for($j=0;$j<count($tmpSql);$j++){
+                        if($selectSql[$i]['time']==$tmpSql[$j]['time']){
+                            $selectSql[$i]['env_temp1']=number_format($tmpSql[$j]['temp1'],2);
+                            $selectSql[$i]['env_temp2']=number_format($tmpSql[$j]['temp2'],2);
+                            break;
+                        }
+                        else if($selectSql[$i]['time'] > $tmpSql[$j]['time']){
+                            $selectSql[$i]['env_temp1']=number_format($tmpSql[$max]['temp1'],2);
+                            $selectSql[$i]['env_temp2']=number_format($tmpSql[$max]['temp2'],2);
+                        }
+                        else{
+                        	  $selectSql[$i]['env_temp1']=255; 
+                    				$selectSql[$i]['env_temp2']=255;
+                        }                          
+                    }
+                }else{
+                    $selectSql[$i]['env_temp1']=255; 
+                    $selectSql[$i]['env_temp2']=255;
+                }
+                if($tmpSql2!=NULL){
+                		$max=count($tmpSql2)-1;
+                    for($j=0;$j<count($tmpSql2);$j++){
+                        if($selectSql[$i]['time']==$tmpSql2[$j]['time']){
+                            $selectSql[$i]['env_temp3']=number_format($tmpSql2[$j]['temp1'],2);
+                            $selectSql[$i]['env_temp4']=number_format($tmpSql2[$j]['temp2'],2);
+                            break;
+                        }
+                        else if($selectSql[$i]['time'] > $tmpSql2[$j]['time']){
+                            $selectSql[$i]['env_temp3']=number_format($tmpSql2[$max]['temp1'],2);
+                            $selectSql[$i]['env_temp4']=number_format($tmpSql2[$max]['temp2'],2);
+                        }
+                        else{
+                        	  $selectSql[$i]['env_temp3']=255; 
+                    				$selectSql[$i]['env_temp4']=255;
+                        }   
+                    }
+                }else{
+                    $selectSql[$i]['env_temp3']=255; 
+                    $selectSql[$i]['env_temp4']=255;
+                } 
+                if($tmpSql3!=NULL){
+                		$max=count($tmpSql3)-1;
+                    for($j=0;$j<count($tmpSql3);$j++){
+                        if($selectSql[$i]['time']==$tmpSql3[$j]['time']){
+                            $selectSql[$i]['env_temp5']=number_format($tmpSql3[$j]['temp1'],2);
+                            $selectSql[$i]['env_temp6']=number_format($tmpSql3[$j]['temp2'],2);
+                            break;
+                        }
+                        else if($selectSql[$i]['time'] > $tmpSql3[$j]['time']){
+                            $selectSql[$i]['env_temp5']=number_format($tmpSql3[$max]['temp1'],2);
+                            $selectSql[$i]['env_temp6']=number_format($tmpSql3[$max]['temp2'],2);
+                        }
+                        else{
+                        	  $selectSql[$i]['env_temp5']=255; 
+                    				$selectSql[$i]['env_temp6']=255;
+                        }   
+                    }
+                }else{
+                    $selectSql[$i]['env_temp5']=255; 
+                    $selectSql[$i]['env_temp6']=255;
+                }                        
+                                   
+            }
+
+            $this->assign('selectSql',$selectSql);
+            //var_dump($selectSql);
+
+        }else{
+        		$date = date("Y-m-d");
+	 	 				$this->assign('date',$date);
+	 	 				$this->assign('date2',$date);
+            echo "<script type='text/javascript'>alert('没有查询到结果.');distory.back();</script>";
+        }
+    }
 		$this->display();
 	}
 	
@@ -490,7 +658,7 @@ class DevselectController extends HomeController {
 					
 					$accSelect=M('access')->group('time')->where('time >='.$yes_time.' and time <'.$end_time)->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,4)->select();
 					$accsize=count($accSelect);
-					if($accsize < 4){
+					if($accsize == 0){
 						continue;
 					}
 	
@@ -595,16 +763,29 @@ class DevselectController extends HomeController {
 	
 	public function factorylow(){
 				$psnid=$_GET['psnid'];
-
+				$delay = 4*3600;
+				$delay_sub = 2*3600;
+ 
+      	$now = time();
+  			$start_time = strtotime(date('Y-m-d',$now));
+      	//var_dump($start_time);
+      	$yes_time = $start_time-86400;
+      	$end_time = $start_time+86400;
+      	$cur_time = $now - $start_time;
+      	//var_dump($cur_time);
+      	$cur_time = (int)($cur_time/$delay)*$delay;
+      	$first_time = $cur_time-$delay+$start_time;
+  			//var_dump($first_time);
+  			
 				$devs=M('device')->where(array('flag'=>1))->where(array('psn'=>$psnid))->order('devid asc')->select();
 				$devcount=count($devs);
+				$j=0;
 				for($i=0; $i< $devcount; $i++){
 					$devid = $devs[$i]['devid'];
-					$accSelect=M('access')->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,4)->select();
+					$accSelect=M('access')->where('time >='.$yes_time.' and time <'.$end_time)->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,4)->select();
 					//echo "devid:";
 					//var_dump($devid);
 					$hcount=0;
-					$j=0;
 					foreach($accSelect as $acc){
 						$temp1=(float)$acc['temp1'];
 						$temp2=(float)$acc['temp2'];
@@ -618,9 +799,15 @@ class DevselectController extends HomeController {
 						}else{
 							$hcount=0;
 						}
+						//var_dump($hcount);
 						if($hcount==4){
 							$devSelect[$j]['devid']=$devid;
-							$devSelect[$j]['fsn']=$devs[$i]['sn'];
+							//$devSelect[$j]['fsn']=$devs[$i]['sn'];
+							if(empty($devs[$i]['sn'])){
+								$devSelect[$j]['fsn']=$psnid.str_pad($devid,4,'0',STR_PAD_LEFT);
+							}else{
+								$devSelect[$j]['fsn']=$devs[$i]['sn'];
+							}
 							$devSelect[$j]['time']=$devs[$i]['time'];
 							$devSelect[$j]['psnid']=$devs[$i]['psn'];
 							$j++;
@@ -636,16 +823,29 @@ class DevselectController extends HomeController {
 
 	public function factoryhigh(){
 				$psnid=$_GET['psnid'];
-
+				$delay = 4*3600;
+				$delay_sub = 2*3600;
+ 
+      	$now = time();
+  			$start_time = strtotime(date('Y-m-d',$now));
+      	//var_dump($start_time);
+      	$yes_time = $start_time-86400;
+      	$end_time = $start_time+86400;
+      	$cur_time = $now - $start_time;
+      	//var_dump($cur_time);
+      	$cur_time = (int)($cur_time/$delay)*$delay;
+      	$first_time = $cur_time-$delay+$start_time;
+  			//var_dump($first_time);
+  			
 				$devs=M('device')->where(array('flag'=>1))->where(array('psn'=>$psnid))->order('devid asc')->select();
 				$devcount=count($devs);
+				$j=0;
 				for($i=0; $i< $devcount; $i++){
 					$devid = $devs[$i]['devid'];
-					$accSelect=M('access')->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,4)->select();
+					$accSelect=M('access')->where('time >='.$yes_time.' and time <'.$end_time)->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,4)->select();
 					//echo "devid:";
 					//var_dump($devid);
 					$hcount=0;
-					$j=0;
 					foreach($accSelect as $acc){
 						$temp1=(float)$acc['temp1'];
 						$temp2=(float)$acc['temp2'];
@@ -661,8 +861,12 @@ class DevselectController extends HomeController {
 						}
 						if($hcount>0){
 							$devSelect[$j]['devid']=$devid;
-							$devSelect[$j]['err']=1;
-							$devSelect[$j]['fsn']=$devs[$i]['sn'];
+							//$devSelect[$j]['fsn']=$devs[$i]['sn'];
+							if(empty($devs[$i]['sn'])){
+								$devSelect[$j]['fsn']=$psnid.str_pad($devid,4,'0',STR_PAD_LEFT);
+							}else{
+								$devSelect[$j]['fsn']=$devs[$i]['sn'];
+							}
 							$devSelect[$j]['time']=$devs[$i]['time'];
 							$devSelect[$j]['psnid']=$devs[$i]['psn'];
 							$j++;
@@ -840,8 +1044,11 @@ class DevselectController extends HomeController {
 								$index=$i;
 							}
 						}
-						if($temp>=$hlevl1){
-							if(abs($temp1-$temp2)< 0.2&&$temp3 > 30){
+						if($temp>$hlevl1){
+							//if(abs($temp1-$temp2)< 0.2&&$temp3 > 30)
+							if($temp1> 38&&$temp2> 38)
+							{
+								dump($temp);
 								$hcount++;
 							}
 						}else{
@@ -851,7 +1058,7 @@ class DevselectController extends HomeController {
 						}
   				}
   				//var_dump($index);
-  				//var_dump($ntemp);
+  				dump('devid:'.$devid.':'.$ntemp);
   				
 					$temp1=$ret[$index]['temp1'];
 					$temp2=$ret[$index]['temp2'];
@@ -859,11 +1066,17 @@ class DevselectController extends HomeController {
 					$cur_time =$ret[$index]['time']; 
   				$days=$s['days'];
   				
-					if($ntemp>=$hlevl1){
-						if(abs($temp1-$temp2)< 0.2&&$temp3 > 25){
+					//dump($temp1);
+					//dump($temp2);
+					//dump($temp3);
+							
+					if($ntemp>$hlevl1){
+						//if(abs($temp1-$temp2)< 0.2&&$temp3 > 25)
+						if($temp1<= 38&&$temp2<= 38)
+						{
 							$level=0;
 						}else{
-							if($temp>=$hlevl2){
+							if($ntemp>=$hlevl2){
 								$level=2;
 							}else{
 								$level=1;
@@ -875,6 +1088,8 @@ class DevselectController extends HomeController {
 					}else{
 						$level=0;
 					}
+					dump('devid:'.$devid.':'.$level);
+					dump('devid:'.$devid.':'.$hcount);
 				  $sick=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn,'state'=>1))->find();
 					if(empty($sick)){
 						if($level>0&&$hcount>=2){
@@ -919,7 +1134,7 @@ class DevselectController extends HomeController {
   						dump(date('Y-m-d H:s',$cur_time));
   						dump(date('Y-m-d H:s',$sick['time']));
   						dump($ntemp);
-  						if($sick['time']!=$cur_time){
+  						//if($sick['time']!=$cur_time){
     						$days=(int)$sick['days'];
     						if($day1-$day2>=86400){
       						$days=$days+1;
@@ -935,7 +1150,7 @@ class DevselectController extends HomeController {
 							  echo "save2:";
 						  	$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
 							  dump($sk);
-						  }
+						  //}
 					  }
 					}
 				}
@@ -969,6 +1184,8 @@ class DevselectController extends HomeController {
 						$vt=(float)$t;
 						if($vt < 20){
 							$temp=$vt;
+							dump($devid);
+							dump($temp);
 						}else{
 							$temp= round($btemp+($vt-$avg)*$temp_value,2);
 						}
@@ -1001,7 +1218,7 @@ class DevselectController extends HomeController {
 					$temp3=$ret[$index]['env_temp'];
 					$cur_time =$ret[$index]['time'];
 					if($ntemp<=$llevl1){
-							if($temp<=$llevl2){
+							if($ntemp<=$llevl2){
 								$level=2;
 							}else{
 								$level=1;
@@ -1054,7 +1271,7 @@ class DevselectController extends HomeController {
   						dump(date('Y-m-d H:s',$cur_time));
   						dump(date('Y-m-d H:s',$sick['time']));
   						dump($ntemp);
-  						if($sick['time']!=$cur_time){
+  						//if($sick['time']!=$cur_time){
     						$days=(int)$sick['days'];
     						if($day1-$day2>=86400){
       						$days=$days+1;
@@ -1074,7 +1291,7 @@ class DevselectController extends HomeController {
 							  dump($psn);
 							  dump($sk);
 						  }
-						}
+						//}
 					}
 				}
 			}
@@ -1096,7 +1313,7 @@ class DevselectController extends HomeController {
     }
     var_dump($state);
     if($state==1){
-    	 var_dump($state);
+    	 //var_dump($state);
        $sk=array(
 					'state'=>0,
 		  		);
@@ -1152,9 +1369,17 @@ class DevselectController extends HomeController {
 		$msg= $_POST['msg'];
 		$temp = $_GET['temp1'];
   	$name=$_SESSION['name'];
+  	$state =(int)$_POST['radio1'];
+
   	$this->assign('name',$name);
-  	
+ 		//var_dump($state);
 		if(!empty($msg)){
+			if($state==2){
+				$sk=array(
+						'flag'=>2,
+			  		);
+			  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psn))->save($sk);
+			}
 			$rec = array(
 						'devid'=>$devid,
 						'psnid'=>$psn,
@@ -1162,7 +1387,7 @@ class DevselectController extends HomeController {
 						'msg'=>$msg,
 					);
 			$rd = D('recovery')->add($rec);	
-			$this ->redirect('Devselect/sickness',array(),0,'');
+			$this ->redirect('Devselect/sickness',array('tab'=>3),0,'');
 			exit;
 		}
 		

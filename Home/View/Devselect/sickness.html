@@ -24,11 +24,11 @@
 </div>
 -->
 <div id="SickQuantity">
-		<p id="sicktitle" style="text-align:right;font-size:16px">总数量:<%$devcount%>&nbsp;&nbsp;&nbsp;&nbsp;</p>
-    <p id="sicktitle1" style="text-align:center;font-size:60px"><%count($devSelect1)%></p>
+		<p id="sicktitle" style="text-align:right;font-size:16px;display:none">总数量:<%$devcount%>&nbsp;&nbsp;&nbsp;&nbsp;</p>
+    <p id="sicktitle1" style="text-align:center;font-size:60px;display:none"><%count($devSelect1)%></p>
     <p id="sicktitle2" style="text-align:center;font-size:60px;display:none"><%count($devSelect2)%></p>
     <p id="sicktitle3" style="text-align:center;font-size:60px;display:none"><%count($devSelect3)%></p>
-    <p id="tab1sick" style="text-align:center;color:orange">异常数量</p>
+    <p id="tab1sick" style="text-align:center;color:orange;display:none">异常数量</p>
     <p id="tab2recover" style="text-align:center;color:green;display:none">治疗数量</p>
     <p id="tab3recycle" style="text-align:center;color:blue;display:none">异常数量</p>
 </div>
@@ -36,12 +36,12 @@
 <div class="weui-tab">
     <div class="weui-tab__bd">
         <div class="weui-navbar">
-            <a class="weui-navbar__item weui-bar__item_on" href="#tab1"> 温度异常 </a>
-            <a class="weui-navbar__item" href="#tab2"> 治疗中 </a>
-            <a class="weui-navbar__item" href="#tab3"> 低温异常 </a>
+            <a id="navbar1" class="weui-navbar__item" href="#tab1"> 温度异常 </a>
+            <a id="navbar2" class="weui-navbar__item" href="#tab2"> 治疗中 </a>
+            <a id="navbar3" class="weui-navbar__item" href="#tab3"> 低温异常 </a>
         </div>
         <div class="weui-tab__panel">
-            <div id="tab1" class="weui_tab_bd_item weui_tab_bd_item_active" style="display">
+            <div id="tab1" class="weui_tab_bd_item" style="display:none">
             		<p id="sicktitle" style="text-align:left;font-size:16px">(舍内)温度:<%$temp1['temp1']%>  湿度:<%$temp1['temp2']%></p>
 								<p id="sicktitle" style="text-align:left;font-size:16px">(舍外)温度:<%$temp2['temp1']%>  湿度:<%$temp1['temp2']%></p>
                 <%foreach $devSelect1 as $value%>
@@ -254,7 +254,7 @@
                                 <button id="TableOperate" type="button"
                                         class="btn btn-lg btn-primary" onclick="OperateSelect()"
                                         style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
-                                    回收
+                                    处理
                                 </button>
                                 </a>
                             </td>
@@ -267,34 +267,6 @@
             </div>
         </div>
     </div>
-    <!--div class="weui-tabbar">
-        <a href="<%$smarty.const.__APP__%>/devselect/sickness"
-           class="weui-tabbar__item weui-bar__item--on">
-
-            <div class="weui-tabbar__icon">
-                <img src="<%$smarty.const.IMG_URL%>/icon_nav_button.png" alt="">
-            </div>
-            <p class="weui-tabbar__label">首页</p>
-        </a>
-        <a href="<%$smarty.const.__APP__%>/add/deviceTab" class="weui-tabbar__item">
-            <div class="weui-tabbar__icon">
-                <img src="<%$smarty.const.IMG_URL%>/icon_nav_msg.png" alt="">
-            </div>
-            <p class="weui-tabbar__label">设备</p>
-        </a>
-        <a href="<%$smarty.const.__APP__%>/acadd/acTab" class="weui-tabbar__item">
-            <div class="weui-tabbar__icon">
-                <img src="<%$smarty.const.IMG_URL%>/icon_nav_article.png" alt="">
-            </div>
-            <p class="weui-tabbar__label">温度</p>
-        </a>
-        <a href="<%$smarty.const.__APP__%>/Mine/mineTab" class="weui-tabbar__item">
-            <div class="weui-tabbar__icon">
-                <img src="<%$smarty.const.IMG_URL%>/icon_nav_cell.png" alt="">
-            </div>
-            <p class="weui-tabbar__label">我的</p>
-        </a>
-    </div-->
 </div>
 
 <script src="<%$smarty.const.AJS_URL%>jquery-2.1.4.js"></script>
@@ -309,6 +281,7 @@
         FastClick.attach(document.body);
     });
 
+		var tab_flag=true;
     $(function(){
         $('.weui-navbar__item').on('click', function () {
             $(this).addClass('weui-bar__item_on').siblings('.weui-bar__item_on').removeClass('weui-bar__item_on');
@@ -318,6 +291,7 @@
             console.log("data_toggle: ",data_toggle);
             $(data_toggle).addClass("weui_tab_bd_item_active");
             $(data_toggle).css("display","");
+            tab_flag=false;
             if(data_toggle=="#tab2"){
                 //console.log("tab2recover");
                 $("#sicktitle1").css("display","none");
@@ -351,6 +325,79 @@
     if (ret=="20000001"){
         $.toptip('暂无查询数据');
     }
+		
+		if(tab_flag==true){
+			var tab = '<%$tab%>';
+			if(tab=="2"){
+					$("#navbar1").removeClass('weui-bar__item_on');
+					$("#navbar2").removeClass('weui-bar__item_on');
+					$("#navbar3").removeClass('weui-bar__item_on');
+          $("#tab1").removeClass("weui_tab_bd_item_active");
+          $("#tab2").removeClass('weui_tab_bd_item_active');
+          $("#tab3").removeClass('weui_tab_bd_item_active');
+					$("#tab1").css("display","none");
+					$("#tab2").css("display","none");
+					$("#tab3").css("display","none");
+					$("#sicktitle1").css("display","none");
+					$("#sicktitle2").css("display","none");
+					$("#sicktitle3").css("display","none");
+					$("#tab1sick").css("display","none");
+					$("#tab2recover").css("display","none");
+					$("#tab3recycle").css("display","none");
+					
+					$("#navbar2").addClass('weui-bar__item_on');
+          $("#tab2").addClass("weui_tab_bd_item_active");	
+          $("#tab2").css("display","");
+          $("#sicktitle2").css("display","");
+          $("#tab2recover").css("display","");
+			}else if(tab=="3"){
+					$("#navbar1").removeClass('weui-bar__item_on');
+					$("#navbar2").removeClass('weui-bar__item_on');
+					$("#navbar3").removeClass('weui-bar__item_on');
+          $("#tab1").removeClass("weui_tab_bd_item_active");
+          $("#tab2").removeClass('weui_tab_bd_item_active');
+          $("#tab3").removeClass('weui_tab_bd_item_active');
+					$("#tab1").css("display","none");
+					$("#tab2").css("display","none");
+					$("#tab3").css("display","none");
+					$("#sicktitle1").css("display","none");
+					$("#sicktitle2").css("display","none");
+					$("#sicktitle3").css("display","none");
+					$("#tab1sick").css("display","none");
+					$("#tab2recover").css("display","none");
+					$("#tab3recycle").css("display","none");
+					
+					$("#navbar3").addClass('weui-bar__item_on');
+          $("#tab3").addClass("weui_tab_bd_item_active");
+          $("#tab3").css("display","");
+          $("#sicktitle3").css("display","");
+          $("#tab3recycle").css("display","");
+			}else{
+					$("#navbar1").removeClass('weui-bar__item_on');
+					$("#navbar2").removeClass('weui-bar__item_on');
+					$("#navbar3").removeClass('weui-bar__item_on');
+          $("#tab1").removeClass("weui_tab_bd_item_active");
+          $("#tab2").removeClass('weui_tab_bd_item_active');
+          $("#tab3").removeClass('weui_tab_bd_item_active');
+					$("#tab1").css("display","none");
+					$("#tab2").css("display","none");
+					$("#tab3").css("display","none");
+					$("#sicktitle1").css("display","none");
+					$("#sicktitle2").css("display","none");
+					$("#sicktitle3").css("display","none");
+					$("#tab1sick").css("display","none");
+					$("#tab2recover").css("display","none");
+					$("#tab3recycle").css("display","none");
+					
+					$("#navbar1").addClass('weui-bar__item_on');
+          $("#tab1").addClass("weui_tab_bd_item_active");
+          $("#tab1").css("display","");
+          $("#sicktitle1").css("display","");
+          $("#tab1sick").css("display","");
+			}
+		}
+		
+		
 
     function OperateSelect(){
         console.log("Charge: ",charge);

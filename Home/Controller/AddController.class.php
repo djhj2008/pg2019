@@ -48,8 +48,17 @@ class AddController extends HomeController {
 	    		$postArr=array();
             $postArr['devid']=$devid;
             $postArr['psn']=$psnid;
-            $postArr['type']=0;
-            $devSelect=M('device')->where($postArr)->order('devid asc')->select();
+            $postArr['dev_type']=0;
+            $postArr2['sn'] = array('like','%'.$devid.'%');
+            $postArr2['psn'] =$psnid;
+            $postArr2['dev_type'] = 0;
+            $where_main['_complex'] = array($postArr,
+																				    $postArr2,
+																				    '_logic' => 'or');
+					  $device = M('device');
+            $devSelect= $device->where($where_main)->order('devid asc')->select();
+            //var_dump($device->getLastSql());
+            //exit;
             if($devSelect){
                 $this->assign('devSelect',$devSelect);
             }else{

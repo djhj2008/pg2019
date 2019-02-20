@@ -46,8 +46,10 @@
      <thead>
 			<tr>
 				<th>DEVID</th>
-				<th>版本</th>
 				<th>SN</th>
+				<th>舍</th>
+        <th>区</th>
+				<th>版本</th>
 				<th>时间</th>
 				<th>电量</th>
 				<th>状态</th>
@@ -59,8 +61,14 @@
 			<%foreach $devSelect as $value%>
 			<tr>
 				<td><%$value['devid']%></td>
-				<td><%$value['version']%></td>
 				<td><%$value['sn']%></td>
+				<td><%$value['shed']%></td>
+		    <%if $v.fold eq 2 %>
+		    <td>B</td>
+		    <%else%>
+		    <td>A</td>
+		    <%/if%>
+				<td><%$value['version']%></td>
 				<td><%$value['time']%></td>
 				<td><%$value['battery']%></td>
 				<td><%$value['dev_state']%></td>
@@ -86,10 +94,6 @@
               buttons: ['excel'],
               bSort: false,
 							columnDefs: [ 
-									{
-								      "targets": 1,
-								      "searchable": false
-									},
 									{
 								      "targets": 2,
 								      "searchable": false
