@@ -48,24 +48,46 @@
   	<%foreach $sickrecord as $value%>
     <a href="javascript:void(0);" class="weui-media-box weui-media-box_appmsg">
       <div class="weui-media-box__hd">
-      	<%if $value["level"] eq 2  %>
-        <button id="temp" type="button"
-                class="btn btn-lg btn-primary"
-                style="font-size:larger;background-color:darkorange;height:35px;color:White;border-radius:3px;">
-           <%number_format($value["temp1"],2)%>℃
-        </button>
-        <%else if $value["level"] eq 1  %>
-        <button id="temp" type="button"
-                class="btn btn-lg btn-primary"
-                style="font-size:larger;background-color:gold;height:35px;color:White;border-radius:3px;">
-           <%number_format($value["temp1"],2)%>℃
-        </button>
+      	<%if $value["state"] eq 1  %>
+	      	<%if $value["level"] eq 2  %>
+	        <button id="temp" type="button"
+	                class="btn btn-lg btn-primary"
+	                style="font-size:larger;background-color:darkorange;height:35px;color:White;border-radius:3px;">
+	           <%number_format($value["temp1"],2)%>℃
+	        </button>
+	        <%else if $value["level"] eq 1  %>
+	        <button id="temp" type="button"
+	                class="btn btn-lg btn-primary"
+	                style="font-size:larger;background-color:gold;height:35px;color:White;border-radius:3px;">
+	           <%number_format($value["temp1"],2)%>℃
+	        </button>
+	        <%else%>
+	        <button id="temp" type="button"
+	                class="btn btn-lg btn-primary"
+	                style="font-size:larger;background-color:lightgreen;gold:35px;color:White;border-radius:3px;">
+	           <%number_format($value["temp1"],2)%>℃
+	        </button>
+	        <%/if%>
         <%else%>
-        <button id="temp" type="button"
-                class="btn btn-lg btn-primary"
-                style="font-size:larger;background-color:lightgreen;gold:35px;color:White;border-radius:3px;">
-           <%number_format($value["temp1"],2)%>℃
-        </button>
+	      	<%if $value["level"] eq 2  %>
+	        <button id="temp" type="button"
+	                class="btn btn-lg btn-primary"
+	                style="font-size:larger;background-color:lightblue;height:35px;color:White;border-radius:3px;">
+	           <%number_format($value["temp1"],2)%>℃
+	        </button>
+	        <%else if $value["level"] eq 1  %>
+	        <button id="temp" type="button"
+	                class="btn btn-lg btn-primary"
+	                style="font-size:larger;background-color:lightgray;height:35px;color:White;border-radius:3px;">
+	           <%number_format($value["temp1"],2)%>℃
+	        </button>
+	        <%else%>
+	        <button id="temp" type="button"
+	                class="btn btn-lg btn-primary"
+	                style="font-size:larger;background-color:lightgreen;gold:35px;color:White;border-radius:3px;">
+	           <%number_format($value["temp1"],2)%>℃
+	        </button>
+	        <%/if%>
         <%/if%>
       </div>
       <div>&nbsp;&nbsp;&nbsp;</div>

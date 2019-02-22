@@ -1114,16 +1114,21 @@ class DevselectController extends HomeController {
   			  	}
 					}else{
   					if($level==0||$hcount< 2){
-    					$sk=array(
-						  		'temp1'=>$ntemp,
-									'time'=>$ret[0]['time'],
-									'date'=>$date,
-									'level'=>$level,
-									'state'=>1,
-						  		);
-							  echo "del:";
-						  	//$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
+  						if($sick['flag']==1){
+	    					$sk=array(
+							  		'temp1'=>$ntemp,
+										'time'=>$ret[0]['time'],
+										'date'=>$date,
+										'level'=>$level,
+										'state'=>0,
+							  		);
+							  echo "save:";
+						  	$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
+						  }else{
+						  	echo "del:";
 						  	$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->delete();
+						  }
+						  	//$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->delete();
 							  dump($devid);
 							  dump($psn);
 							  dump($sk);
@@ -1249,16 +1254,21 @@ class DevselectController extends HomeController {
   			  	}
 					}else{
   					if($level==0||$lcount< 4){
-    					$sk=array(
-						  		'temp1'=>$last_temp,
-									'time'=>$last_time,
-									'date'=>$date,
-									'level'=>$level,
-									'state'=>2,
-						  		);
-						  echo "dell1:";
-						  //$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
-						  $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->delete();
+  						if($sick['flag']==1){
+	    					$sk=array(
+							  		'temp1'=>$last_temp,
+										'time'=>$last_time,
+										'date'=>$date,
+										'level'=>$level,
+										'state'=>0,
+							  		);
+							  echo "savel1:";
+							  $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
+							}else{
+								 echo "dell1:";
+								 $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->delete();
+							}
+							
 						  dump($devid);
 						  dump($lcount);
 						  dump($psn);
@@ -1345,7 +1355,22 @@ class DevselectController extends HomeController {
 		$temp = $_GET['temp1'];
   	$name=$_SESSION['name'];
   	$this->assign('name',$name);
-  	
+		$psnfind = M('psn')->where(array('id'=>$psn))->find();
+		if(empty($psnfind)){
+			echo "PSN NULL.";
+			exit;
+		}
+
+  	$hlevl1=$psnfind['htemplev1'];
+  	$hlevl2=$psnfind['htemplev2'];
+  	$llevl1=$psnfind['ltemplev1'];
+  	$llevl2=$psnfind['ltemplev2'];
+		
+		//dump($hlevl1);
+		//dump($hlevl2);
+		//dump($llevl1);
+		//dump($llevl2);
+		
 		if(!empty($msg)){
 			$rec = array(
 						'devid'=>$devid,
@@ -1359,6 +1384,24 @@ class DevselectController extends HomeController {
 		}
 		
 		$record=M('sickrecord')->where(array('devid'=>$devid ,'psn'=>$psn))->order('time desc')->select();
+		//dump($record);
+		for($i=0;$i< count($record);$i++){
+			$value=$record[$i]['temp'];
+			$level=0;
+			if($value >$hlevl1){
+				$level=1;
+				if($value>=$hlevl2){
+					$level=2;
+				}
+			}
+			if($value < $llevl1){
+				$level=1;
+				if($value<= $llevl2){
+					$level=2;
+				}
+			}
+			$record[$i]['level']=$level;
+		}
     $this->assign('sickrecord',$record);
     $this->display();
 	}
@@ -1374,24 +1417,31 @@ class DevselectController extends HomeController {
   	$this->assign('name',$name);
  		//var_dump($state);
 		if(!empty($msg)){
-			if($state==2){
-				$sk=array(
-						'flag'=>2,
-			  		);
-			  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psn))->save($sk);
-			}
 			$rec = array(
 						'devid'=>$devid,
 						'psnid'=>$psn,
 						'temp1'=>$temp,
 						'msg'=>$msg,
 					);
-			$rd = D('recovery')->add($rec);	
+			if($state==2){
+				$sk=array(
+						'flag'=>2,
+			  		);
+			  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psn))->save($sk);
+			  $rd = D('sickrecord')->add($rec);	
+			}else{
+				$sk=array(
+						'flag'=>1,
+			  		);
+			  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psn))->save($sk);
+			  $rd = D('recovery')->add($rec);	
+			}
+
 			$this ->redirect('Devselect/sickness',array('tab'=>3),0,'');
 			exit;
 		}
 		
-		$record=M('recovery')->where(array('devid'=>$devid ,'psn'=>$psn))->order('time desc')->select();
+		//$record=M('recovery')->where(array('devid'=>$devid ,'psn'=>$psn))->order('time desc')->select();
     $this->assign('recovery',$record);
     $this->display();
 	}
