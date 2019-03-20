@@ -509,4 +509,143 @@ class AddController extends HomeController {
     	}    	
        $this->display();
     }
+    
+    public function addserver(){
+    	$check_value=0.25;
+    	$base_temp=39;
+    	$htemplev1=39.5;
+    	$htemplev2=40;
+    	$ltemplev1=37.5;
+    	$ltemplev2=30;
+    	$userid=18;
+    	$tsn=$_POST['tsn'];
+    	$sn=$_POST['sn'];
+    	$info=$_POST['info'];
+    	if(empty($tsn)){
+    		$this->display();
+    		exit;
+    	}
+    	$psnsave['check_value']=$check_value;
+    	$psnsave['base_temp']=$base_temp;
+    	$psnsave['htemplev1']=$htemplev1;
+    	$psnsave['htemplev2']=$htemplev2;
+    	$psnsave['ltemplev1']=$ltemplev1;
+    	$psnsave['ltemplev2']=$ltemplev2;
+    	$psnsave['userid']=$userid;
+    	$psnsave['tsn']=$tsn;
+    	$psnsave['sn']=$sn;
+    	if(!empty($info)){
+    		$psnsave['info']=$info;
+    	}
+    	if($have=M('psn')->where(array('tsn'=>$tsn,'sn'=>$sn))->find()){
+					$this->assign('errcode',"1001");
+				  $this->display();
+				  exit;
+    	}else{
+    		$ret=M('psn')->add($psnsave);
+				$this ->redirect('Devselect/select',NULL,0,'');
+    	}
+    	$this->display();
+    }
+    
+    public function addstation(){
+    	$psnid=$_GET['psnid'];
+    	$id=$_POST['id'];
+    	$uptime=$_POST['uptime'];
+    	$count=$_POST['count'];
+    	$rate_id=$_POST['rate_id'];
+    	$url="pg.51elook.com";
+    	
+    	$psn=M('psn')->where(array('id'=>$psnid))->find();
+    	if(empty($psn)){
+    		$this->assign('ret',"1001");
+    		$this ->redirect('Devselect/select',NULL,0,'');
+    		exit;
+    	}
+    	$sn=$psn['sn'];
+    	if(empty($id)){
+    		$rate=M('rate')->select();
+    		$this->assign('sn',$sn);
+    		$this->assign('rate',$rate);
+    		$this->display();
+    		exit;
+    	}
+    	$devsave['psnid']=$psnid;
+    	$devsave['tsn']=$psn['tsn'];
+    	$devsave['psn']=$psn['sn'];
+    	$devsave['id']=$id;
+    	$devsave['psn']=$sn;
+    	$devsave['rate_id']=$rate_id;
+    	$devsave['uptime']=$uptime;
+    	$devsave['count']=$count;
+    	$devsave['sn']=$sn;
+			$devsave['url']=$url;
+    	if($have=M('bdevice')->where(array('psnid'=>$psnid,'id'=>$id))->find()){
+					$this->assign('errcode',"1001");
+				  $this->display();
+				  exit;
+    	}else{
+    		$ret=M('bdevice')->add($devsave);
+				$this->redirect('Devselect/station',array('psnid'=>$psnid),0,'');
+    	}
+    }
+    
+    public function delstation(){
+    	$autoid=$_GET['autoid'];
+    	$have=M('bdevice')->where(array('autoid'=>$autoid))->find();
+    	if($have){
+    		$ret=M('bdevice')->where(array('autoid'=>$autoid))->delete();
+    		$this->redirect('Devselect/station',array('psnid'=>$have['psnid']),0,'');
+    	}
+    }
+
+    public function editstation(){
+    	$autoid=$_GET['autoid'];
+			$id=$_POST['id'];
+			$uptime=$_POST['uptime'];
+			$count=$_POST['count'];
+			$rate_id=$_POST['rate_id'];
+			$have=M('bdevice')->where(array('autoid'=>$autoid))->find();
+			$psnid=$have['psnid'];
+			
+    	$psn=M('psn')->where(array('id'=>$psnid))->find();
+    	if(empty($psn)){
+    		$this->assign('ret',"1001");
+    		$this ->redirect('Devselect/select',NULL,0,'');
+    		exit;
+    	}
+    	$sn=$psn['sn'];
+    	if(empty($id)){
+    		$rate=M('rate')->select();
+    		$this->assign('sn',$sn);
+    		$this->assign('rate',$rate);
+    		$this->assign('station',$have);
+    		$this->display();
+    		exit;
+    	}
+    	
+    	if($have){
+				if($id!=$have['id']){
+					$savedev['id']=$id;
+				}
+				if($uptime!=$have['uptime']){
+					$savedev['uptime']=$uptime;
+				}
+				if($count!=$have['count']){
+					$savedev['count']=$count;
+				}
+				if($rate_id!=$have['rate_id']){
+					$savedev['rate_id']=$rate_id;
+				}
+				if(empty($savedev)){
+					$this->assign('station',$have);
+				  $this->display();
+				  exit;
+				}else{
+					$ret=M('bdevice')->where(array('autoid'=>$autoid))->save($savedev);
+					$this->redirect('Devselect/station',array('psnid'=>$have['psnid']),0,'');
+					exit;
+				}
+    	}
+    }
 }

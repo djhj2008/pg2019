@@ -262,6 +262,7 @@ class DevselectController extends HomeController {
 		$devSelect=M('bdevice')->where(array('psnid'=>$psnid))->order('id asc')->select();
 		//dump($dev);
 		$this->assign('devSelect',$devSelect);
+		$this->assign('psnid',$psnid);
 		$this->display();
 	}
 	

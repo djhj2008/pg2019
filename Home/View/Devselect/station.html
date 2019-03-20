@@ -25,6 +25,10 @@
   <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
 	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
 	<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+	
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
 </head>
 <style>
 	b {color: #23527C;}
@@ -42,6 +46,9 @@
 		</div>
 		
 		<div class="container" >
+		  <div class="weui-btn-area">
+		    <button class="weui-btn weui-btn_primary" onclick="addstation()">添加基站</button>
+		  </div>
      <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
      <thead>
 			<tr>
@@ -52,6 +59,7 @@
 				<th>状态</th>
 				<th>基带ID</th>
 				<th>url</th>
+				<th>操作</th>
 			</tr>
 		</thead>
 		  <tbody>
@@ -68,6 +76,10 @@
 				<%/if%>
 				<td><%$value['rate_id']%></td>
 				<td><%$value['url']%></td>
+				<td>
+					<a href="<%$smarty.const.__APP__%>/add/editstation?autoid=<%$value['autoid']%>">编辑</a>
+					<a href="<%$smarty.const.__APP__%>/add/delstation?autoid=<%$value['autoid']%>">|删除</a>
+				</td>
 			</tr>
 			<%/foreach%>
 		</tbody>
@@ -123,6 +135,8 @@
           table.buttons().container()
                   .appendTo('#datatable-buttons_wrapper .col-md-6:eq(0)');
       } );
-
+      function addstation(){
+          window.location.href="<%$smarty.const.__APP__%>/add/addstation?psnid=<%$psnid%>";
+      }
 </script>
 </html>
