@@ -96,6 +96,7 @@ class ManagerController extends HomeController {
     
 		public function login(){
 			$code = $_GET['code'];
+			$aip = $_POST['aip'];
 			if($code){
 				//var_dump($code);
 				$url="https://api.weixin.qq.com/sns/oauth2/access_token?appid=wx4dba4ec159da3bf7&secret=bf6fac869e348f3454d68ef9956cd61b&code=".$code."&grant_type=authorization_code";
@@ -103,13 +104,12 @@ class ManagerController extends HomeController {
 				$ret=json_decode($ret,true);
 				//var_dump($ret);
 				$openid=$ret['openid'];
-				dump($openid);
+				//var_dump($openid);
 				$userFind=M('useropenid')->where(array('openid'=>$openid))->find();
 			}
-			dump($userFind);
+			//dump($userFind);
 			
 			if(empty($userFind)){
-				
 				if($_POST['pwd']!=NULL&&$_POST['name']!=NULL){
 					$openid = $_SESSION['openid'];
 					//var_dump($openid);
@@ -126,17 +126,32 @@ class ManagerController extends HomeController {
 							if($openid){
 								$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$user['id']));
 							}
+							if($aip=='ios'){
+								$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000101,'data'=>$user));
+								$this ->redirect('',array(),1,json_encode(array('UserInfo'=>$jarr)));
+								exit;
+							}
 							session('userid',	$user['id']);
 							session('name',	$user['info']);
             	$this ->redirect('/Devselect/sickness',array(),0,'');
             	exit;
               	
 					}else{
+							if($aip=='ios'){
+								$jarr=array('ret'=>array("ret_message"=>'fail','status_code'=>10000102));
+								$this ->redirect('',array(),1,json_encode(array('UserInfo'=>$jarr)));
+								exit;
+							}
 							echo "<script type='text/javascript'>alert('用户不存在.');distory.back();</script>";
 							$this->display();
 	          	exit;
 					}
 				}else{
+					if($aip=='ios'){
+						$jarr=array('ret'=>array("ret_message"=>'fail','status_code'=>10000103,'openid'=>$openid));
+						$this ->redirect('',array(),1,json_encode(array('UserInfo'=>$jarr)));
+						exit;
+					}
 					session('openid', 	$openid);	
 				}
 				$this->display();
@@ -145,6 +160,11 @@ class ManagerController extends HomeController {
 				$user=M('user')->where(array('id'=>$userFind['userid']))->find();
 				session('userid',	$userFind['userid']);
 				session('name',	$user['info']);
+				if($aip=='ios'){
+					$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000100,'data'=>$user));
+					$this ->redirect('',array(),1,json_encode(array('UserInfo'=>$jarr)));
+					exit;
+				}
       	$this ->redirect('/Devselect/sickness',array(),0,'');
       	exit;
 			}
@@ -267,7 +287,7 @@ class ManagerController extends HomeController {
 				$ret=json_decode($ret,true);
 				//var_dump($ret);
 				$openid=$ret['openid'];
-				dump($openid);
+				//dump($openid);
 				$userFind=M('useropenid')->where(array('openid'=>$openid))->find();
 			}
 			//var_dump($userFind);

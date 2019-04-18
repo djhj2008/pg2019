@@ -73,7 +73,7 @@ class DevselectController extends HomeController {
 		$devSelect1=M('sickness')->where($where2)->where(array('state'=>1,'flag'=>0))->order('devid asc')->select();
 		$devSelect2=M('sickness')->where($where2)->where(array('flag'=>1))->order('devid asc')->select();
 		$devSelect3=M('sickness')->where($where2)->where(array('state'=>2,'flag'=>0))->order('devid asc')->select();
-		$this->assign('devcount',$devdount);
+		$this->assign('devcount',200);
 		$this->assign('devSelect1',$devSelect1);
 		$this->assign('devSelect2',$devSelect2);
 		$this->assign('devSelect3',$devSelect3);
@@ -1384,25 +1384,29 @@ class DevselectController extends HomeController {
 			exit;
 		}
 		
-		$record=M('sickrecord')->where(array('devid'=>$devid ,'psn'=>$psn))->order('time desc')->select();
+		$record=M('sickrecord')->where(array('devid'=>$devid ,'psnid'=>$psn))->order('time desc')->select();
 		//dump($record);
 		for($i=0;$i< count($record);$i++){
-			$value=$record[$i]['temp'];
+			$value=$record[$i]['temp1'];
 			$level=0;
 			if($value >$hlevl1){
+				$record[$i]['state']=1;
 				$level=1;
 				if($value>=$hlevl2){
 					$level=2;
 				}
 			}
 			if($value < $llevl1){
+				$record[$i]['state']=2;
 				$level=1;
 				if($value<= $llevl2){
 					$level=2;
 				}
 			}
+			
 			$record[$i]['level']=$level;
 		}
+		//dump($record);
     $this->assign('sickrecord',$record);
     $this->display();
 	}
@@ -1429,13 +1433,13 @@ class DevselectController extends HomeController {
 						'flag'=>2,
 			  		);
 			  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psn))->save($sk);
-			  $rd = D('sickrecord')->add($rec);	
+			  $rd = D('recovery')->add($rec);	
 			}else{
 				$sk=array(
 						'flag'=>1,
 			  		);
 			  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psn))->save($sk);
-			  $rd = D('recovery')->add($rec);	
+			  $rd = D('sickrecord')->add($rec);	
 			}
 
 			$this ->redirect('Devselect/sickness',array('tab'=>3),0,'');
