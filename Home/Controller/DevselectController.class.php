@@ -22,17 +22,21 @@ class DevselectController extends HomeController {
 
 	public function sickness(){
 		$tab = $_GET['tab'];
-  	$uid= $_SESSION['userid'];
+  	$uid = $_SESSION['userid'];
+  	$aip = $_POST['aip'];
   	//dump($uid);
   	$name=$_SESSION['name'];
   	$tab= $_GET['tab'];
   	$this->assign('name',$name);
   	
+  	if(!empty($aip)){
+  		$uid = $_POST['userid'];
+  	}
+  	
   	if(empty($tab)==false){
   		$this->assign('tab',$tab);
   	}
-  	//dump($tab);
-  	
+
   	$psnSelect=M('psn')->where(array('userid'=>$uid))->select();
   	if(empty($psnSelect)){
   		//dump($psnSelect);
@@ -73,11 +77,19 @@ class DevselectController extends HomeController {
 		$devSelect1=M('sickness')->where($where2)->where(array('state'=>1,'flag'=>0))->order('devid asc')->select();
 		$devSelect2=M('sickness')->where($where2)->where(array('flag'=>1))->order('devid asc')->select();
 		$devSelect3=M('sickness')->where($where2)->where(array('state'=>2,'flag'=>0))->order('devid asc')->select();
+		
+		if($aip=='ios'){
+			$temparr=array('temp1'=>$temp1,'temp2'=>$temp2);
+			$devarr=array('dev1'=>$devSelect1,'dev2'=>$devSelect2,'dev3'=>$devSelect3);
+			$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devcount'=>200,'temp'=>$temparr,'devs'=>$devarr));
+			$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+			exit;
+		}
+				
 		$this->assign('devcount',200);
 		$this->assign('devSelect1',$devSelect1);
 		$this->assign('devSelect2',$devSelect2);
 		$this->assign('devSelect3',$devSelect3);
-      
 		$this->display();
 	}
 	
@@ -264,6 +276,21 @@ class DevselectController extends HomeController {
 		$this->assign('devSelect',$devSelect);
 		$this->assign('psnid',$psnid);
 		$this->display();
+	}
+	
+	public function stopdevice(){
+			$psn = $_GET['psnid'];
+	  	$id=$_GET['devid'];
+			$psnid = $_GET['psnid'];
+			
+			$where=array(
+										'psn'=>$psn,
+										'devid'=>$id,
+									);
+			$re_flag['re_flag']=1;
+			$ret=M('device')->where($where)->save($re_flag);
+			$this ->redirect('/Devselect/devlist',array('psnid'=>$psn),0,'');
+			
 	}
 	
 	public function querytempnew(){
@@ -882,21 +909,21 @@ class DevselectController extends HomeController {
 	}	
 	
 	public function autoadd(){
-
 			//$i=2760;
-		  for($i=2;$i<=50;$i++){
+		  for($i=2;$i<=200;$i++){
 					$dev=array(
-						'psn'=>3,
+						'psn'=>12,
 						'shed'=>1,
 						'fold'=>1,
-						'flag'=>1,
+						'flag'=>0,
 						'state'=>1,
 						's_count'=>0,
 						'rid'=>$i,
 						'age'=>1,
 						'devid'=>$i,
 					);
-					//$saveSql=M('device')->add($dev);
+					$saveSql=M('device')->add($dev);
+					dump($saveSql);
   		}
   		echo "ok";
   		exit;
@@ -1576,4 +1603,10 @@ class DevselectController extends HomeController {
 		exit;
 	}
 	
+	public function test(){
+		$num=6;
+		$str=str_pad($num,2,'0',STR_PAD_LEFT);
+		dump($str);
+		exit;
+	}
 }

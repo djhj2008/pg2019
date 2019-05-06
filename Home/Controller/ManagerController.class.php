@@ -152,7 +152,7 @@ class ManagerController extends HomeController {
 						$this ->redirect('',array(),1,json_encode(array('UserInfo'=>$jarr)));
 						exit;
 					}
-					session('openid', 	$openid);	
+					session('openid',$openid);
 				}
 				$this->display();
 			}
