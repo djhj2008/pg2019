@@ -25,10 +25,6 @@
   <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
 	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
 	<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
-	
-	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
-	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
-	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
 </head>
 <style>
 	b {color: #23527C;}
@@ -41,48 +37,36 @@
 		<ul class="nav navbar-nav" >
 			<li class="active"><a href="<%$smarty.const.__APP__%>/devselect/select"><b >首页</b></a></li>
 			<li><a href="<%$smarty.const.__APP__%>/acadd/checkrssi"><b>基站RSSI</b></a></li>
-			<li><a href="<%$smarty.const.__APP__%>/manager/logout"><b>退出登陆</b></a></li>
 			</ul>
 		</div>
 		</div>
 		
+		
 		<div class="container" >
-		  <div class="weui-btn-area">
-		    <button class="weui-btn weui-btn_primary" onclick="addserver()">添加牧场</button>
-		  </div>
+		 <h3>当前厂号:<%$psn_sn%></h3>
      <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
      <thead>
 			<tr>
-				<th>信息</th>
-				<th>统编</th>
-				<th>SN</th>
+				<th>设备厂号</th>
+				<th>设备ID</th>
+				<th>新设备ID</th>
+        <th>状态</th>
+        <th>时间</th>
 				<th>操作</th>
-				<th>工厂状态(处理慢)</th>
-				<th>出厂状态(处理慢)</th>
 			</tr>
 		</thead>
 		  <tbody>
-			<%foreach $psnSelect as $value%>
+			<%foreach $devSelect as $value%>
 			<tr>
-				<td><%$value['info']%></td>
-				<td><%$value['tsn']%></td>
-				<td><%$value['sn']%></td>
-				<td><a href="<%$smarty.const.__APP__%>/devselect/devlist?psnid=<%$value['id']%>">设备信息</a>
-					<a href="<%$smarty.const.__APP__%>/acadd/select?psnid=<%$value['id']%>">|设备温度</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/station?psnid=<%$value['id']%>">|基站信息</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/devmove?psnid=<%$value['id']%>">|1301信息</a>
-					</td>
-					<td>
-					<a href="<%$smarty.const.__APP__%>/devselect/checkfactory?psnid=<%$value['id']%>">重新扫描</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factoryfail?psnid=<%$value['id']%>">|次数不足</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factorypass?psnid=<%$value['id']%>">|成功设备</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factorynone?psnid=<%$value['id']%>">|未上报</a>
-				</td>
+				<td><%$value['old_psn']%></td>
+				<td><%$value['old_devid']%></td>
+				<td><%$value['new_devid']%></td>
+				<td><%$value['flag']%></td>
+				<td><%$value['time']%></td>
 				<td>
-					<a href="<%$smarty.const.__APP__%>/devselect/factoryfailout?psnid=<%$value['id']%>">次数不足</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factorynoneout?psnid=<%$value['id']%>">|未上报</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factoryhigh?psnid=<%$value['id']%>">|高温</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factorylow?psnid=<%$value['id']%>">|低温</a>
+					<%if $value['flag'] neq 2 %>
+					<a href="<%$smarty.const.__APP__%>/add/movedev?changeid=<%$value['id']%>">更改ID</a>
+					<%/if%>
 				</td>
 			</tr>
 			<%/foreach%>
@@ -99,26 +83,23 @@
           //Buttons examples
           var table = $('#datatable-buttons').DataTable({
               lengthChange: true,
+              iDisplayLength: 25,
               info: false,
               buttons: ['excel'],
               bSort: false,
 							columnDefs: [ 
-								{
-							      "targets": 0,
-							      "searchable": false
-								},
-								{
-							      "targets": 1,
-							      "searchable": false
-								},
-								{
-							      "targets": 3,
-							      "searchable": false
-								},
-								{
-							      "targets": 4,
-							      "searchable": false
-								},
+									{
+								      "targets": 1,
+								      "searchable": false
+									},
+									{
+								      "targets": 4,
+								      "searchable": false
+									},
+									{
+								      "targets": 5,
+								      "searchable": false
+									}
 							],
               language: {
                   "sProcessing": "处理中...",
@@ -144,12 +125,11 @@
                       "sSortDescending": ": 以降序排列此列"
                   }
               }
-          });;
+          });
+
           table.buttons().container()
                   .appendTo('#datatable-buttons_wrapper .col-md-6:eq(0)');
-      } );
-      function addserver(){
-          window.location.href="<%$smarty.const.__APP__%>/add/addserver";
-      }
+      });
+
 </script>
 </html>

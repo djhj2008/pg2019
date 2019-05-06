@@ -648,4 +648,52 @@ class AddController extends HomeController {
 				}
     	}
     }
+    
+    public function movedev(){
+    	$old_psn=$_POST['old_psn'];
+    	$old_devid=$_POST['old_devid'];
+    	$new_devid=$_POST['new_devid'];
+    	
+    	if(empty($old_psn)||empty($old_devid)||empty($new_devid)){
+	    	$id=$_GET['changeid'];
+	    	$dev=M('changeidlog')->where(array('id'=>$id))->find();
+	    	$old_psn=$dev['old_psn'];
+	    	$old_devid=$dev['old_devid'];
+	    	$psnid=$dev['psnid'];
+	    	
+	    	$devlist=M('device')->where(array('psn'=>$psnid))->order('devid asc')->select();
+	    	if($devlist){
+	    		for($i=2;$i<2000;$i++){
+	    			$finddev=0;
+	    			foreach($devlist as $v){
+	    				if($i==$v['devid']){
+	    					$finddev=1;
+	    					break;
+	    				}
+	    			}
+	    			if($finddev==0){
+	    				$devids[]=$i;
+	    			}
+	    			if(count($devids)>19){
+	    				$this->assign('devids',$devids);
+	    				break;
+	    			}
+	    		}
+	    	}
+	    	$this->assign('dev',$dev);
+	    	$this->display();
+	    	exit;
+    	}
+			
+			$newdev=array('new_devid'=>$new_devid,
+										'flag'=>1);
+			$dev=M('changeidlog')->where(array('old_psn'=>$old_psn,'old_devid'=>$old_devid))->save($newdev);
+
+			$psn=M('changeidlog')->where(array('sn'=>$old_psn))->find();
+			if($psn){
+				$psnid=$psn['id'];
+			}
+
+			$this ->redirect('devselect/devmove',array('psnid'=>$psnid),0,'');
+    }
 }

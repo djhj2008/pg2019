@@ -1695,9 +1695,9 @@ class DatapushController extends Controller {
 
 		//$str = "32303139303130343135303031303132303836373536333030000040010140014102420343044400060000200256217400014662244602ffffffffffffffffffffffffff0000200356217400014862244602ffffffffffffffffffffffffff0000200644217400014763345103ffffffffffffffffffffffffff0000200551217400014772244602ffffffffffffffffffffffffff0000200857217400014662244602ffffffffffffffffffffffffff0000200745217400015193344903ffffffffffffffffffffffffff00006002";
     {
-          $imgDir = "lora_backup3/";
-          if(!file_exists("lora_backup3")){
-                 mkdir("lora_backup3");
+          $imgDir = "lora_backup30/";
+          if(!file_exists("lora_backup30")){
+                 mkdir("lora_backup30");
           }
           if(!file_exists($imgDir)){
              mkdir($imgDir);
@@ -1738,9 +1738,9 @@ class DatapushController extends Controller {
     if($bsnint!=$sid){
     	echo "OKE".date('YmdHis')."00101";
     	{
-          $imgDir = "lora_error3/";
-          if(!file_exists("lora_error3")){
-                 mkdir("lora_error3");
+          $imgDir = "lora_error30/";
+          if(!file_exists("lora_error30")){
+                 mkdir("lora_error30");
           }
           if(!file_exists($imgDir)){
              mkdir($imgDir);
@@ -1950,8 +1950,20 @@ class DatapushController extends Controller {
     	$info    =D('device')->where(array('devid'=>$snint,'psn'=>$psnid))->find();//查询devce是否存在
     	//var_dump($info);
     	
-    	if(!$info){
-    		continue;
+    	if(empty($info)){
+					$savedev=array(
+						'psn'=>$psnid,
+						'shed'=>1,
+						'fold'=>1,
+						'flag'=>0,
+						'state'=>0,
+						's_count'=>0,
+						'rid'=>$snint,
+						'age'=>1,
+						'devid'=>$snint,
+					);
+					$saveSql=M('device')->add($savedev);
+    			//continue;
     	}
     
 	    if($min_delay == 0){
@@ -2103,6 +2115,7 @@ class DatapushController extends Controller {
 					  	));
 
 				  	 	$saveSql=M('device')->where(array('devid'=>$snint,'psn'=>$psnid))->save(array(
+				  	 																																	'state'=>1,
 				  	 																																	'battery'=>$battery,
 																																				  	 	'dev_state'=>$state,
 																																				  	 	'version'=>$cvs)
@@ -2210,6 +2223,7 @@ class DatapushController extends Controller {
 					  	));
 
 				  	 	$saveSql=M('device')->where(array('devid'=>$snint,'psn'=>$psnid))->save(array(
+				  	 																																	'state'=>1,
 				  	 																																	'battery'=>$battery,
 																																				  	 	'dev_state'=>$state,
 																																				  	 	'version'=>$cvs)
@@ -2313,9 +2327,9 @@ class DatapushController extends Controller {
 
 		//$str = "323031393034323631353030303531313038363735363330300000a0010150000000000000000000070000a00772820400015862252003ffffffffffffffffffffffffff0000a00771820400015862252003ffffffffffffffffffffffffff0000a00773820400015862252003ffffffffffffffffffffffffff0000a00772820400015862252003ffffffffffffffffffffffffff0000a00772820400015862252003ffffffffffffffffffffffffff0000a00771820400015862252003ffffffffffffffffffffffffff0000a007701204d6015452254802ffffffffffffffffffffffffff0000737a";
     {
-          $imgDir = "lora_backup4/";
-          if(!file_exists("lora_backup4")){
-                 mkdir("lora_backup4");
+          $imgDir = "lora_backup35/";
+          if(!file_exists("lora_backup35")){
+                 mkdir("lora_backup35");
           }
           if(!file_exists($imgDir)){
              mkdir($imgDir);
@@ -2356,9 +2370,9 @@ class DatapushController extends Controller {
     if($bsnint!=$sid){
     	echo "OKE";
     	{
-          $imgDir = "lora_error4/";
-          if(!file_exists("lora_error4")){
-                 mkdir("lora_error4");
+          $imgDir = "lora_error35/";
+          if(!file_exists("lora_error35")){
+                 mkdir("lora_error35");
           }
           if(!file_exists($imgDir)){
              mkdir($imgDir);
@@ -2562,12 +2576,12 @@ class DatapushController extends Controller {
     	//echo "type:";
     	//var_dump($type);
     	$snint=$snint;
-    	$info    =D('device')->where(array('devid'=>$snint,'psn'=>$psnid))->find();//查询devce是否存在
+    	//$info    =D('device')->where(array('devid'=>$snint,'psn'=>$psnid))->find();//查询devce是否存在
     	//var_dump($info);
     	
-    	if(!$info){
-    		continue;
-    	}
+    	//if(empty($info)){
+    			//continue;
+    	//}
     
 	    if($min_delay == 0){
 	      $real_time = ((int)(($now+$hour_pre_time)/($hour_delay*$hour_time))-1)*$hour_delay*$hour_time;
@@ -2864,6 +2878,7 @@ class DatapushController extends Controller {
 				$ch_psn = $chdev['old_psn'];
 				$ch_devid=$chdev['old_devid'];
 				$new_devid=$chdev['new_devid'];
+				$dev=M('changeidlog')->where(array('old_psn'=>$ch_psn,'old_devid'=>$ch_devid,'new_devid'=>$new_devid))->save(array('flag'=>2));
 				//var_dump($chdev);
 				//var_dump($psn);
 				//$olddev=($ch_psn<<13)|($ch_devid);

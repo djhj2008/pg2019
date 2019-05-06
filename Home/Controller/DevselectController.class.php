@@ -263,7 +263,7 @@ class DevselectController extends HomeController {
 	
 	public function devlist(){
 		$psnid = $_GET['psnid'];
-		$devSelect=M('device')->where(array('dev_type'=>0,'flag'=>1,'psn'=>$psnid))->order('devid asc')->select();
+		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
 		//dump($dev);
 		$this->assign('devSelect',$devSelect);
 		$this->display();
@@ -922,8 +922,8 @@ class DevselectController extends HomeController {
 						'age'=>1,
 						'devid'=>$i,
 					);
-					$saveSql=M('device')->add($dev);
-					dump($saveSql);
+					//$saveSql=M('device')->add($dev);
+					//dump($saveSql);
   		}
   		echo "ok";
   		exit;
@@ -1608,5 +1608,16 @@ class DevselectController extends HomeController {
 		$str=str_pad($num,2,'0',STR_PAD_LEFT);
 		dump($str);
 		exit;
+	}
+	
+	public function devmove(){
+		$psnid = $_GET['psnid'];
+		$psn=M('psn')->where(array('id'=>$psnid))->find();
+		$psn_sn=$psn['sn'];
+		$devSelect=M('changeidlog')->where(array('psn'=>$psnid))->order('time asc')->select();
+		//dump($dev);
+		$this->assign('devSelect',$devSelect);
+		$this->assign('psn_sn',$psn_sn);
+		$this->display();
 	}
 }
