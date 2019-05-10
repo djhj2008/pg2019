@@ -654,15 +654,16 @@ class AddController extends HomeController {
     	$old_devid=$_POST['old_devid'];
     	$new_devid=$_POST['new_devid'];
     	
+    	$id=$_GET['changeid'];
+    	$dev=M('changeidlog')->where(array('id'=>$id))->find();
+    	$psnid=$dev['psnid'];
+	    	
     	if(empty($old_psn)||empty($old_devid)||empty($new_devid)){
-	    	$id=$_GET['changeid'];
-	    	$dev=M('changeidlog')->where(array('id'=>$id))->find();
 	    	$old_psn=$dev['old_psn'];
 	    	$old_devid=$dev['old_devid'];
-	    	$psnid=$dev['psnid'];
 	    	
 	    	$devlist=M('device')->where(array('psn'=>$psnid))->order('devid asc')->select();
-	    	if($devlist){
+	    	
 	    		for($i=2;$i<2000;$i++){
 	    			$finddev=0;
 	    			foreach($devlist as $v){
@@ -679,7 +680,7 @@ class AddController extends HomeController {
 	    				break;
 	    			}
 	    		}
-	    	}
+	    	
 	    	$this->assign('dev',$dev);
 	    	$this->display();
 	    	exit;
@@ -689,9 +690,19 @@ class AddController extends HomeController {
 										'flag'=>1);
 			$dev=M('changeidlog')->where(array('old_psn'=>$old_psn,'old_devid'=>$old_devid))->save($newdev);
 
-			$psn=M('changeidlog')->where(array('sn'=>$old_psn))->find();
-			if($psn){
-				$psnid=$psn['id'];
+			$this ->redirect('devselect/devmove',array('psnid'=>$psnid),0,'');
+    }
+    
+    public function quitmovedev(){
+
+    	$id=$_GET['changeid'];
+			$newdev=array('flag'=>0);
+    	$id=$_GET['changeid'];
+    	$dev=M('changeidlog')->where(array('id'=>$id))->find();
+    	$psnid=$dev['psnid'];
+    	
+			if($dev){
+				$ret=M('changeidlog')->where(array('id'=>$id))->save($newdev);
 			}
 
 			$this ->redirect('devselect/devmove',array('psnid'=>$psnid),0,'');

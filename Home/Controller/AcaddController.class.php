@@ -153,6 +153,7 @@ class AcaddController extends HomeController {
         	$start_time = strtotime($time);
         	$end_time = strtotime($time2)+86400;
             $dev=M('device')->where(array('devid'=>$id,'psn'=>$psn))->find();
+            /*
             if($dev==NULL){
                 $date = date("Y-m-d");
                 $this->assign('date',$date);
@@ -161,8 +162,9 @@ class AcaddController extends HomeController {
                 $this->display();
                 exit;
             }
-            $psn = $dev['psn'];
-            $shed = $dev['shed'];
+            */
+            //$psn = $dev['psn'];
+            //$shed = $dev['shed'];
             //var_dump($dev);
 
             $devSelect=M('device')->where(array('flag'=>1,'dev_type'=>1,'psn'=>$psn))->find();

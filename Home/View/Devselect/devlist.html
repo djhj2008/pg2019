@@ -48,7 +48,7 @@
 				<th>DEVID</th>
 				<th>SN</th>
 				<th>舍</th>
-        <th>区</th>
+        <th>时间</th>
 				<th>电量</th>
 				<th>状态</th>
 				<th>Assert</th>
@@ -62,7 +62,7 @@
 				<td><%$value['devid']%></td>
 				<td><%$value['sn']%></td>
 				<td><%$value['shed']%></td>
-				<td><%$value['fold']%></td>
+				<td><%$value['time']%></td>
 				<td><%$value['battery']%></td>
 				<td><%$value['dev_state']%></td>
 				<td><%$value['dev_assert']%></td>
@@ -77,18 +77,40 @@
 		</tbody>
 		</table>
 		</div>
-	<!--div class="container" style="margin-top: 50px"->
+	<!--div class="container" style="margin-top: 50px"-->
 </body>
-<!-- Required datatable js -->
-<script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jquery.dataTables.min.js"></script>
-<script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.js"></script>
+    <!-- jQuery  -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/popper.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/bootstrap.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/metisMenu.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/waves.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.slimscroll.js"></script>
+
+    <!-- Required datatable js -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.js"></script>
+    <!-- Buttons examples -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.buttons.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jszip.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/pdfmake.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/vfs_fonts.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.html5.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.print.min.js"></script>
+    <!-- Responsive examples -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/responsive.bootstrap4.min.js"></script>
+    <!-- App js -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.core.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.app.js"></script>
 <script type="text/javascript">
       $(document).ready(function() {
           //Buttons examples
           var table = $('#datatable-buttons').DataTable({
               lengthChange: true,
               iDisplayLength: 25,
-              info: false,
+              info: true,
               buttons: ['excel'],
               bSort: false,
 							columnDefs: [ 

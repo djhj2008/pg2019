@@ -279,9 +279,12 @@ class DevselectController extends HomeController {
 	}
 	
 	public function stopdevice(){
+			echo "WARNING.";
+			/*
 			$psn = $_GET['psnid'];
 	  	$id=$_GET['devid'];
 			$psnid = $_GET['psnid'];
+			
 			
 			$where=array(
 										'psn'=>$psn,
@@ -289,7 +292,9 @@ class DevselectController extends HomeController {
 									);
 			$re_flag['re_flag']=1;
 			$ret=M('device')->where($where)->save($re_flag);
+			
 			$this ->redirect('/Devselect/devlist',array('psnid'=>$psn),0,'');
+			*/
 			
 	}
 	
@@ -536,6 +541,38 @@ class DevselectController extends HomeController {
       	
       	exit;
 	}
+
+	public function addfactory2(){
+		    $psnid= 12;
+
+      	$product=M('device')->where(array('psn'=>12,'dev_type'=>0))->select();
+      	dump($product);
+      	foreach($product as $v){
+      		$snstr = $v['devid'];
+      		if($snstr<20){
+      			continue;
+      		}else{
+      			$devfind=M('factory')->where(array( 'psnid'=>$psnid,
+																		      			'devid'=>$snstr)
+																		    )->find();
+						var_dump($devfind);				    
+      			if(empty($psnfind)){
+      				$dev = array( 'psnid'=>$psnid,
+								      			'devid'=>$snstr,
+														'state'=>1,
+								      			'fsn'=>"ABC");
+							$ret=M('factory')->add($dev);      			
+      			}
+      		}		
+      	}
+      	
+    //$devSelect=M('device')->where(array('flag'=>1,'dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
+		//dump($dev);
+		//$this->assign('devSelect',$devSelect);
+		//$this->display();
+      	
+    exit;
+	}
 	
 	public function checkfactory(){
 				$psnid=$_GET['psnid'];
@@ -554,11 +591,12 @@ class DevselectController extends HomeController {
   			//var_dump($first_time);
 				
       	$devlist=M('factory')->where(array('psnid'=>$psnid))->order('id asc')->select();
+      	dump(count($devlist));
 
 				foreach($devlist as $dev){
 					$devid = $dev['devid'];
 					$psnid = $dev['psnid'];
-					$dev=M('device')->where(array('devid'=>$devid,'psn'=>$psnid,'flag'=>1))->order('id asc')->find();
+					$dev=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->order('id asc')->find();
 					//var_dump($dev);
 					if(!empty($dev)){
 						$accSelect=M('access')->group('time')->where('time >='.$yes_time.' and time <'.$end_time)->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,4)->select();
@@ -615,7 +653,7 @@ class DevselectController extends HomeController {
 						//var_dump($temp1);
 						//var_dump($temp2);
 						//var_dump($temp3);
-						if($temp1 < 20||$temp2==0||$temp3==0)
+					if($temp1 ==0||$temp2==0||$temp3==0||$temp1< 10||$temp2< 10||$temp3< 10||$temp1> 40||$temp2> 40||$temp3> 40)
 						{
 							$devSelect[$i]['err']=1;
 						}else{
@@ -1614,10 +1652,91 @@ class DevselectController extends HomeController {
 		$psnid = $_GET['psnid'];
 		$psn=M('psn')->where(array('id'=>$psnid))->find();
 		$psn_sn=$psn['sn'];
-		$devSelect=M('changeidlog')->where(array('psn'=>$psnid))->order('time asc')->select();
+		$devSelect=M('changeidlog')->where(array('psnid'=>$psnid))->order('time desc')->select();
 		//dump($dev);
 		$this->assign('devSelect',$devSelect);
 		$this->assign('psn_sn',$psn_sn);
 		$this->display();
+	}
+	
+	public function startchkdrop(){
+    	$psn= $_GET['psnid'];
+    	$now = time();
+			$start_time = strtotime(date('Y-m-d',$now));
+    	dump($start_time);
+    	$end_time = $start_time+86400;
+
+			$psnfind = M('psn')->where(array('id'=>$psn))->find();
+			if(empty($psnfind)){
+				echo "PSN NULL.";
+				exit;
+			}
+			$btemp=$psnfind['base_temp'];
+    	$hlevl1=$psnfind['htemplev1'];
+    	$hlevl2=$psnfind['htemplev2'];
+    	$llevl1=$psnfind['ltemplev1'];
+    	$llevl2=$psnfind['ltemplev2'];
+			$temp_value=$psnfind['check_value'];
+
+			//dump($btemp);
+			//dump($hlevl1);
+			//dump($hlevl2);
+			//dump($llevl1);
+			//dump($llevl2);
+			//dump($temp_value);
+
+			$devs = M('device')->where(array('psn'=>$psn,'flag'=>1,'dev_type'=>0))->select();
+			
+			if(empty($devs)){
+				echo "DEV NULL.";
+				exit;
+			}
+			dump('high');
+			foreach($devs as $dev){
+				$devid=$dev['devid'];
+				$ret=M('access')->where('time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$devid))->group('time')->order('time desc')->limit(0,1)->select();
+				$flag=$dev['flag'];
+				$avg=$dev['avg_temp'];
+				$size = count($ret);
+				//dump($devid);
+				
+				if($avg==0){
+					dump('no avg:'.$devid);
+					continue;
+				}
+				
+				if($size>0){
+					$ntemp = 255;
+					$index =0;
+					$hcount = 0;
+  				for($i=0;$i< $size;$i++){
+  					$date = date('Y-m-d H:i:s',$ret[$i]['time']);
+  					$day1 = strtotime((date('Y-m-d',$ret[$i]['time'])));
+  					$day2 = strtotime((date('Y-m-d',$s['time'])));
+						
+	    			$temp1=$ret[$i]['temp1'];
+						$temp2=$ret[$i]['temp2'];
+						$temp3=$ret[$i]['env_temp'];
+						$a=array($temp1,$temp2);
+						$t=max($a);
+						$vt=(float)$t;
+						if($vt>=30){
+							$nor[]=$ret[$i];
+							//dump('devid:'.$devid.':'.$vt);
+						}else{
+							$drop[]=$ret[$i];
+						}
+  				}
+				}else{
+					$eor[]=$dev;
+				}
+				
+			}
+			dump($nor);
+			dump($drop);
+			dump($eor);
+			$devs2 = M('device')->where(array('psn'=>$psn,'flag'=>2,'dev_type'=>0))->select();
+			dump($devs2);
+			exit;
 	}
 }

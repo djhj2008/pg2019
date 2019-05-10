@@ -64,8 +64,10 @@
 				<td><%$value['flag']%></td>
 				<td><%$value['time']%></td>
 				<td>
-					<%if $value['flag'] neq 2 %>
+					<%if $value['flag'] eq 0 %>
 					<a href="<%$smarty.const.__APP__%>/add/movedev?changeid=<%$value['id']%>">更改ID</a>
+					<%else if $value['flag'] eq 1 %>
+					<a href="<%$smarty.const.__APP__%>/add/quitmovedev?changeid=<%$value['id']%>">取消</a>
 					<%/if%>
 				</td>
 			</tr>

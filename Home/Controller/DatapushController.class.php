@@ -1350,8 +1350,20 @@ class DatapushController extends Controller {
     	$info    =D('device')->where(array('devid'=>$snint,'psn'=>$psnid))->find();//查询devce是否存在
     	//var_dump($info);
     	
-    	if(!$info){
-    		continue;
+    	if(empty($info)){
+					$savedev=array(
+						'psn'=>$psnid,
+						'shed'=>1,
+						'fold'=>1,
+						'flag'=>0,
+						'state'=>0,
+						's_count'=>0,
+						'rid'=>$snint,
+						'age'=>1,
+						'devid'=>$snint,
+					);
+					$saveSql=M('device')->add($savedev);
+    			//continue;
     	}
     
 	    if($min_delay == 0){
@@ -2526,7 +2538,7 @@ class DatapushController extends Controller {
 				if($ch_dev['old_psn']==$dev_psn
 						&&$ch_dev['old_devid']==$snint){
 					$changeid_find=true;
-					if($ch_dev['flag']==1){
+					if($ch_dev['flag']==1||$ch_dev['flag']==2){
 						$tmp_dev=array('old_psn'=>$dev_psn,
 													'old_devid'=>$snint,
 													'new_devid'=>$ch_dev['new_devid']
