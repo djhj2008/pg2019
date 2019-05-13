@@ -42,32 +42,28 @@
 		</div>
 		
 		<div class="container" >
+		 <h4>异常设备:</h4>
      <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
      <thead>
 			<tr>
-				<th>生产编号</th>
+				<th>DEVID</th>
+				<th>温度1</th>
+				<th>温度2</th>
 				<th>时间</th>
-				<th>设备</th>
-				<th>生产</th>
-				<th>出厂</th>
+				<th>上报时间</th>
+				<th>操作</th>
 			</tr>
 		</thead>
 		  <tbody>
-			<%foreach $productlog as $value%>
+			<%foreach $acclist as $value%>
 			<tr>
-				<td><%$value['number']%></td>
-				<td><%$value['time']%></td>
+				<td><%$value['devid']%></td>
+				<td><%$value['temp1']%></td>
+				<td><%$value['temp2']%></td>
+				<td><%date('Y-m-d H:i:s',$value['time'])%></td>
+				<td><%$value['cur_time']%></td>
 				<td>
-					<a href="<%$smarty.const.__APP__%>/product/devselect?psnid=<%$value['psnid']%>&productno=<%$value['number']%>">查看设备</a>
-					<a href="<%$smarty.const.__APP__%>/product/devtempnow?psnid=<%$value['psnid']%>&productno=<%$value['number']%>">|最新上报</a>
-					<a href="<%$smarty.const.__APP__%>/product/devtempnext?psnid=<%$value['psnid']%>&productno=<%$value['number']%>">|比较上次</a>
-				</td>
-				<td>
-					<a href="<%$smarty.const.__APP__%>/product/addfactory?productno=<%$value['number']%>">导入设备</a>
-					<a href="<%$smarty.const.__APP__%>/product/scanfactory?psnid=<%$value['psnid']%>&productno=<%$value['number']%>">|扫描设备</a>
-				</td>
-				<td>
-					<a href="<%$smarty.const.__APP__%>/product/factorytempeor?psnid=<%$value['psnid']%>&productno=<%$value['number']%>">设备异常</a>
+				<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">查看温度</a>
 				</td>
 			</tr>
 			<%/foreach%>
@@ -109,33 +105,6 @@
               iDisplayLength: 25,
               info: true,
               buttons: ['excel'],
-              bSort: false,
-							columnDefs: [ 
-									{
-								      "targets": 2,
-								      "searchable": false
-									},
-									{
-								      "targets": 3,
-								      "searchable": false
-									},
-									{
-								      "targets": 4,
-								      "searchable": false
-									},
-									{
-								      "targets": 5,
-								      "searchable": false
-									},
-									{
-								      "targets": 6,
-								      "searchable": false
-									},
-									{
-								      "targets": 7,
-								      "searchable": false
-									},
-							],
               language: {
                   "sProcessing": "处理中...",
                   "sLengthMenu": "显示 _MENU_ 项结果",
@@ -164,7 +133,7 @@
 
           table.buttons().container()
                   .appendTo('#datatable-buttons_wrapper .col-md-6:eq(0)');
-      });
+      } );
 
 </script>
 </html>

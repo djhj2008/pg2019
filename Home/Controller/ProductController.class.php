@@ -23,15 +23,14 @@ class ProductController extends HomeController {
 			$productlog=M('productlog')->where(array('productno'=>$productno))->find();
 			$psnid=$productlog['psnid'];
 			$mytab='product'.$productno;
-			
+			dump('psnid:'.$psnid);		
 			if(!$productno){
 				echo 'PRODUCTNO ERR.';
 				exit;
 			}
 			dump('productno:'.$productno);		
 			$product=M($mytab)->select();
-			//dump($product);
-			//$devs = M('factory')->where(array('psnid'=>$psnid))->select();
+			//dump($product);		
     	foreach($product as $v){
     		$snstr = $v['sn'];
 				$sn_start=strlen($snstr)-4;
@@ -39,19 +38,20 @@ class ProductController extends HomeController {
   			$sn = substr($snstr,$sn_start,4);
   			$psn=(int)$psn;
   			$sn=(int)$sn;
-  			//var_dump($sn);
+  			//dump($sn);
   			$psnfind=M('psn')->where(array('sn'=>$psn))->find();
   			if(!$psnfind){
   				echo 'PSN ERROR :'.$psn;
   				exit;
   			}
   			$psnid=$psnfind['id'];
-
+  			//dump($psnid);
+  			//dump($sn);
   			$devfind=M('factory')->where(array( 'psnid'=>$psnid,
-																      			'devid'=>$sn)
-																    )->find();
-				//var_dump($devfind);
-  			if(empty($psnfind)){
+																      			'devid'=>$sn))->find();
+				$mytime=strtotime($v['time']);
+				//dump($mytime);						      			
+  			if(empty($devfind)){
   				$devadd = array( 
   											'psnid'=>$psnid,
 						      			'devid'=>$sn,
@@ -59,7 +59,7 @@ class ProductController extends HomeController {
 												'state'=>1,
 						      			'fsn'=>"ABC",
 						      			'time'=>$v['time']);
-					dump('add dev:'.$devadd);		
+					dump('add dev:'.$sn);
 					$ret=M('factory')->add($devadd);      			
   			}	    		
     	}
@@ -79,166 +79,275 @@ class ProductController extends HomeController {
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now));
     	//var_dump($start_time);
-    	$yes_time = $start_time-86400;
+    	$yes_time = $start_time;
     	$end_time = $start_time+86400;
     	$cur_time = $now - $start_time;
     	//var_dump($cur_time);
     	$cur_time = (int)($cur_time/$delay)*$delay;
     	$first_time = $cur_time-$delay+$start_time;
+    	$last_time = $cur_time-$delay+$start_time-$delay-$delay_sub;
+    	
+    	//dump(date('Y-m-d H:s:i',$first_time));
+    	//dump(date('Y-m-d H:s:i',$last_time));
 			//var_dump($first_time);
 			
     	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
-    	dump(count($devlist));
-
+    	//dump(count($devlist));
+			$accSelect=M('access')->where('time >='.$last_time.' and time <='.$first_time)->where(array('psn'=>$psnid))->order('time desc')->select();
+			//dump(count($accSelect));
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
 				$psnid = $dev['psnid'];
-				$dev=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->order('id asc')->find();
-				//var_dump($dev);
-				if(!empty($dev)){
-					$accSelect=M('access')->group('time')->where('time >='.$yes_time.' and time <'.$end_time)->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,4)->select();
-					$accsize=count($accSelect);
-					if($accsize<4){
-						$stateSave=array('state'=>3);
-						if($accsize==0){
-      		  		$stateSave=array('state'=>4);
+				$acc_size=0;
+				unset($acc_list);
+				$acc_list = array();
+				foreach($accSelect as $acc){
+					if($acc['devid']==$devid){
+						$acc_list[]=$acc;
+					}
+				}
+				$acc_size=count($acc_list);
+				//dump('devid:'.$devid.' count:'.$acc_size);
+				if($acc_size<4){
+						if($acc_size==0){
+      		  		$dev_none[]=$devid;
+      			}else{
+      				$dev_lost[]=$devid;
       			}
-      			$ret=M('factory')->where(array('devid'=>$devid,'psnid'=>$psnid))->save($stateSave);
-      		  //var_dump($devid);
-      		  //var_dump($psnid);
       			continue;
-      		}
-	      	for($i=0;$i < 4;$i++){
-	      		$time=(int)$accSelect[$i]['time'];
-	      		//$time = date('Y-m-d H:s:i',$time);
-	      		$right_time=$first_time-$i*$delay_sub;
-	      		//echo "devid:";
-	      		//var_dump($devid);
-	      		//var_dump($time);
-	      		//var_dump($right_time);
-	      		if($time!=$right_time){
-	      			$ret=M('factory')->where(array('devid'=>$devid,'psnid'=>$psnid))->save(array('state'=>3));
-	      			break;
-	      		}
-	      		$ret=M('factory')->where(array('devid'=>$devid,'psnid'=>$psnid))->save(array('state'=>2));
-	      	}
-	      }else{
-	      	//echo "devid:";
-	      	//var_dump($devid);
-	      	$ret=M('factory')->where(array('devid'=>$devid,'psnid'=>$psnid))->save(array('state'=>0));
-	      }
+				}
+				$dev_pass[]=$devid;
 			}
-			$devSelect=M('factory')->where(array('state'=>2))->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
+			//dump($dev_lost);
+			//dump($dev_none);
+			//dump($dev_pass);
+			//$wherelost['devid']=array('in',$dev_lost);
+			//$wherenone['devid']=array('in',$dev_none);
+			//$wherepass['devid']=array('in',$dev_pass);
+			
+			if($dev_lost){
+				$wherelost['devid']=array('in',$dev_lost);
+				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wherelost)->save(array('state'=>3));
+			}
+			if($dev_none){
+				$wherenone['devid']=array('in',$dev_none);
+				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wherenone)->save(array('state'=>4));
+			}
+			if($dev_pass){
+				$wherepass['devid']=array('in',$dev_pass);
+				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wherepass)->save(array('state'=>2));
+			}
+
+			$devSelect=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('devid asc')->select();
 			$this->assign('devSelect',$devSelect);
 			$this->display();
 		}
 
-		public function factorypass(){
+		public function factorytempeor(){
 			$psnid=$_GET['psnid'];
 			$productno=$_GET['productno'];
-				
+			$delay = 4*3600;
+			$delay_sub = 2*3600;
+
 			if(!$productno){
 				echo 'PRODUCTNO ERR.';
 				exit;
-			}				
+			}
+    	$now = time();
+			$start_time = strtotime(date('Y-m-d',$now));
+    	//var_dump($start_time);
+    	$yes_time = $start_time;
+    	$end_time = $start_time+86400;
+    	$cur_time = $now - $start_time;
+    	//var_dump($cur_time);
+    	$cur_time = (int)($cur_time/$delay)*$delay;
+    	$first_time = $cur_time-$delay+$start_time;
+    	$last_time = $cur_time-$delay+$start_time-$delay-$delay_sub;	
 				
-			$devSelect=M('factory')->where(array('state'=>2))->where(array('psnid'=>$psnid,'productno'=>$productno))->order('devid asc')->select();
-			$devcount=count($devSelect);
-			for($i=0; $i< $devcount; $i++){
-				$devid = $devSelect[$i]['devid'];
-				$accSelect=M('access')->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,1)->select();
-				//echo "devid:";
-				//var_dump($devid);
-				foreach($accSelect as $acc){
-					$temp1=(float)$acc['temp1'];
-					$temp2=(float)$acc['temp2'];
-					$temp3=(float)$acc['env_temp'];
-					//var_dump($temp1);
-					//var_dump($temp2);
-					//var_dump($temp3);
-					if($temp1 ==0||$temp2==0||$temp3==0||$temp1< 10||$temp2< 10||$temp3< 10||$temp1> 40||$temp2> 40||$temp3> 40)
-					{
-						$devSelect[$i]['err']=1;
-					}else{
-						$devSelect[$i]['err']=0;
-					}
+			$devSelect=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('devid asc')->select();
+
+			foreach($devSelect as $dev){
+				$devlist[]=$dev['devid'];
+			}
+			
+			$wheredev['devid']=array('in',$devlist);
+			
+			$accSelect=M('access')->where(array('psn'=>$psnid,'time'=>$first_time))->where($wheredev)->order('time desc')->select();
+
+			foreach($accSelect as $acc){
+				$temp1=(float)$acc['temp1'];
+				$temp2=(float)$acc['temp2'];
+				$temp3=(float)$acc['env_temp'];
+				//dump($temp1);
+				//var_dump($temp2);
+				//var_dump($temp3);
+				if($temp1 ==0||$temp2==0||$temp3==0||$temp1< 10||$temp2< 10||$temp3< 10||$temp1> 40||$temp2> 40||$temp3> 40)
+				//if($temp1 > 0)
+				{
+					$acclist[]=$acc;
 				}
 			}
+			//dump($devtempeor);
+			//if($devtempeor){
+			//	$wheretempeor['devid']=array('in',$devtempeor);
+			//}
+			//$devSelect=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wheretempeor)->select();
 			//exit;
 			//var_dump($devSelect);
-			$this->assign('devSelect',$devSelect);
+			$this->assign('acclist',$acclist);
 			$this->display();
 		}
 	
-		public function factoryfail(){
+		public function devselect(){
 			$psnid=$_GET['psnid'];
 			$productno=$_GET['productno'];
 			if(!$productno){
 				echo 'PRODUCTNO ERR.';
 				exit;
-			}		
-			$devSelect=M('factory')->where(array('state'=>3))->where(array('psnid'=>$psnid,'productno'=>$productno))->order('devid asc')->select();
-
-			$devcount=count($devSelect);
-			for($i=0; $i< $devcount; $i++){
-				$devid = $devSelect[$i]['devid'];
-				$accSelect=M('access')->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,1)->select();
-				//echo "devid:";
-				//var_dump($devid);
-				foreach($accSelect as $acc){
-					$temp1=(float)$acc['temp1'];
-					$temp2=(float)$acc['temp2'];
-					$temp3=(float)$acc['env_temp'];
-					//var_dump($temp1);
-					//var_dump($temp2);
-					//var_dump($temp3);
-					if($temp1 ==0||$temp2==0||$temp3==0||$temp1< 10||$temp2< 10||$temp3< 10||$temp1> 40||$temp2> 40||$temp3> 40)
-					{
-						$devSelect[$i]['err']=1;
-					}else{
-						$devSelect[$i]['err']=0;
-					}
-				}
 			}
-			//exit;
-			//var_dump($devSelect);
+			$devSelect=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('devid asc')->select();
+			
 			$this->assign('devSelect',$devSelect);
 			$this->display();
 		}
 		
-		public function factorynone(){
+		public function devtempnow(){
 			$psnid=$_GET['psnid'];
 			$productno=$_GET['productno'];
+			$delay = 4*3600;
+			$delay_sub = 2*3600;
+
 			if(!$productno){
 				echo 'PRODUCTNO ERR.';
 				exit;
 			}
-			$devSelect=M('factory')->where(array('state'=>4))->where(array('psnid'=>$psnid,'productno'=>$productno))->order('devid asc')->select();
+    	$now = time();
+			$start_time = strtotime(date('Y-m-d',$now));
+    	//var_dump($start_time);
+    	$yes_time = $start_time;
+    	$end_time = $start_time+86400;
+    	$cur_time = $now - $start_time;
+    	//dump($cur_time);
+    	$cur_time = (int)($cur_time/$delay)*$delay;
+    	$first_time = $cur_time-$delay+$start_time;
+			//dump($first_time);
 			
-			$devcount=count($devSelect);
-			for($i=0; $i< $devcount; $i++){
-				$devid = $devSelect[$i]['devid'];
-				$accSelect=M('access')->where(array('devid'=>$devid,'psn'=>$psnid))->order('time desc')->limit(0,1)->select();
-				//echo "devid:";
-				//var_dump($devid);
+    	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
+    	//dump(count($devlist));
+			$accSelect2=M('access')->where(array('psn'=>$psnid,'time'=>$first_time))->order('devid asc')->select();
+			//dump(count($accSelect2));
+			foreach($devlist as $dev){
+				$devid = $dev['devid'];
+				$psnid = $dev['psnid'];
 				foreach($accSelect as $acc){
-					$temp1=(float)$acc['temp1'];
-					$temp2=(float)$acc['temp2'];
-					$temp3=(float)$acc['env_temp'];
-					//var_dump($temp1);
-					//var_dump($temp2);
-					//var_dump($temp3);
-					if($temp1< 20||$temp2==0||$temp3==0)
-					{
-						$devSelect[$i]['err']=1;
-					}else{
-						$devSelect[$i]['err']=0;
+					if($devid==$acc['devid']){
+						$acclist[]=$acc;
 					}
 				}
 			}
+			//dump(count($acclist));
+			foreach($devlist as $dev){
+				$devid = $dev['devid'];
+				$psnid = $dev['psnid'];
+				foreach($accSelect2 as $acc){
+					if($devid==$acc['devid']){
+						$acclist2[]=$acc;
+					}
+				}
+			}
+
+			$this->assign('acclist',$acclist2);
+			$this->display();
+		}
+		
+		public function devtempnext(){
+			$psnid=$_GET['psnid'];
+			$productno=$_GET['productno'];
+			$delay = 4*3600;
+			$delay_sub = 2*3600;
+
+			if(!$productno){
+				echo 'PRODUCTNO ERR.';
+				exit;
+			}
+    	$now = time();
+			$start_time = strtotime(date('Y-m-d',$now));
+    	//var_dump($start_time);
+    	$yes_time = $start_time;
+    	$end_time = $start_time+86400;
+    	$cur_time = $now - $start_time;
+    	//dump($cur_time);
+    	$cur_time = (int)($cur_time/$delay)*$delay;
+    	$first_time = $cur_time-$delay+$start_time;
+    	$pre_time = $cur_time-$delay+$start_time-$delay;
+			//dump($first_time);
+			//dump($pre_time);
+    	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
+    	//dump(count($devlist));
+			$accSelect=M('access')->where(array('psn'=>$psnid,'time'=>$pre_time))->order('devid asc')->select();
+			//dump(count($accSelect));
+			$accSelect2=M('access')->where(array('psn'=>$psnid,'time'=>$first_time))->order('devid asc')->select();
+			//dump(count($accSelect2));
+			foreach($devlist as $dev){
+				$devid = $dev['devid'];
+				$psnid = $dev['psnid'];
+				foreach($accSelect as $acc){
+					if($devid==$acc['devid']){
+						$acclist[]=$acc;
+					}
+				}
+			}
+			$precount=count($acclist);
+			//dump(count($acclist));
+			foreach($devlist as $dev){
+				$devid = $dev['devid'];
+				$psnid = $dev['psnid'];
+				foreach($accSelect2 as $acc){
+					if($devid==$acc['devid']){
+						$acclist2[]=$acc;
+					}
+				}
+			}
+			$nowcount=count($acclist2);
+			//dump(count($acclist2));
+			if($precount>$nowcount){
+				foreach($acclist as $dev){
+					$devid = $dev['devid'];
+					$psnid = $dev['psnid'];
+					$find=false;
+					foreach($accSelect2 as $acc){
+						if($devid==$acc['devid']){
+							$find=true;
+							break;
+						}
+					}
+					if($find==false){
+						$nolist[]=$dev;
+					}
+				}	
+			}
+			else if($precount< $nowcount){
+				foreach($acclist2 as $dev){
+					$devid = $dev['devid'];
+					$psnid = $dev['psnid'];
+					$find=false;
+					foreach($accSelect as $acc){
+						if($devid==$acc['devid']){
+							$find=true;
+							break;
+						}
+					}
+					if($find==false){
+						$nolist[]=$dev;
+					}
+				}	
+			}
+			//dump($nolist);
+			//dump($acclist);
 			//exit;
-			//var_dump($devSelect);
-			$this->assign('devSelect',$devSelect);
+			$this->assign('precount',$precount);
+			$this->assign('nowcount',$nowcount);
+			$this->assign('acclist',$nolist);
 			$this->display();
 		}
 }
