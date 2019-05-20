@@ -28,7 +28,7 @@ class DevselectController extends HomeController {
   	$name=$_SESSION['name'];
   	$tab= $_GET['tab'];
   	$this->assign('name',$name);
-  	
+  	//dump($aip);
   	if(!empty($aip)){
   		$uid = $_POST['userid'];
   	}
@@ -37,46 +37,35 @@ class DevselectController extends HomeController {
   		$this->assign('tab',$tab);
   	}
 
-  	$psnSelect=M('psn')->where(array('userid'=>$uid))->select();
+  	$psnSelect=M('psn')->where(array('userid'=>$uid))->find();
   	if(empty($psnSelect)){
-  		//dump($psnSelect);
-  		//exit;
+  		dump($psnSelect);
+  		exit;
   	}else{
   		//dump($psnSelect);
-  		$psnsize=count($psnSelect);
-  		for($i=0;$i< $psnsize;$i++){
-  				if($i==0){
-  					$where1='psn='.$psnSelect[$i]['sn'];
-  					$where2='psnid='.$psnSelect[$i]['sn'];
-  				}else{
-	  				$sql1=' or psn='.$psnSelect[$i]['sn'];
-	  				$sql2=' or psnid='.$psnSelect[$i]['sn'];
-	  				$where1=$where1.$sql1;
-	  				$where2=$where2.$sql2;
-  				}
-  		}
+  		$psnid=$psnSelect['id'];
   	}
-  	//dump($where);
+  	//dump($psnid);
   	//exit;
-  	$dev1=M('device')->where($where1)->where(array('dev_type'=>1))->find();
+  	$dev1=M('device')->where(array('psn'=>$psnid,'dev_type'=>1))->find();
   	
-  	$dev2=M('device')->where($where1)->where(array('dev_type'=>2))->find();
+  	$dev2=M('device')->where(array('psn'=>$psnid,'dev_type'=>2))->find();
   	
   	$devid1=$dev1['devid'];
   	$devid2=$dev2['devid'];
   	
   	
-  	$temp1 = M('taccess')->where($where1)->where(array('devid'=>$devid1))->order('time desc')->find();
-  	$temp2 = M('taccess')->where($where1)->where(array('devid'=>$devid2))->order('time desc')->find();
+  	$temp1 = M('taccess')->where(array('psn'=>$psnid,'devid'=>$devid1))->order('time desc')->find();
+  	$temp2 = M('taccess')->where(array('psn'=>$psnid,'devid'=>$devid2))->order('time desc')->find();
   	//dump($temp1);
   	//dump($temp2);
 		$this->assign('temp1',$temp1);
 		$this->assign('temp2',$temp2);
 
-  	$devdount=M('device')->where($where1.' and flag > 0 and dev_type=0')->count();
-		$devSelect1=M('sickness')->where($where2)->where(array('state'=>1,'flag'=>0))->order('devid asc')->select();
-		$devSelect2=M('sickness')->where($where2)->where(array('flag'=>1))->order('devid asc')->select();
-		$devSelect3=M('sickness')->where($where2)->where(array('state'=>2,'flag'=>0))->order('devid asc')->select();
+  	$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psnid'=>$psnid))->count();
+		$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->order('devid asc')->select();
+		$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
+		$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->order('devid asc')->select();
 		
 		if($aip=='ios'){
 			$temparr=array('temp1'=>$temp1,'temp2'=>$temp2);
@@ -147,11 +136,9 @@ class DevselectController extends HomeController {
         //var_dump($devid3);
     }
 
-    if($devid==NULL){
-    
+    if($devid!=NULL){
+    	$tmpSql=M('taccess')->where('devid ='.$devid.' and psn= '.$psn.' and time <= '.$end_time)->order('id desc')->limit(0,8)->select();
     }
-    $tmpSql=M('taccess')->where('devid ='.$devid.' and psn= '.$psn.' and time <= '.$end_time)->order('id desc')->limit(0,8)->select();
-
 		if($devid2!=NULL){
     	$tmpSql2=M('taccess')->where('devid ='.$devid2.' and psn= '.$psn.' and time <= '.$end_time)->order('id desc')->limit(0,8)->select();
 			//var_dump($tmpSql2);
@@ -382,7 +369,7 @@ class DevselectController extends HomeController {
         }
         
         if($devid==NULL){
-            if($selectSql=M('access')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
+            if($selectSql=M('access')->group('time')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
                 $this->assign('devid',$id);
                 $this->assign('date',$time);
                 $this->assign('date2',$time2);
@@ -409,7 +396,7 @@ class DevselectController extends HomeController {
 					//var_dump($tmpSql3);
 				}
 				
-        if($selectSql=M('access')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
+        if($selectSql=M('access')->group('time')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
             $this->assign('devid',$id);
             $this->assign('date',$time);
             $this->assign('date2',$time2);
@@ -970,8 +957,8 @@ class DevselectController extends HomeController {
 	public function avgtoday(){
 			$psnid=$_GET['psnid'];
 			$now = time();
-		  $time =date('2019-01-25');
-		  var_dump($time);
+		  $time =date('Y-m-d',$now);
+		  dump($time);
 			$start_time = strtotime($time)-86400+3600*18;
 			$end_time = strtotime($time)+86400;
 			$max_count=6;
@@ -988,7 +975,7 @@ class DevselectController extends HomeController {
 				
 				//var_dump($devid);
 				$accss=M('access')->where('time >='.$start_time.' and time <='.$end_time)
-														->where(array('devid'=>$devid,'psn'=>$psnid))->group('time')->order('time asc')->limit(0,$max_count)
+														->where(array('devid'=>$devid,'psn'=>$psnid))->group('time')->order('time desc')->limit(0,$max_count)
 														->select();
 				$temp=NULL;
 				$count = count($accss);
@@ -1024,11 +1011,11 @@ class DevselectController extends HomeController {
 					$accss[$i]['vtemp']=$vt;
 					//var_dump($acc);
 				}
-				//var_dump($accss);
+				dump($devid);
 				$avg= round($sum/$count,2);
-				//var_dump($avg);
+				dump($avg);
 				if($avg< 30){
-					var_dump('avg:'.$avg);
+					dump('avg:'.$avg);
 					$avg=0;
 				}
 			  $devSave=M('device')->where(array('psn'=>$psnid,'devid'=>$devid))->save(array('avg_temp'=>$avg));
@@ -1043,6 +1030,7 @@ class DevselectController extends HomeController {
 			$start_time = strtotime(date('Y-m-d',$now));
     	dump($start_time);
     	$end_time = $start_time+86400;
+			$com_count=8;
 
 			$psnfind = M('psn')->where(array('id'=>$psn))->find();
 			if(empty($psnfind)){
@@ -1072,7 +1060,7 @@ class DevselectController extends HomeController {
 			dump('high');
 			foreach($devs as $dev){
 				$devid=$dev['devid'];
-				$ret=M('access')->where('time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$devid))->group('time')->order('time desc')->limit(0,8)->select();
+				$ret=M('access')->where('time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$devid))->group('time')->order('time desc')->limit(0,$com_count)->select();
 				$flag=$dev['flag'];
 				$avg=$dev['avg_temp'];
 				$size = count($ret);
@@ -1230,7 +1218,7 @@ class DevselectController extends HomeController {
 			dump('low');
 			foreach($devs as $dev){
 				$devid=$dev['devid'];
-				$ret=M('access')->where('time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$devid))->group('time')->order('time desc')->limit(0,8)->select();
+				$ret=M('access')->where('time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$devid))->group('time')->order('time desc')->limit(0,$com_count)->select();
 				$flag=$dev['flag'];
 				$avg=$dev['avg_temp'];
 				$size = count($ret);

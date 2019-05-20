@@ -547,9 +547,48 @@ class DatapushTestController extends Controller {
     $strarr    =unpack("H*", $post);//unpack() 函数从二进制字符串对数据进行解包。
     $str       =implode("", $strarr);
 
-		$str = "323031393035313331353034303032323038363735363330300000e0020250000000000000000000090000c00625020482034352244722255032256202266302ffffffff0000c0092502048102510225502226612226ffffffffffffffffff0000e0db3322140102422224424224455224ffffffffffffffffff0000e0e93712140102411224403224432224ffffffffffffffffff0000e10b3962140102423224414224453224ffffffffffffffffff0000e10d3d32140302410224393224421224ffffffffffffffffff0000e1103722140102411224435224456224ffffffffffffffffff0000e1133922140102402224413224444224ffffffffffffffffff0000e14a4792140202442224445224435224ffffffffffffffffff00007239";
 
 
+		//$str = "323031393035313331353034303032323038363735363330300000e0020250000000000000000000090000c00625020482034352244722255032256202266302ffffffff0000c0092502048102510225502226612226ffffffffffffffffff0000e0db3322140102422224424224455224ffffffffffffffffff0000e0e93712140102411224403224432224ffffffffffffffffff0000e10b3962140102423224414224453224ffffffffffffffffff0000e10d3d32140302410224393224421224ffffffffffffffffff0000e1103722140102411224435224456224ffffffffffffffffff0000e1133922140102402224413224444224ffffffffffffffffff0000e14a4792140202442224445224435224ffffffffffffffffff00007239";
+
+		$changedev_str="99";
+		for($i=0;$i<99;$i++){
+			$changedev_str=$changedev_str."000040001"."000050108";
+		}
+		$blacklist_str="99";
+		for($i=0;$i<99;$i++){
+			$blacklist_str=$blacklist_str."000060005";
+		}
+
+		$header='OK1';
+		//var_dump($rate);
+  	{
+        $imgDir = "lora_req36Test/";
+        if(!file_exists("lora_req36Test")){
+               mkdir("lora_req36Test");
+        }
+        if(!file_exists($imgDir)){
+           mkdir($imgDir);
+        }
+        //要生成的图片名字
+        $ctime = date("Ymd_His_").mt_rand(10, 99);
+        $lnewFilePath = $imgDir.$ctime."/";//图片存入路径
+        if(!file_exists($lnewFilePath)){
+        	mkdir($lnewFilePath);
+        }
+        			
+        $filename = date("Ymd_His_").mt_rand(10, 99).".bmp"; //新图片名称
+        $newFilePath = $lnewFilePath.$filename;//图片存入路径
+        $newFile = fopen($newFilePath,"w"); //打开文件准备写入
+        fwrite($newFile,$header.$changedev_str.$blacklist_str);
+        fclose($newFile); //关闭文件
+         
+  	}
+    			
+		echo $header.$changedev_str.$blacklist_str;
+
+		exit;
+		
 		if(strlen($str) < $CDATA_START){
     	echo "OKF";
     	exit;
@@ -1098,19 +1137,6 @@ class DatapushTestController extends Controller {
 		$blacklist_str=str_pad(count($blacklist),2,'0',STR_PAD_LEFT);
 		foreach($blacklist as $name){
 			$blacklist_str=$blacklist_str.$name;
-		}
-		
-		//$changedev_str="00";
-		//$changedev_str=$changedev_str."000040001"."000050108"."000040002"."000050109";
-		
-		//$blacklist_str="05";
-		//$blacklist_str=$blacklist_str."000060005"."000060006"."000060007"."000060008"."000060009";
-		
-		//var_dump($rate);
-		if($crc==$sum){
-			echo "OK1".$changedev_str.$blacklist_str;
-		}else{
-			echo "OK2".$changedev_str.$blacklist_str;
 		}
 		exit;
 	}

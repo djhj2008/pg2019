@@ -2287,12 +2287,36 @@ class DatapushController extends Controller {
 				$devres_str=$devres_str.$devre_id;
 		}
 
-		//var_dump($rate);
 		if($crc==$sum){
-			echo "OK1".date('YmdHis').$delay_time.$rate.$footer.$devres_str;
+			$header="OK1".date('YmdHis');
 		}else{
-			echo "OK2".date('YmdHis').$delay_time.$rate.$footer.$devres_str;
+			$header="OK2".date('YmdHis');
 		}
+  	{
+        $imgDir = "lora_req30/";
+        if(!file_exists("lora_req30")){
+               mkdir("lora_req30");
+        }
+        if(!file_exists($imgDir)){
+           mkdir($imgDir);
+        }
+        //要生成的图片名字
+        $ctime = date("Ymd_His_").mt_rand(10, 99);
+        $lnewFilePath = $imgDir.$ctime."/";//图片存入路径
+        if(!file_exists($lnewFilePath)){
+        	mkdir($lnewFilePath);
+        }
+        			
+        $filename = date("Ymd_His_").mt_rand(10, 99).".bmp"; //新图片名称
+        $newFilePath = $lnewFilePath.$filename;//图片存入路径
+        $newFile = fopen($newFilePath,"w"); //打开文件准备写入
+        fwrite($newFile,$header.$delay_time.$rate.$footer.$devres_str);
+        fclose($newFile); //关闭文件
+         
+  	}
+
+		echo $header.$delay_time.$rate.$footer.$devres_str;
+
 		exit;
 	}
 
@@ -2985,10 +3009,34 @@ class DatapushController extends Controller {
 		
 		//var_dump($rate);
 		if($crc==$sum){
-			echo "OK1".$changedev_str.$blacklist_str;
+			$header="OK1";
 		}else{
-			echo "OK2".$changedev_str.$blacklist_str;
+			$header="OK2";
 		}
+  	{
+        $imgDir = "lora_req36/";
+        if(!file_exists("lora_req36")){
+               mkdir("lora_req36");
+        }
+        if(!file_exists($imgDir)){
+           mkdir($imgDir);
+        }
+        //要生成的图片名字
+        $ctime = date("Ymd_His_").mt_rand(10, 99);
+        $lnewFilePath = $imgDir.$ctime."/";//图片存入路径
+        if(!file_exists($lnewFilePath)){
+        	mkdir($lnewFilePath);
+        }
+        			
+        $filename = date("Ymd_His_").mt_rand(10, 99).".bmp"; //新图片名称
+        $newFilePath = $lnewFilePath.$filename;//图片存入路径
+        $newFile = fopen($newFilePath,"w"); //打开文件准备写入
+        fwrite($newFile,$header.$changedev_str.$blacklist_str);
+        fclose($newFile); //关闭文件
+         
+  	}
+
+		echo $header.$changedev_str.$blacklist_str;
 		exit;
 	}
 }

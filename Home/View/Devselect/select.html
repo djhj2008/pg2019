@@ -57,6 +57,7 @@
 				<th>统编</th>
 				<th>SN</th>
 				<th>操作</th>
+				<th>扫描</th>
 				<th>生产信息</th>
 			</tr>
 		</thead>
@@ -71,6 +72,10 @@
 					<a href="<%$smarty.const.__APP__%>/acadd/select?psnid=<%$value['id']%>">|设备温度</a>
 					<a href="<%$smarty.const.__APP__%>/devselect/station?psnid=<%$value['id']%>">|基站信息</a>
 					<a href="<%$smarty.const.__APP__%>/devselect/devmove?psnid=<%$value['id']%>">|1301信息</a>
+				</td>
+				<td>
+					<a href="<%$smarty.const.__APP__%>/product/scanfactoryall?psnid=<%$value['id']%>">扫描设备</a>
+					<a href="<%$smarty.const.__APP__%>/product/factorytempeorall?psnid=<%$value['id']%>">|错误设备</a>
 				</td>
 				<td>
 					<a href="<%$smarty.const.__APP__%>/product/productlist?psnid=<%$value['id']%>">查看</a>
