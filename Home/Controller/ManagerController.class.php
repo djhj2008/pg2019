@@ -293,8 +293,9 @@ class ManagerController extends HomeController {
 			//var_dump($userFind);
 					
 			if($_POST['pwd']!=NULL&&$_POST['name']!=NULL){
-				$openid = $_SESSION['openid'];
-				//var_dump($openid);
+				$openid = $_POST['openid'];//$_SESSION['openid'];
+				//dump($openid);
+				//exit;
 				$pwd   =trim($_POST['pwd']);
 			  $name =trim($_POST['name']);
 				$name  =htmlspecialchars($name);
@@ -304,10 +305,19 @@ class ManagerController extends HomeController {
 					'pwd' =>md5($pwd)
 				);
 				$user=M('user')->where($nameArr)->find();
+				//($user);
 				if($user){
 						if($openid){
-							$userset=M('useropenid')->where(array('openid'=>$openid))->delete();
-							$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$user['id']));
+							$useropenid=M('useropenid')->where(array('openid'=>$openid))->find();
+							//dump($useropenid);
+							if($useropenid){
+								$userset=M('useropenid')->where(array('id'=>$useropenid['id']))->save(array('userid'=>$user['id']));
+							}else{
+								$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$user['id']));
+							}
+						}else{
+							echo "<script type='text/javascript'>alert('授权失败.');distory.back();</script>";
+							exit;
 						}
 						session('userid',	$user['id']);
 						session('name',	$user['info']);
@@ -318,6 +328,7 @@ class ManagerController extends HomeController {
 						echo "<script type='text/javascript'>alert('用户不存在.');distory.back();</script>";
 				}
 			}else{
+				$this->assign('openid',$openid);
 				session('openid', 	$openid);	
 			}
 			

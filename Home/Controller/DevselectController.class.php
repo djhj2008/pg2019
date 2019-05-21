@@ -1031,6 +1031,7 @@ class DevselectController extends HomeController {
     	dump($start_time);
     	$end_time = $start_time+86400;
 			$com_count=8;
+			$loweor_count=2;
 
 			$psnfind = M('psn')->where(array('id'=>$psn))->find();
 			if(empty($psnfind)){
@@ -1264,7 +1265,7 @@ class DevselectController extends HomeController {
 						if($temp<=$llevl1){
 							$lcount++;
 						}else{
-							if($lcount< 4){
+							if($lcount< $loweor_count){
 								$lcount=0;
 							}
 						}
@@ -1288,7 +1289,7 @@ class DevselectController extends HomeController {
 					
 				  $sick=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn,'state'=>2))->find();
 					if(empty($sick)){
-						if($level>0&&$lcount>=4){
+						if($level>0&&$lcount>=$loweor_count){
 		        	$sk=array(
 					   	  'psnid'=>$psn,
 					  		'devid'=>$devid,
@@ -1307,7 +1308,7 @@ class DevselectController extends HomeController {
   			  	 	$saveSql=D('sickness')->add($sk);
   			  	}
 					}else{
-  					if($level==0||$lcount< 4){
+  					if($level==0||$lcount< $loweor_count){
   						if($sick['flag']==1){
 	    					$sk=array(
 							  		'temp1'=>$last_temp,

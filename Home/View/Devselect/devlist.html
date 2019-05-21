@@ -53,6 +53,7 @@
 				<th>状态</th>
 				<th>Assert</th>
 				<th>停止标志</th>
+				<th>基础温度</th>
 				<th>操作</th>
 			</tr>
 		</thead>
@@ -67,11 +68,12 @@
 				<td><%$value['dev_state']%></td>
 				<td><%$value['dev_assert']%></td>
 				<td><%$value['re_flag']%></td>
+				<td><%$value['avg_temp']%></td>
 				<td><a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">查看温度</a>
 					<%if $value['re_flag'] eq 0 %>
 					<a href="<%$smarty.const.__APP__%>/devselect/stopdevice?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|回收</a>
 					<%/if%>
-					</td>
+				</td>
 			</tr>
 			<%/foreach%>
 		</tbody>
