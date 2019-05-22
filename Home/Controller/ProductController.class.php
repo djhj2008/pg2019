@@ -554,4 +554,63 @@ class ProductController extends HomeController {
 			//$this->display();
 		}
 
+		public function scandevlow(){
+			$psnid=$_GET['psnid'];
+			$delay = 4*3600;
+			$delay_sub = 2*3600;
+
+    	$now = time();
+			$start_time = strtotime(date('Y-m-d',$now));
+    	//var_dump($start_time);
+    	$yes_time = $start_time;
+    	$end_time = $start_time+86400;
+    	$cur_time = $now - $start_time;
+    	//var_dump($cur_time);
+    	$cur_time = (int)($cur_time/$delay)*$delay;
+    	$first_time = $cur_time-$delay+$start_time;
+    	$last_time = $first_time-$delay-$delay_sub;
+    	//dump(date('Y-m-d H:s:i',$last_time));
+    	//dump(date('Y-m-d  H:s:i',$first_time));
+    	
+    	$devlist=M('device')->where(array('psn'=>$psnid,'flag'=>1))->order('id asc')->select();
+    	foreach($devlist as $dev){
+    		$devidlist[]=$dev['devid'];
+    	}
+    	
+    	$wheredev['devid']=array('in',$devidlist);
+    	//dump(count($devlist));
+			$accSelect=M('access')->where($wheredev)->where('time >='.$last_time.' and time <='.$first_time)->where(array('psn'=>$psnid))->order('time desc')->select();
+			//dump(count($accSelect));
+			foreach($devlist as $dev){
+				$devid = $dev['devid'];
+				$acc_size=0;
+				unset($acc_list);
+				$acc_list = array();
+				foreach($accSelect as $acc){
+					if($acc['devid']==$devid){
+						$acc_list[]=$acc;
+					}
+				}
+				$acc_size=count($acc_list);
+				//dump('devid:'.$devid.' count:'.$acc_size);
+				$lcount=0;
+				foreach($acc_list as $acc){
+					if($acc['temp1']<30&&$acc['temp2']<30){
+						$lcount++;
+						if($lcount > 1){
+							$dev['temp1']=$acc['temp1'];
+							$dev['temp2']=$acc['temp2'];
+							$dev['env_temp']=$acc['env_temp'];
+							$devSelect[]=$dev;
+							break;
+						}
+					}else{
+						$lcount=0;
+					}
+				}
+			}
+
+			$this->assign('devSelect',$devSelect);
+			$this->display();
+		}
 }

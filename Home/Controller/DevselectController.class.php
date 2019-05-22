@@ -250,7 +250,7 @@ class DevselectController extends HomeController {
 	
 	public function devlist(){
 		$psnid = $_GET['psnid'];
-		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
+		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid,'flag'=>1))->order('devid asc')->select();
 		//dump($dev);
 		$this->assign('devSelect',$devSelect);
 		$this->display();
@@ -266,7 +266,8 @@ class DevselectController extends HomeController {
 	}
 	
 	public function stopdevice(){
-			echo "WARNING.";
+			$this->display();
+			exit;
 			/*
 			$psn = $_GET['psnid'];
 	  	$id=$_GET['devid'];
@@ -970,7 +971,7 @@ class DevselectController extends HomeController {
 				$devid=$dev['devid'];
 				$avg = $dev['avg_temp'];
 				if($avg>0){
-					//continue;
+					continue;
 				}
 				
 				//var_dump($devid);
@@ -1011,12 +1012,12 @@ class DevselectController extends HomeController {
 					$accss[$i]['vtemp']=$vt;
 					//var_dump($acc);
 				}
-				dump($devid);
+				//dump($devid);
 				$avg= round($sum/$count,2);
-				dump($avg);
+				//dump($avg);
 				if($avg< 30){
 					dump('avg:'.$avg);
-					$avg=0;
+					//$avg=0;
 				}
 			  $devSave=M('device')->where(array('psn'=>$psnid,'devid'=>$devid))->save(array('avg_temp'=>$avg));
 
@@ -1103,7 +1104,7 @@ class DevselectController extends HomeController {
 							//if(abs($temp1-$temp2)< 0.2&&$temp3 > 30)
 							if($temp1> 38&&$temp2> 38)
 							{
-								dump($temp);
+								dump('devid:'.$devid.':'.$ntemp);
 								$hcount++;
 							}
 						}else{
@@ -1113,7 +1114,7 @@ class DevselectController extends HomeController {
 						}
   				}
   				//var_dump($index);
-  				dump('devid:'.$devid.':'.$ntemp);
+  				//dump('devid:'.$devid.':'.$ntemp);
   				
 					$temp1=$ret[$index]['temp1'];
 					$temp2=$ret[$index]['temp2'];
@@ -1143,8 +1144,8 @@ class DevselectController extends HomeController {
 					}else{
 						$level=0;
 					}
-					dump('devid:'.$devid.':'.$level);
-					dump('devid:'.$devid.':'.$hcount);
+					//dump('devid:'.$devid.':'.$level);
+					//dump('devid:'.$devid.':'.$hcount);
 				  $sick=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn,'state'=>1))->find();
 					if(empty($sick)){
 						if($level>0&&$hcount>=2){
@@ -1242,10 +1243,11 @@ class DevselectController extends HomeController {
 						$a=array($temp1,$temp2);
 						$t=max($a);
 						$vt=(float)$t;
-						if($vt < 20){
+						if($vt < 30){
 							$temp=$vt;
-							dump($devid);
-							dump($temp);
+							dump('low temp dev:'.$devid);
+							//dump($devid);
+							//dump($temp);
 						}else{
 							$temp= round($btemp+($vt-$avg)*$temp_value,2);
 						}
@@ -1325,17 +1327,17 @@ class DevselectController extends HomeController {
 							}
 							
 						  dump($devid);
-						  dump($lcount);
+						  //dump($lcount);
 						  dump($psn);
-						  dump($sk);
+						  //dump($sk);
   					}else{
   						$day1 = strtotime((date('Y-m-d',$cur_time)));
   						$day2 = strtotime((date('Y-m-d',$sick['time'])));
-  						dump($sick['devid']);
-  						dump($lcount);
-  						dump(date('Y-m-d H:s',$cur_time));
-  						dump(date('Y-m-d H:s',$sick['time']));
-  						dump($ntemp);
+  						//dump($sick['devid']);
+  						//dump($lcount);
+  						//dump(date('Y-m-d H:s',$cur_time));
+  						//dump(date('Y-m-d H:s',$sick['time']));
+  						//dump($ntemp);
   						//if($sick['time']!=$cur_time){
     						$days=(int)$sick['days'];
     						if($day1-$day2>=86400){
@@ -1352,9 +1354,9 @@ class DevselectController extends HomeController {
 							  echo "savel2:";
 							  $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
 							  dump($devid);
-							  dump($lcount);
+							  //dump($lcount);
 							  dump($psn);
-							  dump($sk);
+							  //dump($sk);
 						  }
 						//}
 					}
