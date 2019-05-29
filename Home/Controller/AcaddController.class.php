@@ -170,13 +170,13 @@ class AcaddController extends HomeController {
             $devSelect=M('device')->where(array('flag'=>1,'dev_type'=>1,'psn'=>$psn))->find();
             if($devSelect!=NULL){
                 $devid=$devSelect['devid'];
-                //var_dump($devid);
+                //dump($devid);
             }
             
             $devSelect2=M('device')->where(array('flag'=>1,'dev_type'=>2,'psn'=>$psn))->find();
             if($devSelect2!=NULL){
                 $devid2=$devSelect2['devid'];
-                //var_dump($devid2);
+                //($devid2);
             }
 
             $devSelect3=M('device')->where(array('flag'=>1,'dev_type'=>3,'psn'=>$psn))->find();
