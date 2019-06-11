@@ -1068,7 +1068,7 @@ class DevselectController extends HomeController {
     	
     	$accSelect=M('access')->where($wheredev)->where('time >='.$start_time.' and time <='.$end_time)->where(array('psn'=>$psn))->order('time desc')->select();
     	
-    	$sickSelect=D('sickness')->where($wheredev)->where(array('psnid'=>$psn))->find();
+    	$sickSelect=D('sickness')->where($wheredev)->where(array('psnid'=>$psn))->select();
     	
     	dump($sickSelect);
 
@@ -1103,6 +1103,7 @@ class DevselectController extends HomeController {
   				for($i=0;$i< $acc_size;$i++){
   					$cur_time=$acc_list[$i]['time'];
   					if($pre_time==$cur_time){
+  						//dump('same:'.$devid.' :'.$cur_time);
   						continue;
   					}
 
@@ -1128,7 +1129,9 @@ class DevselectController extends HomeController {
 							//if(abs($temp1-$temp2)< 0.2&&$temp3 > 30)
 							if($temp1> 38&&$temp2> 38)
 							{
-								dump('devid:'.$devid.':'.$ntemp);
+								//dump('devid:'.$devid.':'.$ntemp);
+								//dump($cur_time);
+								//dump($pre_time);
 								$hcount++;
 							}
 						}else{
@@ -1164,10 +1167,13 @@ class DevselectController extends HomeController {
 						if($s['devid']==$devid){
 							$find_sick=true;
 							$sick=$s;
+							dump('find sick.');
+							dump($sick);
+							break;
 						}
 					}
 
-					if(empty($sick)){
+					if($sick==NULL){
 						if($level>0&&$hcount>=2){
 		        	$sk=array(
 					   	  'psnid'=>$psn,
@@ -1211,13 +1217,13 @@ class DevselectController extends HomeController {
 								  dump($sk);
 								}
 	  					}else{
-	  							$day1 = strtotime((date('Y-m-d',$cur_time)));
+	  							$day1 = strtotime((date('Y-m-d',$index_time)));
 		  						$day2 = strtotime((date('Y-m-d',$sick['time'])));
 		  						dump($sick['devid']);
-		  						dump(date('Y-m-d H:s',$cur_time));
+		  						dump(date('Y-m-d H:s',$index_time));
 		  						dump(date('Y-m-d H:s',$sick['time']));
 		  						dump($ntemp);
-		  						//if($sick['time']!=$cur_time){
+		  						if($sick['time']!=$index_time){
 		    						$days=(int)$sick['days'];
 		    						if($day1-$day2>=86400){
 		      						$days=$days+1;
@@ -1233,7 +1239,7 @@ class DevselectController extends HomeController {
 									  echo "save2:";
 								  	$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
 									  dump($sk);
-								  //}
+								  }
 						  }
 					}
 				}
@@ -1269,6 +1275,7 @@ class DevselectController extends HomeController {
   				for($i=0;$i< $acc_size;$i++){
   					$cur_time=$acc_list[$i]['time'];
   					if($pre_time==$cur_time){
+  						//dump('same:'.$devid.' :'.$cur_time);
   						continue;
   					}
   					$date = date('Y-m-d H:i:s',$cur_time);
@@ -1280,9 +1287,6 @@ class DevselectController extends HomeController {
 						$vt=(float)$t;
 						if($vt < 30){
 							$temp=$vt;
-							dump('low temp dev:'.$devid);
-							//dump($devid);
-							//dump($temp);
 						}else{
 							$temp= round($btemp+($vt-$avg)*$temp_value,2);
 						}
@@ -1300,6 +1304,9 @@ class DevselectController extends HomeController {
 							}
 						}
 						if($temp<=$llevl1){
+							//dump('low temp dev:'.$devid.':'.$ntemp);
+							//dump($cur_time);
+							//dump($pre_time);
 							$lcount++;
 						}else{
 							if($lcount< $loweor_count){
@@ -1331,10 +1338,13 @@ class DevselectController extends HomeController {
 						if($s['devid']==$devid){
 							$find_sick=true;
 							$sick=$s;
+							dump('find sick.');
+							dump($sick);
+							break;
 						}
-					}  
-				  
-					if(empty($sick)){
+					}
+
+					if($sick==NULL){
 						if($level>0&&$lcount>=$loweor_count){
 		        	$sk=array(
 					   	  'psnid'=>$psn,
@@ -1377,14 +1387,14 @@ class DevselectController extends HomeController {
 							  //dump($sk);
 							}
   					}else{
-  						$day1 = strtotime((date('Y-m-d',$cur_time)));
+  						$day1 = strtotime((date('Y-m-d',$index_time)));
   						$day2 = strtotime((date('Y-m-d',$sick['time'])));
   						//dump($sick['devid']);
   						//dump($lcount);
   						//dump(date('Y-m-d H:s',$cur_time));
   						//dump(date('Y-m-d H:s',$sick['time']));
   						//dump($ntemp);
-  						//if($sick['time']!=$cur_time){
+  						if($sick['time']!=$index_time){
     						$days=(int)$sick['days'];
     						if($day1-$day2>=86400){
       						$days=$days+1;
@@ -1404,7 +1414,7 @@ class DevselectController extends HomeController {
 							  dump($psn);
 							  //dump($sk);
 						  }
-						//}
+						}
 					}
 				}
 			}
