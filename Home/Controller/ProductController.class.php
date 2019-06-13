@@ -622,4 +622,9 @@ class ProductController extends HomeController {
 			$this->assign('devSelect',$devSelect);
 			$this->display();
 		}
+		
+		public function test(){
+			
+			send163msg('13801394601',NULL);
+		}
 }

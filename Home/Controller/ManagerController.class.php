@@ -111,7 +111,7 @@ class ManagerController extends HomeController {
 			
 			if(empty($userFind)){
 				if($_POST['pwd']!=NULL&&$_POST['name']!=NULL){
-					$openid = $_SESSION['openid'];
+					$openid = $_POST['openid'];
 					//var_dump($openid);
 					$pwd   =trim($_POST['pwd']);
 				  $name =trim($_POST['name']);
@@ -152,8 +152,8 @@ class ManagerController extends HomeController {
 						$this ->redirect('',array(),1,json_encode(array('UserInfo'=>$jarr)));
 						exit;
 					}
-					session('openid',$openid);
 				}
+				$this->assign('openid',$openid);
 				$this->display();
 			}
 			else{
@@ -305,11 +305,11 @@ class ManagerController extends HomeController {
 					'pwd' =>md5($pwd)
 				);
 				$user=M('user')->where($nameArr)->find();
-				//($user);
+				//dump($user);
 				if($user){
 						if($openid){
 							$useropenid=M('useropenid')->where(array('openid'=>$openid))->find();
-							//dump($useropenid);
+							dump($useropenid);
 							if($useropenid){
 								$userset=M('useropenid')->where(array('id'=>$useropenid['id']))->save(array('userid'=>$user['id']));
 							}else{
@@ -328,11 +328,10 @@ class ManagerController extends HomeController {
 						echo "<script type='text/javascript'>alert('用户不存在.');distory.back();</script>";
 				}
 			}else{
-				$this->assign('openid',$openid);
 				session('openid', 	$openid);	
 			}
 			
-			
+			$this->assign('openid',$openid);
 			$this->display();
     
 		}
