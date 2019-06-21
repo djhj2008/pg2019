@@ -55,8 +55,8 @@ function send_sms_code($phone,$code){
 
 
 
- function voiceVerify($verifyCode,$playTimes,$to,$displayNum,$respUrl,$lang,$userData,$welcomePrompt,$playVerifyCode)
-  {
+function voiceVerify($verifyCode,$playTimes,$to,$displayNum,$respUrl,$lang,$userData,$welcomePrompt,$playVerifyCode)
+{
 
 	  	//请求地址，格式如下，不需要写https://
 	    $serverIP='sandboxapp.cloopen.com';
@@ -122,8 +122,6 @@ function more(){
         echo $pattern[$i]."&nbsp"."&nbsp"."&nbsp"."&nbsp"."&nbsp"."&nbsp".$more;
         echo "<br/>";
     }
-    
-    
 }
 
 
@@ -169,7 +167,7 @@ function sendNotifyAll($message){
  * @param array $regid 特定设备的设备标识 
  * @param string $message 需要推送的消息 
  */  
-function sendNotifySpecial($regid,$message){  
+function sendNotifySpecial($regid,$message){ 
    require_once "JPush/autoload.php";  
    $app_key = 'bf74ed9e18f0f2771d1e959e';                //填入你的app_key  
    $master_secret = '230e49626a5987a514b11c93';    //填入你的master_secret  
@@ -212,7 +210,19 @@ function reportNotify($msgIds){
    return json_array($response);  
 } 
 
+function send163msg($phone,$msg){
+	//网易云信分配的账号，请替换你在管理后台应用下申请的Appkey
+	$AppKey = '6973948f02cb204c13ad868f636660b9';
+	//网易云信分配的账号，请替换你在管理后台应用下申请的appSecret
+	$AppSecret = '2b6bc24f75a6';
+	$p = new Org\Xb\ServerAPI($AppKey,$AppSecret,'curl');     //fsockopen伪造请求
 
+	//发送短信验证码
+	//print_r( $p->sendSmsCode('14809235',$phone,'','6') );
+
+	//发送模板短信
+	print_r( $p->sendSMSTemplate('14799317',$phone,$msg));
+}
 
 //下载
 // function query(){

@@ -1192,7 +1192,8 @@ class DevselectController extends HomeController {
 						  dump($devid);
 						  dump($psn);
 					  	dump($sk);
-  			  	 	$saveSql=D('sickness')->add($sk);
+  			  	 	$addSql=D('sickness')->add($sk);
+  			  	 	$adddev[]=$devid;
   			  	}
 					}else{						
 	  					if($level==0||$hcount< 2){
@@ -1207,9 +1208,11 @@ class DevselectController extends HomeController {
 									  		);
 									  echo "save:";
 								  	$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
+								  	$deldev[]=$devid;
 								  }else{
 								  	echo "del:";
-								  	$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->delete();
+								  	$delSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->delete();
+								  	$deldev[]=$devid;
 								  }
 								  	//$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->delete();
 								  dump($devid);
@@ -1238,6 +1241,7 @@ class DevselectController extends HomeController {
 									  		);
 									  echo "save2:";
 								  	$saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
+								  	$adddev[]=$devid;
 									  dump($sk);
 								  }
 						  }
@@ -1418,7 +1422,62 @@ class DevselectController extends HomeController {
 					}
 				}
 			}
-			exit;
+			
+			$userinfo=M('usermsginfo')->where(array('psnid'=>$psn))->select();
+			$sub=',';
+     	$other_head1='设备(';
+     	$foot=')体温升高,';
+     	$other_foot1=')体温已恢复正常,';
+     	$other_head1=iconv("GBK", "UTF-8", $other_head1); 
+     	$foot=iconv("GBK", "UTF-8", $foot); 
+     	$other_foot1=iconv("GBK", "UTF-8", $other_foot1); 
+		
+			if($adddev){
+				foreach($adddev as $dev){
+     				if($devname!=NULL){
+     					$devname=$devname.$sub;
+     				}else{
+     					$devname='ID:';
+     				}
+     				$devname=$devname.$dev;
+				}
+			}
+			if($deldev){
+				foreach($deldev as $dev){
+     				if($devname2!=NULL){
+     					$devname2=$devname2.$sub;
+     				}else{
+     					$devname2='ID:';
+     				}
+     				$devname2=$devname2.$dev;
+				}
+			}
+			
+   		foreach($userinfo as $user){
+   			//$phone[]=$user['phone'];
+   			$name=$user['info'];
+   		}
+   		
+     	if($devname){
+     		$other=$other_head1.$devname.$foot;
+     	} 	
+     	
+     	if($devname2){
+     		$other=$other.$other_head1.$devname2.$other_foot1;
+     	}
+     					
+     	$msg[]=$name;
+
+     	if($other){
+     		$msg[]=$other;
+     	}else{
+     		$msg[]='';
+     	}
+			$phone[]='15010150766';
+			dump($msg);
+			if($phone&&$other){
+				send163msg($phone,$msg);
+			}
 	}
 	
 	public function setting(){

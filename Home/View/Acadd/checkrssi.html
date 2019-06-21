@@ -126,7 +126,6 @@
     <!-- Responsive examples -->
     <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
     <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/responsive.bootstrap4.min.js"></script>
-
     <!-- App js -->
     <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.core.js"></script>
     <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.app.js"></script>
@@ -134,11 +133,53 @@
             $(document).ready(function() {
                 //Buttons examples
                 var table = $('#datatable-buttons').DataTable({
-                    lengthChange: true,
-                    iDisplayLength: 50,
-                    info: false,
-                    bSort: false,
-                    buttons: ['excel','pdf'],
+              lengthChange: true,
+              iDisplayLength: 25,
+              info: true,
+              buttons: ['excel'],
+              bSort: true,
+							columnDefs: [ 
+									{
+								      "targets": 2,
+								      "searchable": false
+									},
+									{
+								      "targets": 3,
+								      "searchable": false
+									},
+									{
+								      "targets": 4,
+								      "searchable": false
+									},
+									{
+								      "targets": 5,
+								      "searchable": false
+									},
+									{
+								      "targets": 6,
+								      "searchable": false
+									},
+									{
+								      "targets": 7,
+								      "searchable": false
+									},
+									{
+								      "targets": 8,
+								      "searchable": false
+									},
+									{
+								      "targets": 9,
+								      "searchable": false
+									},
+									{
+								      "targets": 10,
+								      "searchable": false
+									},
+									{
+								      "targets": 11,
+								      "searchable": false
+									},
+							],
                     language: {
                         "sProcessing": "处理中...",
                         "sLengthMenu": "显示 _MENU_ 项结果",

@@ -547,48 +547,11 @@ class DatapushTestController extends Controller {
     $strarr    =unpack("H*", $post);//unpack() 函数从二进制字符串对数据进行解包。
     $str       =implode("", $strarr);
 
+		$str = "323031393036313530383031303031323038363735363330300000e002025001c600000000000000220000e01448521c0102199194008011560900ffffffffffffffffff0000e0265b621401015803365802ffffffffffffffffffffffffff0000e05c63921481017203370903ffffffffffffffffffffffffff0000e0696142740202615336901236643330ffffffffffffffffff0000e0825e821400016603369902ffffffffffffffffffffffffff0000e0876c621400016503374403ffffffffffffffffffffffffff0000e08e4e121400017323374503ffffffffffffffffffffffffff0000e09048721401015373350803ffffffffffffffffffffffffff0000e0a567721401017673373603ffffffffffffffffffffffffff0000e0a64d221481015673350003ffffffffffffffffffffffffff0000e0a74b421400015173350403ffffffffffffffffffffffffff0000e0a84b721401016543363003ffffffffffffffffffffffffff0000e0a948121402016143350903ffffffffffffffffffffffffff0000e0b151921401015593350003ffffffffffffffffffffffffff0000e0b253221481014523355702ffffffffffffffffffffffffff0000e0cc54121402014543340403ffffffffffffffffffffffffff0000e0d64f421400016533360703ffffffffffffffffffffffffff0000e0db5d121401015853359702ffffffffffffffffffffffffff0000e0df53421400017243375403ffffffffffffffffffffffffff0000e0e654821402017313377503ffffffffffffffffffffffffff0000e0e751221402015433350903ffffffffffffffffffffffffff0000e0e83c521401015003347702ffffffffffffffffffffffffff0000e0ea49221402015863350203ffffffffffffffffffffffffff0000e0ec48921400016533362103ffffffffffffffffffffffffff0000e10b48421400016353360503ffffffffffffffffffffffffff0000e10d4f121402013523348702ffffffffffffffffffffffffff0000e11058121401014533358802ffffffffffffffffffffffffff0000e11949121401016153363003ffffffffffffffffffffffffff0000e11e49921400016523360903ffffffffffffffffffffffffff0000e11f5b221400015713361503ffffffffffffffffffffffffff0000e12145921401016213367602ffffffffffffffffffffffffff0000e1487212740002542335850236601330ffffffffffffffffff0000e14a45721400013803338602ffffffffffffffffffffffffff0000e14e53121400015773359502ffffffffffffffffffffffffff000222f4";
+    {
+     
+    }
 
-
-		//$str = "323031393035313331353034303032323038363735363330300000e0020250000000000000000000090000c00625020482034352244722255032256202266302ffffffff0000c0092502048102510225502226612226ffffffffffffffffff0000e0db3322140102422224424224455224ffffffffffffffffff0000e0e93712140102411224403224432224ffffffffffffffffff0000e10b3962140102423224414224453224ffffffffffffffffff0000e10d3d32140302410224393224421224ffffffffffffffffff0000e1103722140102411224435224456224ffffffffffffffffff0000e1133922140102402224413224444224ffffffffffffffffff0000e14a4792140202442224445224435224ffffffffffffffffff00007239";
-
-		$changedev_str="99";
-		for($i=0;$i<99;$i++){
-			$changedev_str=$changedev_str."000040001"."000050108";
-		}
-		$blacklist_str="99";
-		for($i=0;$i<99;$i++){
-			$blacklist_str=$blacklist_str."000060005";
-		}
-
-		$header='OK1';
-		//var_dump($rate);
-  	{
-        $imgDir = "lora_req36Test/";
-        if(!file_exists("lora_req36Test")){
-               mkdir("lora_req36Test");
-        }
-        if(!file_exists($imgDir)){
-           mkdir($imgDir);
-        }
-        //要生成的图片名字
-        $ctime = date("Ymd_His_").mt_rand(10, 99);
-        $lnewFilePath = $imgDir.$ctime."/";//图片存入路径
-        if(!file_exists($lnewFilePath)){
-        	mkdir($lnewFilePath);
-        }
-        			
-        $filename = date("Ymd_His_").mt_rand(10, 99).".bmp"; //新图片名称
-        $newFilePath = $lnewFilePath.$filename;//图片存入路径
-        $newFile = fopen($newFilePath,"w"); //打开文件准备写入
-        fwrite($newFile,$header.$changedev_str.$blacklist_str);
-        fclose($newFile); //关闭文件
-         
-  	}
-    			
-		echo $header.$changedev_str.$blacklist_str;
-
-		exit;
-		
 		if(strlen($str) < $CDATA_START){
     	echo "OKF";
     	exit;
@@ -607,12 +570,23 @@ class DatapushTestController extends Controller {
     
     //$psn = $bdevinfo['psn'];
     //var_dump($bsnint);
+    if($bsnint!=$sid){
+    	echo "OKE";
+    	{
 
+           
+    	}    	
+    	exit;
+    }
     $psninfo = D('psn')->where(array('tsn'=>$btsn,'sn'=>$psn))->find();
     if($psninfo){
     	$psnid=$psninfo['id'];
     }else{
     	echo "OKE";
+    	{
+
+           
+    	}
     	exit;
     }
 
@@ -913,12 +887,30 @@ class DatapushTestController extends Controller {
 		    	
 		    	$acc_value=D('access')->where(array('time'=>$up_time,'psn'=>$psnid,'devid'=>$snint))->find();
 		    	if(empty($acc_value)){
+			  		$access=D('access')->add(array(
+			  				'psn'=>$psnid,
+					  		'devid'=>$snint,
+					  		'temp1'=>$temp1,
+					  		'temp2'=>$temp2,
+					  		'env_temp'=>$temp3,
+					  		'sign'=>$sign,
+					  		'cindex'=>$cindex,
+					  		'lcount'=>$lcount,
+					  		'delay'=>$delay,
+					  		'time' =>$up_time,
+					  		'sid' =>$sid,
+					  	));
+
+				  	 	$saveSql=M('device')->where(array('devid'=>$snint,'psn'=>$psnid))->save(array(
+				  	 																																	'battery'=>$battery,
+																																				  	 	'dev_state'=>$state,
+																																				  	 	'version'=>$cvs)
+																															  	 						);
+					
 					}
 					$acc1301=D('access1301')->where(array('time'=>$up_time,'psn'=>$dev_psn,'devid'=>$snint))->find();
-					var_dump(date('Y-m-d H:i:s',$up_time));
-					//var_dump($acc1301);
 					if(empty($acc1301)){
-			  		$access=D('access1301')->add(array(
+			  		$access=array(
 			  				'psn'=>$dev_psn,
 			  				'psnid'=>$psnid,
 					  		'devid'=>$snint,
@@ -931,10 +923,11 @@ class DatapushTestController extends Controller {
 					  		'delay'=>$delay,
 					  		'sid'=>$sid,
 					  		'time' =>$up_time,
-					  	));
+					  	);
+					  	dump('add1301');
+					  	dump($access);
 					}else{
 						if($j==($vaild-1)&&count($blacklist)<64){
-							//var_dump($acc1301);
 							$blpsn_str=str_pad($dev_psn,5,'0',STR_PAD_LEFT).str_pad($snint,4,'0',STR_PAD_LEFT);
 							$inlist=false;
 							foreach($blacklist as $black){
@@ -950,143 +943,8 @@ class DatapushTestController extends Controller {
 					}
 					
 				}else{
-						if($j==0){
-					    $temp1str1 = substr($tempstr,3,1);
-				  		$temp1str2 = substr($tempstr,0,1);
-				    	$temp1str3 = substr($tempstr,1,1);
-				    	$temp1int =base_convert($temp1str1,16,10);
+						
 
-				    	$temp2str1 = substr($tempstr,4,1);
-				  		$temp2str2 = substr($tempstr,5,1);
-				    	$temp2str3 = substr($tempstr,2,1);
-				    	
-				    	$temp3str1 = substr($tempstr,9,1);
-				  		$temp3str2 = substr($tempstr,6,1);
-				    	$temp3str3 = substr($tempstr,7,1);
-			    	}else if($j==1){
-			    		$temp1str1 = substr($tempstr,10,1);
-				  		$temp1str2 = substr($tempstr,11,1);
-				    	$temp1str3 = substr($tempstr,8,1);
-				    	$temp1int =base_convert($temp1str1,16,10);
-				    	
-				    	$temp2str1 = substr($tempstr,15,1);
-				  		$temp2str2 = substr($tempstr,12,1);
-				    	$temp2str3 = substr($tempstr,13,1);	
-				    	
-				    	$temp3str1 = substr($tempstr,16,1);
-				  		$temp3str2 = substr($tempstr,17,1);
-				    	$temp3str3 = substr($tempstr,14,1);	
-			    	}else if($j==2){
-					    $temp1str1 = substr($tempstr,21,1);
-				  		$temp1str2 = substr($tempstr,18,1);
-				    	$temp1str3 = substr($tempstr,19,1);
-				    	$temp1int =base_convert($temp1str1,16,10);
-				    	
-				    	$temp2str1 = substr($tempstr,22,1);
-				  		$temp2str2 = substr($tempstr,23,1);
-				    	$temp2str3 = substr($tempstr,20,1);
-				    	
-				    	$temp3str1 = substr($tempstr,27,1);
-				  		$temp3str2 = substr($tempstr,24,1);
-				    	$temp3str3 = substr($tempstr,25,1);					    	
-			    	}else if($j==3){
-			    		$temp1str1 = substr($tempstr,28,1);
-				  		$temp1str2 = substr($tempstr,29,1);
-				    	$temp1str3 = substr($tempstr,26,1);
-				    	$temp1int =base_convert($temp1str1,16,10);
-
-				    	$temp2str1 = substr($tempstr,33,1);
-				  		$temp2str2 = substr($tempstr,30,1);
-				    	$temp2str3 = substr($tempstr,31,1);	
-
-				    	$temp3str1 = substr($tempstr,34,1);
-				  		$temp3str2 = substr($tempstr,35,1);
-				    	$temp3str3 = substr($tempstr,32,1);						    	
-			    	}
-
-		    if(($temp1int&0x08)==0x08){
-	    		$temp1str1=$temp1int&0x07;
-	    		if($temp1str1==0){
-	    			$temp1 = '-'.$temp1str2.".".$temp1str3;
-	    		}else{
-	    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
-	    		}
-	    	}else{
-		    		if($temp1str1==0){
-		    			$temp1 = $temp1str2.".".$temp1str3;
-		    		}else{
-		    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
-		    		}
-	    	}
-
-			  //var_dump('temp1:'.$temp1);
-				if($temp2str1 == 0){
-			    $temp2 = $temp2str2.".".$temp2str3;
-		 	 	}else{
-		 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
-		 	 	}
-		    //var_dump('temp2:'.$temp2);
-		    if($temp3str1 == 0){
-			    $temp3 = $temp3str2.".".$temp3str3;
-		 	 	}else{
-		 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
-		 	 	}
-		    //var_dump('temp3:'.$temp3);
-		    
-		    	
-					$tacc_value=D('taccess')->where(array('time'=>$up_time,'psn'=>$psnid,'devid'=>$snint))->find();
-
-					if(empty($tacc_value)){
-					   $access=D('taccess')->add(array(
-					   	  'psn'=>$psnid,
-					  		'devid'=>$snint,
-					  		'temp1'=>$temp1,
-					  		'temp2'=>$temp2,
-				  			'env_temp'=>$temp3,
-				  			'sign'=>$sign,
-					  		'cindex'=>$cindex,
-					  		'lcount'=>$lcount,
-					  		'delay'=>$delay,
-					  		'time' =>$up_time,
-					  	));
-
-				  	 	$saveSql=M('device')->where(array('devid'=>$snint,'psn'=>$psnid))->save(array(
-				  	 																																	'battery'=>$battery,
-																																				  	 	'dev_state'=>$state,
-																																				  	 	'version'=>$cvs)
-																																				  	 	);
-					}
-					$acc1301=D('access1301')->where(array('time'=>$up_time,'psn'=>$dev_psn,'devid'=>$snint))->find();
-					if(empty($acc1301)){
-			  		$access=D('access1301')->add(array(
-			  				'psn'=>$dev_psn,
-			  				'psnid'=>$psnid,
-					  		'devid'=>$snint,
-					  		'temp1'=>$temp1,
-					  		'temp2'=>$temp2,
-					  		'env_temp'=>$temp3,
-					  		'sign'=>$sign,
-					  		'cindex'=>$cindex,
-					  		'lcount'=>$lcount,
-					  		'delay'=>$delay,
-					  		'sid'=>$sid,
-					  		'time' =>$up_time,
-					  	));
-					}else{
-						if($j==0&&count($blacklist)<64){
-							$blpsn_str=str_pad($dev_psn,5,'0',STR_PAD_LEFT).str_pad($snint,4,'0',STR_PAD_LEFT);
-							$inlist=false;
-							foreach($blacklist as $black){
-								if($black==$blpsn_str){
-									$inlist=true;
-									break;
-								}
-							}
-							if($inlist==false){
-								$blacklist[]=$blpsn_str;
-							}
-						}
-					}
 					
 				}
 			}
@@ -1098,9 +956,9 @@ class DatapushTestController extends Controller {
     
     $len=strlen($str);
     $crc=substr($str,$len-$CRC_LEN*2);//收到发来的crc
-    var_dump($crc);
+    //var_dump($crc);
     $crc=hexdec($crc);
-    var_dump($crc);
+    //var_dump($crc);
 
     $sum=0;
     $len = strlen($str);
@@ -1110,9 +968,8 @@ class DatapushTestController extends Controller {
 			//var_dump($value);
 			$sum+=$value;
 		}
-		var_dump($sum);
-		$sum=$sum&0xffff;
-		var_dump($sum);
+		$sum=$sum&0xffffffff;
+
 		$changedev_count=count($change_buf);
 		$changedev_count=str_pad($changedev_count,2,'0',STR_PAD_LEFT);
 		$changedev_str=$changedev_count.'';
@@ -1138,6 +995,20 @@ class DatapushTestController extends Controller {
 		foreach($blacklist as $name){
 			$blacklist_str=$blacklist_str.$name;
 		}
+		
+		//$changedev_str="00";
+		//$changedev_str=$changedev_str."000040001"."000050108"."000040002"."000050109";
+		
+		//$blacklist_str="05";
+		//$blacklist_str=$blacklist_str."000060005"."000060006"."000060007"."000060008"."000060009";
+		
+		//var_dump($rate);
+		if($crc==$sum){
+			$header="OK1";
+		}else{
+			$header="OK2";
+		}
+		echo $header.$changedev_str.$blacklist_str;
 		exit;
 	}
 }
