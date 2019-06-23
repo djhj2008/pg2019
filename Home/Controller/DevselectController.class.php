@@ -1226,7 +1226,7 @@ class DevselectController extends HomeController {
 		  						dump(date('Y-m-d H:s',$index_time));
 		  						dump(date('Y-m-d H:s',$sick['time']));
 		  						dump($ntemp);
-		  						if($sick['time']!=$index_time){
+		  						if($day1!=$day2){
 		    						$days=(int)$sick['days'];
 		    						if($day1-$day2>=86400){
 		      						$days=$days+1;
@@ -1393,12 +1393,12 @@ class DevselectController extends HomeController {
   					}else{
   						$day1 = strtotime((date('Y-m-d',$index_time)));
   						$day2 = strtotime((date('Y-m-d',$sick['time'])));
-  						//dump($sick['devid']);
+  						dump($sick['devid']);
   						//dump($lcount);
-  						//dump(date('Y-m-d H:s',$cur_time));
-  						//dump(date('Y-m-d H:s',$sick['time']));
-  						//dump($ntemp);
-  						if($sick['time']!=$index_time){
+  						dump(date('Y-m-d H:s',$index_time));
+  						dump(date('Y-m-d H:s',$sick['time']));
+  						dump($ntemp);
+  						if($day1!=$day2){
     						$days=(int)$sick['days'];
     						if($day1-$day2>=86400){
       						$days=$days+1;
@@ -1454,7 +1454,7 @@ class DevselectController extends HomeController {
 			}
 			
    		foreach($userinfo as $user){
-   			//$phone[]=$user['phone'];
+   			$phone[]=$user['phone'];
    			$name=$user['info'];
    		}
    		
@@ -1473,7 +1473,7 @@ class DevselectController extends HomeController {
      	}else{
      		$msg[]='';
      	}
-			$phone[]='15010150766';
+			//$phone[]='15010150766';
 			dump($msg);
 			if($phone&&$other){
 				send163msg($phone,$msg);
