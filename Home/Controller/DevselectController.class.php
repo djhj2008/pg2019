@@ -1474,6 +1474,7 @@ class DevselectController extends HomeController {
      		$msg[]='';
      	}
 			//$phone[]='15010150766';
+			dump($phone);
 			dump($msg);
 			if($phone&&$other){
 				send163msg($phone,$msg);
