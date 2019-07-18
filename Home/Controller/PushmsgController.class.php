@@ -32,11 +32,10 @@ class PushmsgController extends Controller {
      	$msg[]=$name;
      	$msg[]=$devname;
      	$msg[]=$other;
-     	$phone[]='13311152676';
+     	$phone[]='15010150766';
      	//dump(iconv_get_encoding());
      	dump($msg);
      	dump($phone);
-     	//exit;
      	send163msg($phone,$msg);
      	exit;
     }

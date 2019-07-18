@@ -33,11 +33,11 @@
     // 基于准备好的dom，初始化echarts实例
     var myChart = echarts.init(document.getElementById('main'),'macarons');
     $(document).ready(function() {
-        var C1=window.location.href.split("?")[1];
-        var time=C1.split("=")[2];
-       // console.log(time);
-        var uptime=  time.substring(5,10);
-        document.getElementById("title").innerHTML=uptime;
+      //var C1=window.location.href.split("?")[1];
+      //var time=C1.split("=")[2];
+      //console.log(time);
+      //var uptime=  time.substring(5,10);
+      //document.getElementById("title").innerHTML=uptime;
 
        var date = JSON.parse('<%$dateArr%>');
        var temp1 = JSON.parse('<%$temp1Arr%>');
