@@ -23,7 +23,7 @@ class AddController extends HomeController {
 					}
 			    	
 		    	$uid = $userFind['userid'];
-		    	$user=M('user')->where(array('id'=>$uid))->find();
+		    	$user=M('user')->where(array('autoid'=>$uid))->find();
 					$name = $user['info'];
 					$this->assign('name',$name);
 					session('userid',	$uid);
@@ -33,7 +33,13 @@ class AddController extends HomeController {
 					$name = $_SESSION['name'];
 					$this->assign('name',$name);
 				}
-				$user=M('user')->where(array('id'=>$uid))->find();
+				if($uid==2){
+					$user_autoid=$uid;
+					$uid=5;
+				}
+				
+				$user=M('user')->where(array('autoid'=>$uid))->find();
+				
 				$psnSelect=M('psn')->where(array('userid'=>$uid))->select();
 				$psnsize=count($psnSelect);
 				if($psnsize>1){
@@ -67,7 +73,11 @@ class AddController extends HomeController {
                 $this->assign('ret',"2001");
             }
 	    	}else{
-	    		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('flag desc,devid asc')->select();
+	    		if($user_autoid==2){
+	    			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid,'flag'=>1))->limit(20,50)->order('flag desc,devid asc')->select();
+	    		}else{
+	    			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('flag desc,devid asc')->select();
+	    		}
 	    	}
 
 				$this->assign('devSelect',$devSelect);

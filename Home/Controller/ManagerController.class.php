@@ -108,7 +108,6 @@ class ManagerController extends HomeController {
 				$userFind=M('useropenid')->where(array('openid'=>$openid))->find();
 			}
 			//dump($userFind);
-			
 			if(empty($userFind)){
 				if($_POST['pwd']!=NULL&&$_POST['name']!=NULL){
 					$openid = $_POST['openid'];
@@ -124,7 +123,7 @@ class ManagerController extends HomeController {
 					$user=M('user')->where($nameArr)->find();
 					if($user){
 							if($openid){
-								$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$user['id']));
+								$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$user['autoid']));
 							}
 							if($aip=='ios'){
 								$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000101,'data'=>$user));
@@ -132,6 +131,7 @@ class ManagerController extends HomeController {
 								exit;
 							}
 							session('userid',	$user['id']);
+							session('user_autoid',	$user['autoid']);
 							session('name',	$user['info']);
             	$this ->redirect('/Devselect/sickness',array(),0,'');
             	exit;
@@ -142,7 +142,7 @@ class ManagerController extends HomeController {
 								$this ->redirect('',array(),1,json_encode(array('UserInfo'=>$jarr)));
 								exit;
 							}
-							echo "<script type='text/javascript'>alert('用户不存在.');distory.back();</script>";
+							echo "<script type='text/javascript'>alert('用户名或密码错误.');distory.back();</script>";
 							$this->display();
 	          	exit;
 					}
@@ -157,9 +157,10 @@ class ManagerController extends HomeController {
 				$this->display();
 			}
 			else{
-				$user=M('user')->where(array('id'=>$userFind['userid']))->find();
+				$user=M('user')->where(array('autoid'=>$userFind['userid']))->find();
 				session('userid',	$userFind['userid']);
 				session('name',	$user['info']);
+				session('user_autoid',	$user['autoid']);
 				if($aip=='ios'){
 					$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000100,'data'=>$user));
 					$this ->redirect('',array(),1,json_encode(array('UserInfo'=>$jarr)));
@@ -207,7 +208,7 @@ class ManagerController extends HomeController {
             	exit;
               	
 					}else{
-							echo "<script type='text/javascript'>alert('用户不存在.');distory.back();</script>";
+							echo "<script type='text/javascript'>alert('用户名或密码错误.');distory.back();</script>";
 							$this->display();
 	          	exit;
 					}
@@ -261,7 +262,7 @@ class ManagerController extends HomeController {
             	exit;
               	
 					}else{
-							echo "<script type='text/javascript'>alert('用户不存在.');distory.back();</script>";
+							echo "<script type='text/javascript'>alert('用户名或密码错误.');distory.back();</script>";
 							$this->display();
 	          	exit;
 					}
@@ -309,23 +310,24 @@ class ManagerController extends HomeController {
 				if($user){
 						if($openid){
 							$useropenid=M('useropenid')->where(array('openid'=>$openid))->find();
-							dump($useropenid);
+							//dump($useropenid);
 							if($useropenid){
-								$userset=M('useropenid')->where(array('id'=>$useropenid['id']))->save(array('userid'=>$user['id']));
+								$userset=M('useropenid')->where(array('id'=>$useropenid['id']))->save(array('userid'=>$user['autoid']));
 							}else{
-								$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$user['id']));
+								$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$user['autoid']));
 							}
 						}else{
 							echo "<script type='text/javascript'>alert('授权失败.');distory.back();</script>";
 							exit;
 						}
-						session('userid',	$user['id']);
+						session('userid',	$user['autoid']);
 						session('name',	$user['info']);
+						session('user_autoid',	$user['autoid']);
           	$this ->redirect('/Devselect/sickness',array(),0,'');
           	exit;
             	
 				}else{
-						echo "<script type='text/javascript'>alert('用户不存在.');distory.back();</script>";
+						echo "<script type='text/javascript'>alert('用户名或密码错误.');distory.back();</script>";
 				}
 			}else{
 				session('openid', 	$openid);	

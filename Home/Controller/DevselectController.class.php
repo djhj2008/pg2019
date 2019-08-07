@@ -23,6 +23,7 @@ class DevselectController extends HomeController {
 	public function sickness(){
 		$tab = $_GET['tab'];
   	$uid = $_SESSION['userid'];
+  	$user_autoid = $_SESSION['user_autoid'];
   	$aip = $_POST['aip'];
   	//dump($uid);
   	$name=$_SESSION['name'];
@@ -37,6 +38,11 @@ class DevselectController extends HomeController {
   		$this->assign('tab',$tab);
   	}
 
+		//dump($uid);
+		if($uid==2){
+			$uid=5;
+		}
+		
   	$psnSelect=M('psn')->where(array('userid'=>$uid))->find();
   	if(empty($psnSelect)){
   		dump($psnSelect);
@@ -45,7 +51,7 @@ class DevselectController extends HomeController {
   		//dump($psnSelect);
   		$psnid=$psnSelect['id'];
   	}
-  	//dump($psnid);
+  	//dump($psnSelect);
   	//exit;
   	$dev1=M('device')->where(array('psn'=>$psnid,'dev_type'=>1))->find();
   	
@@ -62,11 +68,17 @@ class DevselectController extends HomeController {
 		$this->assign('temp1',$temp1);
 		$this->assign('temp2',$temp2);
 
-  	$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psnid'=>$psnid))->count();
-		$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->order('devid asc')->select();
-		$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
-		$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->order('devid asc')->select();
-		
+		if($user_autoid==2){
+			$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psnid'=>$psnid))->count();
+			$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->limit(2,2)->order('devid asc')->select();
+			$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->limit(2,2)->order('devid asc')->select();
+			$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(3,1)->order('devid asc')->select();
+		}else{
+			$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psnid'=>$psnid))->count();
+			$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->order('devid asc')->select();
+			$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
+			$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(0,1)->order('devid asc')->select();
+		}
 		if($aip=='ios'){
 			$temparr=array('temp1'=>$temp1,'temp2'=>$temp2);
 			$devarr=array('dev1'=>$devSelect1,'dev2'=>$devSelect2,'dev3'=>$devSelect3);
@@ -74,8 +86,12 @@ class DevselectController extends HomeController {
 			$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
 			exit;
 		}
-				
-		$this->assign('devcount',200);
+		if($user_autoid==2){
+			$this->assign('devcount',50);
+		}else{
+			$this->assign('devcount',500);
+		}
+		
 		$this->assign('devSelect1',$devSelect1);
 		$this->assign('devSelect2',$devSelect2);
 		$this->assign('devSelect3',$devSelect3);
@@ -1477,7 +1493,7 @@ class DevselectController extends HomeController {
 			dump($phone);
 			dump($msg);
 			if($phone&&$other){
-				send163msg($phone,$msg);
+				//send163msg($phone,$msg);
 			}
 	}
 	

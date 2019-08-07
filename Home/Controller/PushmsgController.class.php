@@ -10,29 +10,46 @@ class PushmsgController extends Controller {
      		$devlist=M('sickness')->where(array('psnid'=>$psnid,'state'=>1))->order('devid asc')->select();
      		if($devlist){
      			foreach($devlist as $dev){
-     				if($devname!=NULL){
-     					$devname=$devname.$sub;
+     				if(strlen($devname)>12){
+     					$devname=$devname.'...';
+     					break;
      				}else{
-     					$devname='ID:';
+	     				if($devname!=NULL){
+	     					$devname=$devname.$sub;
+	     				}else{
+	     					$devname='ID:';
+	     				}
+     					$devname=$devname.$dev['devid'];
      				}
-     				$devname=$devname.$dev['devid'];
      			}
      		}
      		foreach($psn as $user){
-     			//$phone[]=$user['phone'];
+     			$phone[]=$user['phone'];
      			$name=$user['info'];
      		}
      	}
      	
-     	//dump($name);
-     	//dump($devname);
-     	$other='设备(ID:30)体温已恢复正常,';
-     	$other=iconv("GBK", "UTF-8", $other); 
+     	//$devname = 'ID:388,389,390,400,401';
+			//$sub=',';
+			
+     	$other_head1='设备(';
+     	$foot=')体温升高,';
+     	$other_foot1=')体温已恢复正常,';
+     	$other_head1=iconv("GBK", "UTF-8", $other_head1);
+     	$foot=iconv("GBK", "UTF-8", $foot); 
+     	$other_foot1=iconv("GBK", "UTF-8", $other_foot1); 
+     	
+     	if($devname){
+     		$other=$other_head1.$devname.$foot;
+     	} 
      	//print_r($test);
      	$msg[]=$name;
-     	$msg[]=$devname;
-     	$msg[]=$other;
-     	$phone[]='15010150766';
+     	if($other){
+     		$msg[]=$other;
+     	}else{
+     		$msg[]='';
+     	}
+     	//$phone[]='15010150766';
      	//dump(iconv_get_encoding());
      	dump($msg);
      	dump($phone);
