@@ -1498,53 +1498,111 @@ class DevselectController extends HomeController {
 	}
 	
 	public function setting(){
-		$devid = $_GET['devid'];
-  	$psn= $_GET['psnid'];
-		$temp = $_GET['temp1'];
+		$aip = $_POST['aip'];
+		if($aip=='ios'){
+			$devid = $_POST['devid'];
+			$psnid= $_POST['psnid'];
+			$temp = $_POST['temp1'];
+		}else{
+			$devid = $_GET['devid'];
+	  	$psnid= $_GET['psnid'];
+			$temp = $_GET['temp1'];
+	  	$name=$_SESSION['name'];
+	  	$this->assign('name',$name);
+		}
+		
   	$state =(int)$_POST['radio1'];
     $msg = $_POST['msg'];
-  	$name=$_SESSION['name'];
-  	$this->assign('name',$name);
 
-    if(empty($state)&&empty($msg)){
-    		$this->display();
-    		exit;
-    }
-    var_dump($state);
-    if($state==1){
-    	 //var_dump($state);
-       $sk=array(
-					'state'=>0,
-		  		);
-		   $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psn))->save($sk);
-		   
+    if(!empty($msg)){
+	    if($state==1){
+	    	 //var_dump($state);
+	       $sk=array(
+						'state'=>0,
+			  		);
+			   $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
+			   
+	    }else{
+	       $sk=array(
+						'flag'=>1,
+			  		);
+			   $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
+			   if(!empty($msg)){
+			   	 $rec = array(
+			   	 					'devid'=>$devid,
+			   	 					'psnid'=>$psn,
+			   	 					'temp1'=>$temp,
+			   	 					'msg'=>$msg,
+			   	 				);
+			     $rd = D('sickrecord')->add($rec);	
+			   }
+	    }
     }else{
-       $sk=array(
-					'flag'=>1,
-		  		);
-		   $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psn))->save($sk);
-		   if(!empty($msg)){
-		   	 $rec = array(
-		   	 					'devid'=>$devid,
-		   	 					'psnid'=>$psn,
-		   	 					'temp1'=>$temp,
-		   	 					'msg'=>$msg,
-		   	 				);
-		     $rd = D('sickrecord')->add($rec);	
-		   }
+    	if($aip!='ios'){
+	   		$this->display();
+	   		exit;
+    	}
     }
     
+		if($aip=='ios'){
+			$psnfind = M('psn')->where(array('id'=>$psnid))->find();
+			if(empty($psnfind)){
+				echo "PSN NULL.";
+				exit;
+			}
+	  	$hlevl1=$psnfind['htemplev1'];
+	  	$hlevl2=$psnfind['htemplev2'];
+	  	$llevl1=$psnfind['ltemplev1'];
+	  	$llevl2=$psnfind['ltemplev2'];
+	  	
+			$record=M('sickrecord')->where(array('devid'=>$devid ,'psnid'=>$psnid))->order('time desc')->select();
+			//dump($record);
+			for($i=0;$i< count($record);$i++){
+				$value=$record[$i]['temp1'];
+				$level=0;
+				if($value >$hlevl1){
+					$record[$i]['state']=1;
+					$level=1;
+					if($value>=$hlevl2){
+						$level=2;
+					}
+				}
+				if($value < $llevl1){
+					$record[$i]['state']=2;
+					$level=1;
+					if($value<= $llevl2){
+						$level=2;
+					}
+				}
+				
+				$record[$i]['level']=$level;
+			}
+			$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'descs'=>$record));
+			$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+			exit;
+		}
+		
 		$this ->redirect('Devselect/sickness',array(),0,'');
 	}
 	
 	public function setting2(){
-		$devid = $_GET['devid'];
-  	$psn= $_GET['psnid'];
+		$aip = $_POST['aip'];
+		if($aip=='ios'){
+			$devid = $_POST['devid'];
+			$psnid= $_POST['psnid'];
+			$temp = $_POST['temp1'];
+		}else{
+			$devid = $_GET['devid'];
+	  	$psnid= $_GET['psnid'];
+			$temp = $_GET['temp1'];
+	  	$name=$_SESSION['name'];
+	  	$this->assign('name',$name);
+		}
+  	
 		$msg= $_POST['msg'];
 		$temp = $_GET['temp1'];
-  	$name=$_SESSION['name'];
-  	$this->assign('name',$name);
-		$psnfind = M('psn')->where(array('id'=>$psn))->find();
+
+		$psnfind = M('psn')->where(array('id'=>$psnid))->find();
 		if(empty($psnfind)){
 			echo "PSN NULL.";
 			exit;
@@ -1563,16 +1621,19 @@ class DevselectController extends HomeController {
 		if(!empty($msg)){
 			$rec = array(
 						'devid'=>$devid,
-						'psnid'=>$psn,
+						'psnid'=>$psnid,
 						'temp1'=>$temp,
 						'msg'=>$msg,
 					);
 			$rd = D('sickrecord')->add($rec);	
-			$this ->redirect('Devselect/sickness',array('tab'=>2),0,'');
-			exit;
+			if($aip!='ios'){
+				$this ->redirect('Devselect/sickness',array('tab'=>2),0,'');
+				exit;
+			}
+			
 		}
 		
-		$record=M('sickrecord')->where(array('devid'=>$devid ,'psnid'=>$psn))->order('time desc')->select();
+		$record=M('sickrecord')->where(array('devid'=>$devid ,'psnid'=>$psnid))->order('time desc')->select();
 		//dump($record);
 		for($i=0;$i< count($record);$i++){
 			$value=$record[$i]['temp1'];
@@ -1595,16 +1656,31 @@ class DevselectController extends HomeController {
 			$record[$i]['level']=$level;
 		}
 		//dump($record);
+		if($aip=='ios'){
+			$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'descs'=>$record));
+			$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+			exit;
+		}
+		
     $this->assign('sickrecord',$record);
     $this->display();
 	}
 	
 	public function setting3(){
-		$devid = $_GET['devid'];
-  	$psn= $_GET['psnid'];
+		$aip = $_POST['aip'];
+		if($aip=='ios'){
+			$devid = $_POST['devid'];
+			$psnid= $_POST['psnid'];
+			$temp = $_POST['temp1'];
+		}else{
+			$devid = $_GET['devid'];
+	  	$psnid= $_GET['psnid'];
+			$temp = $_GET['temp1'];
+	  	$name=$_SESSION['name'];
+	  	$this->assign('name',$name);
+		}
 		$msg= $_POST['msg'];
 		$temp = $_GET['temp1'];
-  	$name=$_SESSION['name'];
   	$state =(int)$_POST['radio1'];
 
   	$this->assign('name',$name);
@@ -1612,7 +1688,7 @@ class DevselectController extends HomeController {
 		if(!empty($msg)){
 			$rec = array(
 						'devid'=>$devid,
-						'psnid'=>$psn,
+						'psnid'=>$psnid,
 						'temp1'=>$temp,
 						'msg'=>$msg,
 					);
@@ -1620,22 +1696,58 @@ class DevselectController extends HomeController {
 				$sk=array(
 						'flag'=>2,
 			  		);
-			  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psn))->save($sk);
+			  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
 			  $rd = D('recovery')->add($rec);	
 			}else{
 				$sk=array(
 						'flag'=>1,
 			  		);
-			  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psn))->save($sk);
+			  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
 			  $rd = D('sickrecord')->add($rec);	
 			}
-
-			$this ->redirect('Devselect/sickness',array('tab'=>3),0,'');
-			exit;
+			if($aip!='ios'){
+				$this ->redirect('Devselect/sickness',array('tab'=>3),0,'');
+				exit;
+			}
 		}
 		
-		//$record=M('recovery')->where(array('devid'=>$devid ,'psn'=>$psn))->order('time desc')->select();
-    $this->assign('recovery',$record);
+		if($aip=='ios'){
+			$psnfind = M('psn')->where(array('id'=>$psnid))->find();
+			if(empty($psnfind)){
+				echo "PSN NULL.";
+				exit;
+			}
+	  	$hlevl1=$psnfind['htemplev1'];
+	  	$hlevl2=$psnfind['htemplev2'];
+	  	$llevl1=$psnfind['ltemplev1'];
+	  	$llevl2=$psnfind['ltemplev2'];
+	  	
+			$record=M('sickrecord')->where(array('devid'=>$devid ,'psnid'=>$psnid))->order('time desc')->select();
+			//dump($record);
+			for($i=0;$i< count($record);$i++){
+				$value=$record[$i]['temp1'];
+				$level=0;
+				if($value >$hlevl1){
+					$record[$i]['state']=1;
+					$level=1;
+					if($value>=$hlevl2){
+						$level=2;
+					}
+				}
+				if($value < $llevl1){
+					$record[$i]['state']=2;
+					$level=1;
+					if($value<= $llevl2){
+						$level=2;
+					}
+				}
+				
+				$record[$i]['level']=$level;
+			}
+			$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'descs'=>$record));
+			$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+			exit;
+		}
     $this->display();
 	}
 	
