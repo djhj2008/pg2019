@@ -84,7 +84,53 @@ class AddController extends HomeController {
 				$this->display();
 			
     }
-	
+
+	  public function devlistwx(){
+		    $uid = $_POST['userid'];
+		    $aip = $_POST['aip'];
+		    
+				$psnSelect=M('psn')->where(array('userid'=>$uid))->select();
+				$psnsize=count($psnSelect);
+				if($psnsize>1){
+					$jarr=array('ret'=>array("ret_message"=>'fail','status_code'=>10000300));
+					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+					exit;
+				}
+				$psnid=$psnSelect[0]['id'];
+				
+				$devid = $_POST['devid'];
+	    	if(!empty($devid)){
+	    		$postArr=array();
+            $postArr['devid']=$devid;
+            $postArr['psn']=$psnid;
+            $postArr['dev_type']=0;
+            $postArr2['sn'] = array('like','%'.$devid.'%');
+            $postArr2['psn'] =$psnid;
+            $postArr2['dev_type'] = 0;
+            $where_main['_complex'] = array($postArr,
+																				    $postArr2,
+																				    '_logic' => 'or');
+					  $device = M('device');
+            $devSelect= $device->where($where_main)->order('devid asc')->select();
+            //var_dump($device->getLastSql());
+            //exit;
+            if($devSelect){
+                $this->assign('devSelect',$devSelect);
+								$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devlist'=>$devSelect));
+								$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+            }else{
+                $devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
+								$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devlist'=>$devSelect));
+								$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+			
+            }
+	    	}else{
+		    	$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('flag desc,devid asc')->select();
+					$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devlist'=>$devSelect));
+					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+				}
+    }
+    
     public function adddev(){
     	$uid = $_SESSION['userid'];
 			$name = $_SESSION['name'];

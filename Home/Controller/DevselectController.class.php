@@ -1559,6 +1559,7 @@ class DevselectController extends HomeController {
 			//dump($record);
 			for($i=0;$i< count($record);$i++){
 				$value=$record[$i]['temp1'];
+				$record[$i]['state']=0;
 				$level=0;
 				if($value >$hlevl1){
 					$record[$i]['state']=1;
@@ -1638,6 +1639,7 @@ class DevselectController extends HomeController {
 		for($i=0;$i< count($record);$i++){
 			$value=$record[$i]['temp1'];
 			$level=0;
+			$record[$i]['state']=0;
 			if($value >$hlevl1){
 				$record[$i]['state']=1;
 				$level=1;
@@ -1727,6 +1729,7 @@ class DevselectController extends HomeController {
 			for($i=0;$i< count($record);$i++){
 				$value=$record[$i]['temp1'];
 				$level=0;
+				$record[$i]['state']=0;
 				if($value >$hlevl1){
 					$record[$i]['state']=1;
 					$level=1;
@@ -1791,8 +1794,18 @@ class DevselectController extends HomeController {
 	}
 	
 	public function todayValue(){
-        $devid = $_GET["devid"];
-        $psnid=$_GET["psnid"];
+				$aip = $_POST['aip'];
+				if($aip=='ios'){
+					$devid = $_POST['devid'];
+					$psnid= $_POST['psnid'];
+				}else{
+					$devid = $_GET["devid"];
+					$psnid=$_GET["psnid"];
+					$name=$_SESSION['name'];
+					$this->assign('name',$name);
+				}
+
+        
         $now = time();
         $postArr = array();
         $postArr['devid'] = $devid;
@@ -1862,6 +1875,18 @@ class DevselectController extends HomeController {
            }
            
 				}
+
+			if($aip=='ios'){
+				$jarr=array('ret'=>array(
+					"ret_message"=>'success',
+					'status_code'=>10000200,
+					'temp1Arr'=>$temp1Arr,
+					'temp2Arr'=>$temp2Arr,
+					'dateArr'=>$dateArr)
+				);
+				$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+				exit;
+			}
       $this->assign('temp1Arr',json_encode(array_reverse($temp1Arr)));
       $this->assign('temp2Arr',json_encode(array_reverse($temp2Arr)));
       $this->assign('dateArr',json_encode(array_reverse($dateArr)));
