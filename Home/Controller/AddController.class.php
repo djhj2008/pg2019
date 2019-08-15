@@ -3,7 +3,7 @@ namespace Home\Controller;
 use Tools\HomeController; 
 use Think\Controller;
 class AddController extends HomeController {
-	  public function devlist(){
+ 	  public function devlist(){
 
 	    	if(empty($_SESSION['userid'])||empty($_SESSION['name'])){
 		    	$code = $_GET['code'];
@@ -208,6 +208,45 @@ class AddController extends HomeController {
       $this->display();
     }
     
+    public function deveditwx(){
+ 
+			$psnid = $_POST['psnid'];
+			$devid = $_POST['devid'];
+			
+			$dev =M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->find();
+
+			$psnSelect=M('psn')->where(array('id'=>$psnid))->find();
+			$dev['psninfo']=$psnSelect['info'];
+			
+    	if(!empty($_POST['devid'])){
+				$sn = $_POST['sn'];
+	    	$flag = $_POST['flag'];
+				if(empty($sn)&&empty($flag)){
+					$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'dev'=>$dev));
+					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+					exit;
+				}
+				if($flag){
+					$devsave['flag']=1;
+				}else{
+					$devsave['flag']=0;
+				}
+    		if(!empty($sn)){
+    			$devsave['sn']=$sn;
+    		}
+    		if($have=M('device')->where(array('devid'=>$devid,'psn'=>$psn))->save($devsave)){
+    			$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000201));
+					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+    		}
+    		$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000301));
+				$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+    	}else{
+    		$jarr=array('ret'=>array("ret_message"=>'fail','status_code'=>10000300));
+				$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+    	}
+      
+    }
+        
     public function move(){
     	if($_POST['aip']=='ios' || $_POST['aip']=='an'){
     		if($_POST['devid'] && ($_POST['shed'] || $_POST['column'])){
