@@ -116,17 +116,17 @@ class AddController extends HomeController {
             //exit;
             if($devSelect){
                 $this->assign('devSelect',$devSelect);
-								$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devlist'=>$devSelect));
+								$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devlist'=>$devSelect,'psnid'=>$psnid));
 								$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
             }else{
                 $devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
-								$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devlist'=>$devSelect));
+								$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devlist'=>$devSelect,'psnid'=>$psnid));
 								$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
 			
             }
 	    	}else{
 		    	$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('flag desc,devid asc')->select();
-					$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devlist'=>$devSelect));
+					$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devlist'=>$devSelect,'psnid'=>$psnid));
 					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
 				}
     }
@@ -171,6 +171,39 @@ class AddController extends HomeController {
       $this->display();
     }
 
+    public function devaddwx(){
+			$psnid = $_POST['psnid'];//psnid
+    	if($_POST && $_POST['devid']){
+    		$devid = intval($_POST['devid']);
+    		$sn = $_POST['sn'];
+					
+    		$postArr=array(
+    		'psn' =>$psnid,
+    		'devid'=>$devid,
+    		'sn'=>$sn,
+    		'shed'=>1,
+    		'fold'=>1,
+    		'flag'=>1,
+    		'state'=>1,
+    		's_count'=>1,
+    		'rid'=>$devid,
+    		'age'=>1,
+    		);
+
+    		if($have=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->find()){
+					$jarr=array('ret'=>array("ret_message"=>'fail','status_code'=>10000300));
+					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+    		}else{
+					$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200));
+					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+    		}
+    	}else{
+    		$psn = M('psn')->where(array('id'=>$psnid))->find();
+    		$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'psn'=>$psn));
+				$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+    	}
+    }
+    
     public function devedit(){
 
     	$uid = $_SESSION['userid'];
