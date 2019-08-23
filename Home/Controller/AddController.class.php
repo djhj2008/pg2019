@@ -173,8 +173,8 @@ class AddController extends HomeController {
 
     public function devaddwx(){
 			$psnid = $_POST['psnid'];//psnid
-    	if($_POST && $_POST['devid']){
-    		$devid = intval($_POST['devid']);
+			$devid = $_POST['devid'];
+    	if($devid&&$psnid){
     		$sn = $_POST['sn'];
 					
     		$postArr=array(
@@ -194,6 +194,7 @@ class AddController extends HomeController {
 					$jarr=array('ret'=>array("ret_message"=>'fail','status_code'=>10000300));
 					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
     		}else{
+    			M('device')->add($postArr);
 					$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200));
 					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
     		}
@@ -251,31 +252,31 @@ class AddController extends HomeController {
 			$psnSelect=M('psn')->where(array('id'=>$psnid))->find();
 			$dev['psninfo']=$psnSelect['info'];
 			
-    	if(!empty($_POST['devid'])){
+    	if(!empty($devid)&&!empty($psnid)){
 				$sn = $_POST['sn'];
 	    	$flag = $_POST['flag'];
-				if(empty($sn)&&empty($flag)){
+				if($sn==null&&$flag==null){
 					$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'dev'=>$dev));
 					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
 					exit;
 				}
-				if($flag){
-					$devsave['flag']=1;
-				}else{
-					$devsave['flag']=0;
-				}
-    		if(!empty($sn)){
-    			$devsave['sn']=$sn;
-    		}
-    		if($have=M('device')->where(array('devid'=>$devid,'psn'=>$psn))->save($devsave)){
-    			$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000201));
+
+				$devsave['flag']=$flag ;
+				
+    		$devsave['sn']=$sn;
+
+    		if($have=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->save($devsave)){
+    			$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000201,'devsave'=>$devsave));
 					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+					exit;
     		}
-    		$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000301));
+    		$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000301,'devsave'=>$devsave));
 				$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+				exit;
     	}else{
     		$jarr=array('ret'=>array("ret_message"=>'fail','status_code'=>10000300));
 				$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+				exit;
     	}
       
     }
@@ -835,4 +836,220 @@ class AddController extends HomeController {
 
 			$this ->redirect('devselect/devmove',array('psnid'=>$psnid),0,'');
     }
+    
+	  public function settingwx(){
+			$aip = $_POST['aip'];
+			if($aip=='ios'){
+				$devid = $_POST['devid'];
+				$psnid= $_POST['psnid'];
+				$temp = $_POST['temp1'];
+			}
+			
+	  	$state =(int)$_POST['radio1'];
+	    $msg = $_POST['msg'];
+
+	    if(!empty($msg)){
+		    if($state==1){
+		    	 //var_dump($state);
+		       $sk=array(
+							'state'=>0,
+				  		);
+				   $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
+				   
+		    }else{
+		       $sk=array(
+							'flag'=>1,
+				  		);
+				   $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
+				   if(!empty($msg)){
+				   	 $rec = array(
+				   	 					'devid'=>$devid,
+				   	 					'psnid'=>$psn,
+				   	 					'temp1'=>$temp,
+				   	 					'msg'=>$msg,
+				   	 				);
+				     $rd = D('sickrecord')->add($rec);	
+				   }
+		    }
+	    }else{
+	    }
+	    
+			if($aip=='ios'){
+				$psnfind = M('psn')->where(array('id'=>$psnid))->find();
+				if(empty($psnfind)){
+					echo "PSN NULL.";
+					exit;
+				}
+		  	$hlevl1=$psnfind['htemplev1'];
+		  	$hlevl2=$psnfind['htemplev2'];
+		  	$llevl1=$psnfind['ltemplev1'];
+		  	$llevl2=$psnfind['ltemplev2'];
+		  	
+				$record=M('sickrecord')->where(array('devid'=>$devid ,'psnid'=>$psnid))->order('time desc')->select();
+				//dump($record);
+				for($i=0;$i< count($record);$i++){
+					$value=$record[$i]['temp1'];
+					$record[$i]['state']=0;
+					$level=0;
+					if($value >$hlevl1){
+						$record[$i]['state']=1;
+						$level=1;
+						if($value>=$hlevl2){
+							$level=2;
+						}
+					}
+					if($value < $llevl1){
+						$record[$i]['state']=2;
+						$level=1;
+						if($value<= $llevl2){
+							$level=2;
+						}
+					}
+					
+					$record[$i]['level']=$level;
+				}
+				$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'descs'=>$record));
+				$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+				exit;
+			}
+		}
+		
+		public function setting2wx(){
+			$aip = $_POST['aip'];
+			if($aip=='ios'){
+				$devid = $_POST['devid'];
+				$psnid= $_POST['psnid'];
+				$temp = $_POST['temp1'];
+			}
+	  	
+			$msg= $_POST['msg'];
+
+			$psnfind = M('psn')->where(array('id'=>$psnid))->find();
+			if($psnfind==null){
+				$jarr=array('ret'=>array("ret_message"=>'fail','status_code'=>10000300));
+				$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+				exit;
+			}
+
+	  	$hlevl1=$psnfind['htemplev1'];
+	  	$hlevl2=$psnfind['htemplev2'];
+	  	$llevl1=$psnfind['ltemplev1'];
+	  	$llevl2=$psnfind['ltemplev2'];
+					
+			if(!empty($msg)){
+				$rec = array(
+							'devid'=>$devid,
+							'psnid'=>$psnid,
+							'temp1'=>$temp,
+							'msg'=>$msg,
+						);
+				$rd = D('sickrecord')->add($rec);	
+			}
+			
+			$record=M('sickrecord')->where(array('devid'=>$devid ,'psnid'=>$psnid))->order('time desc')->select();
+			//dump($record);
+			for($i=0;$i< count($record);$i++){
+				$value=$record[$i]['temp1'];
+				$level=0;
+				$record[$i]['state']=0;
+				if($value >$hlevl1){
+					$record[$i]['state']=1;
+					$level=1;
+					if($value>=$hlevl2){
+						$level=2;
+					}
+				}
+				if($value < $llevl1){
+					$record[$i]['state']=2;
+					$level=1;
+					if($value<= $llevl2){
+						$level=2;
+					}
+				}
+				
+				$record[$i]['level']=$level;
+			}
+			//dump($record);
+			if($aip=='ios'){
+				$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'descs'=>$record));
+				$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+				exit;
+			}
+			
+		}
+		
+		public function setting3wx(){
+			$aip = $_POST['aip'];
+			if($aip=='ios'){
+				$devid = $_POST['devid'];
+				$psnid= $_POST['psnid'];
+				$temp = $_POST['temp1'];
+			}
+			$msg= $_POST['msg'];
+			$temp = $_GET['temp1'];
+	  	$state =(int)$_POST['radio1'];
+
+	  	$this->assign('name',$name);
+	 		//var_dump($state);
+			if(!empty($msg)){
+				$rec = array(
+							'devid'=>$devid,
+							'psnid'=>$psnid,
+							'temp1'=>$temp,
+							'msg'=>$msg,
+						);
+				if($state==2){
+					$sk=array(
+							'flag'=>2,
+				  		);
+				  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
+				  $rd = D('recovery')->add($rec);	
+				}else{
+					$sk=array(
+							'flag'=>1,
+				  		);
+				  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
+				  $rd = D('sickrecord')->add($rec);	
+				}
+			}
+			
+			if($aip=='ios'){
+				$psnfind = M('psn')->where(array('id'=>$psnid))->find();
+				if(empty($psnfind)){
+					echo "PSN NULL.";
+					exit;
+				}
+		  	$hlevl1=$psnfind['htemplev1'];
+		  	$hlevl2=$psnfind['htemplev2'];
+		  	$llevl1=$psnfind['ltemplev1'];
+		  	$llevl2=$psnfind['ltemplev2'];
+		  	
+				$record=M('sickrecord')->where(array('devid'=>$devid ,'psnid'=>$psnid))->order('time desc')->select();
+				//dump($record);
+				for($i=0;$i< count($record);$i++){
+					$value=$record[$i]['temp1'];
+					$level=0;
+					$record[$i]['state']=0;
+					if($value >$hlevl1){
+						$record[$i]['state']=1;
+						$level=1;
+						if($value>=$hlevl2){
+							$level=2;
+						}
+					}
+					if($value < $llevl1){
+						$record[$i]['state']=2;
+						$level=1;
+						if($value<= $llevl2){
+							$level=2;
+						}
+					}
+					
+					$record[$i]['level']=$level;
+				}
+				$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'descs'=>$record));
+				$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+				exit;
+			}
+		}
 }
