@@ -125,7 +125,12 @@ class AddController extends HomeController {
 			
             }
 	    	}else{
-		    	$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('flag desc,devid asc')->select();
+	    		if($user_autoid==2){
+	    			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid,'flag'=>1))->limit(20,50)->order('flag desc,devid asc')->select();
+	    		}else{
+	    			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('flag desc,devid asc')->select();
+	    		}
+		    	//$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('flag desc,devid asc')->select();
 					$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devlist'=>$devSelect,'psnid'=>$psnid));
 					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
 				}
@@ -845,39 +850,40 @@ class AddController extends HomeController {
 				$temp = $_POST['temp1'];
 			}
 			
-	  	$state =(int)$_POST['radio1'];
+	  	$state =(int)$_POST['flag'];
 	    $msg = $_POST['msg'];
 
-	    if(!empty($msg)){
-		    if($state==1){
+
+	    if(!empty($msg)||!empty($state)){
+		    if($state==0){
 		    	 //var_dump($state);
 		       $sk=array(
 							'state'=>0,
 				  		);
-				   $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
+				   $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psnid))->save($sk);
 				   
 		    }else{
 		       $sk=array(
 							'flag'=>1,
 				  		);
-				   $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
+				   $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psnid))->save($sk);
 				   if(!empty($msg)){
 				   	 $rec = array(
 				   	 					'devid'=>$devid,
-				   	 					'psnid'=>$psn,
+				   	 					'psnid'=>$psnid,
 				   	 					'temp1'=>$temp,
 				   	 					'msg'=>$msg,
 				   	 				);
 				     $rd = D('sickrecord')->add($rec);	
 				   }
 		    }
-	    }else{
 	    }
-	    
+
 			if($aip=='ios'){
 				$psnfind = M('psn')->where(array('id'=>$psnid))->find();
 				if(empty($psnfind)){
-					echo "PSN NULL.";
+					$jarr=array('ret'=>array("ret_message"=>'fail','status_code'=>10000300));
+					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
 					exit;
 				}
 		  	$hlevl1=$psnfind['htemplev1'];
@@ -986,37 +992,40 @@ class AddController extends HomeController {
 				$temp = $_POST['temp1'];
 			}
 			$msg= $_POST['msg'];
-			$temp = $_GET['temp1'];
-	  	$state =(int)$_POST['radio1'];
+	  	$state =(int)$_POST['flag'];
 
 	  	$this->assign('name',$name);
 	 		//var_dump($state);
-			if(!empty($msg)){
-				$rec = array(
-							'devid'=>$devid,
-							'psnid'=>$psnid,
-							'temp1'=>$temp,
-							'msg'=>$msg,
-						);
-				if($state==2){
-					$sk=array(
-							'flag'=>2,
+	    if(!empty($msg)||!empty($state)){
+		    if($state==0){
+		    	 //var_dump($state);
+		       $sk=array(
+							'state'=>0,
 				  		);
-				  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
-				  $rd = D('recovery')->add($rec);	
-				}else{
-					$sk=array(
+				   $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psnid))->save($sk);
+				   
+		    }else{
+		       $sk=array(
 							'flag'=>1,
 				  		);
-				  $saveSql=D('sickness')->where(array('devid'=>$devid,'psn'=>$psnid))->save($sk);
-				  $rd = D('sickrecord')->add($rec);	
-				}
-			}
-			
+				   $saveSql=D('sickness')->where(array('devid'=>$devid,'psnid'=>$psnid))->save($sk);
+				   if(!empty($msg)){
+				   	 $rec = array(
+				   	 					'devid'=>$devid,
+				   	 					'psnid'=>$psnid,
+				   	 					'temp1'=>$temp,
+				   	 					'msg'=>$msg,
+				   	 				);
+				     $rd = D('sickrecord')->add($rec);	
+				   }
+		    }
+	    }
+	    
 			if($aip=='ios'){
 				$psnfind = M('psn')->where(array('id'=>$psnid))->find();
 				if(empty($psnfind)){
-					echo "PSN NULL.";
+					$jarr=array('ret'=>array("ret_message"=>'fail','status_code'=>10000300));
+					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
 					exit;
 				}
 		  	$hlevl1=$psnfind['htemplev1'];

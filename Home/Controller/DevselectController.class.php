@@ -68,23 +68,42 @@ class DevselectController extends HomeController {
 		$this->assign('temp1',$temp1);
 		$this->assign('temp2',$temp2);
 
+		if($aip=='ios'){
+			if($uid==2){
+				$devdount=M('device')->where('flag > 0  and dev_type=0')->where(array('psn'=>$psnid))->count();
+				$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->limit(2,2)->order('devid asc')->select();
+				$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->limit(2,2)->order('devid asc')->select();
+				$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(3,1)->order('devid asc')->select();
+			}else{
+				$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psn'=>$psnid))->count();
+				$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->order('devid asc')->select();
+				$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
+				$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(0,1)->order('devid asc')->select();
+			}
+			$temparr=array('temp1'=>$temp1,'temp2'=>$temp2);
+			$devarr=array('dev1'=>$devSelect1,'dev2'=>$devSelect2,'dev3'=>$devSelect3);
+			$wx_count=200;
+			if($uid==5){
+				$wx_count=500;
+			}elseif($uid==2){
+				$wx_count=50;
+			}else{
+				$wx_count=$devdount;
+			}
+			$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devcount'=>$wx_count,'temp'=>$temparr,'devs'=>$devarr));
+			$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+			exit;
+		}
 		if($user_autoid==2){
-			$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psnid'=>$psnid))->count();
+			$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psn'=>$psnid))->count();
 			$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->limit(2,2)->order('devid asc')->select();
 			$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->limit(2,2)->order('devid asc')->select();
 			$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(3,1)->order('devid asc')->select();
 		}else{
-			$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psnid'=>$psnid))->count();
+			$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psn'=>$psnid))->count();
 			$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->order('devid asc')->select();
 			$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
 			$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(0,1)->order('devid asc')->select();
-		}
-		if($aip=='ios'){
-			$temparr=array('temp1'=>$temp1,'temp2'=>$temp2);
-			$devarr=array('dev1'=>$devSelect1,'dev2'=>$devSelect2,'dev3'=>$devSelect3);
-			$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'devcount'=>200,'temp'=>$temparr,'devs'=>$devarr));
-			$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
-			exit;
 		}
 		if($user_autoid==2){
 			$this->assign('devcount',50);
