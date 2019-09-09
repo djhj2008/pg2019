@@ -71,9 +71,9 @@ class DevselectController extends HomeController {
 		if($aip=='ios'){
 			if($uid==2){
 				$devdount=M('device')->where('flag > 0  and dev_type=0')->where(array('psn'=>$psnid))->count();
-				$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->limit(2,2)->order('devid asc')->select();
-				$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->limit(2,2)->order('devid asc')->select();
-				$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(3,1)->order('devid asc')->select();
+				$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->limit(0,2)->order('devid asc')->select();
+				$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->limit(0,2)->order('devid asc')->select();
+				$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(0,1)->order('devid asc')->select();
 			}else{
 				$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psn'=>$psnid))->count();
 				$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->order('devid asc')->select();
@@ -96,9 +96,9 @@ class DevselectController extends HomeController {
 		}
 		if($user_autoid==2){
 			$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psn'=>$psnid))->count();
-			$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->limit(2,2)->order('devid asc')->select();
-			$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->limit(2,2)->order('devid asc')->select();
-			$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(3,1)->order('devid asc')->select();
+			$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->limit(0,2)->order('devid asc')->select();
+			$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->limit(0,2)->order('devid asc')->select();
+			$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(0,1)->order('devid asc')->select();
 		}else{
 			$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psn'=>$psnid))->count();
 			$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->order('devid asc')->select();
@@ -1053,8 +1053,9 @@ class DevselectController extends HomeController {
 				if($avg< 30){
 					dump('avg:'.$avg);
 					//$avg=0;
+				}else{
+			  	$devSave=M('device')->where(array('psn'=>$psnid,'devid'=>$devid))->save(array('avg_temp'=>$avg));
 				}
-			  $devSave=M('device')->where(array('psn'=>$psnid,'devid'=>$devid))->save(array('avg_temp'=>$avg));
 
 			}
 			exit;
@@ -1836,6 +1837,7 @@ class DevselectController extends HomeController {
 				$start_time = strtotime($time)-86400;
 				$end_time = strtotime($time)+86400;
         //var_dump($start_time);
+        //var_dump($end_time);
         //var_dump($psnid);
         
         $dateArr = array();
@@ -1860,15 +1862,17 @@ class DevselectController extends HomeController {
 					exit;
 				}
         $avg=(float)$dev['avg_temp'];
-        $postArr['time']=array('between',array($start,$end));
-        if($selectSql=M('access')->where('devid ='.$devid.' and psn= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)
+        //$postArr['time']=array('between',array($start,$end));
+        //' and time >= '.$start_time.
+        if($selectSql=M('access')->where('devid ='.$devid.' and psn= '.$psnid.' and time <= '.$end_time)
 													        ->group('time')
 													        ->order('id desc')
+													        ->limit(0,24)
 													        ->select())
         {
            $todayData = array_slice($selectSql,0,24);
            $dataCount= count($todayData);
-         
+         	 //dump($selectSql);
            for($j=0;$j< $dataCount;$j++){
 							$time=($todayData[$j][time]);
 							$date=date('m-d H:i',$time);
@@ -1878,7 +1882,7 @@ class DevselectController extends HomeController {
 							$a=array($temp1,$temp2);
 							$t=max($a);
 							$vt=(float)$t;
-							if($vt< 20){
+							if($vt< 20||$avg==0){
 								$ntemp=$vt;
 							}else{
 								$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
@@ -2019,4 +2023,154 @@ class DevselectController extends HomeController {
 			exit;
 	}
 
+	public function startnew0908(){
+    	$psn= $_GET['psnid'];
+    	$date=$_GET['date'];
+    	$days=$_GET['days'];
+    	
+    	if(empty($date)||empty($days)){
+    		echo "DATE or DAYS NULL.";
+				exit;
+    	}
+    	
+    	$now = time();
+			$com_count=8;
+			$loweor_count=2;
+
+			$psnfind = M('psn')->where(array('id'=>$psn))->find();
+			if(empty($psnfind)){
+				echo "PSN NULL.";
+				exit;
+			}
+			$btemp=$psnfind['base_temp'];
+    	$hlevl1=$psnfind['htemplev1'];
+    	$hlevl2=$psnfind['htemplev2'];
+    	$llevl1=$psnfind['ltemplev1'];
+    	$llevl2=$psnfind['ltemplev2'];
+			$temp_value=$psnfind['check_value'];
+
+			//dump($btemp);
+			//dump($hlevl1);
+			//dump($hlevl2);
+			//dump($llevl1);
+			//dump($llevl2);
+			//dump($temp_value);
+
+			for($d_index=0;$d_index< $days;$d_index++){
+				$start_time = strtotime(date($date))+86400*$d_index;
+	    	//dump($start_time);
+	    	$end_time = $start_time+86400;
+	    	
+				$devs = M('device')->where(array('psn'=>$psn,'flag'=>1,'dev_type'=>0))->order('devid asc')->select();
+				
+				if(empty($devs)){
+					echo "DEV NULL.";
+					exit;
+				}
+	    	foreach($devs as $dev){
+	    		$devidlist[]=$dev['devid'];
+	    	}
+	    	//dump($devidlist);
+	    	
+	    	$wheredev['devid']=array('in',$devidlist);
+	    	
+	    	$accSelect=M('access')->where($wheredev)->where('time >='.$start_time.' and time <'.$end_time)->where(array('psn'=>$psn))->order('time desc')->select();
+	    	
+	    	if(empty($accSelect)){
+	    		continue;
+	    	}
+	    	
+				//dump('high');
+				foreach($devs as $dev){
+					$devid=$dev['devid'];
+					//$ret=M('access')->where('time <'.$end_time)->where(array('psn'=>$psn,'devid'=>$devid))->group('time')->order('time desc')->limit(0,$com_count)->select();
+					$flag=$dev['flag'];
+					$avg=$dev['avg_temp'];
+					
+					$acc_size=0;
+					unset($acc_list);
+					$acc_list = array();
+					foreach($accSelect as $acc){
+						if($acc['devid']==$devid){
+							$acc_list[]=$acc;
+						}
+					}
+					$acc_size=count($acc_list);
+					
+					//dump($devid);
+					if($avg==0){
+						//dump('no avg:'.$devid);
+						continue;
+					}
+					
+					if($flag==1&&$acc_size>0){
+						$ntemp = 255;
+						$index =0;
+						$hcount = 0;
+						$pre_time=0;
+	  				for($i=0;$i< $acc_size;$i++){
+	  					$cur_time=$acc_list[$i]['time'];
+	  					if($pre_time==$cur_time){
+	  						//dump('same:'.$devid.' :'.$cur_time);
+	  						continue;
+	  					}
+
+		    			$temp1=$acc_list[$i]['temp1'];
+							$temp2=$acc_list[$i]['temp2'];
+							$temp3=$acc_list[$i]['env_temp'];
+							$a=array($temp1,$temp2);
+							$t=max($a);
+							$vt=(float)$t;
+							$temp= round($btemp+($vt-$avg)*$temp_value,2);
+							
+							if($ntemp==255){
+								$last_temp=$temp;
+								$last_time=$cur_time;
+								$ntemp=$temp;
+							}else{
+								if($temp>=$ntemp){
+									$ntemp=$temp;
+									$index=$i;
+								}
+							}
+							$pre_time=$cur_time;
+	  				}
+
+	  				
+						$temp1=$acc_list[$index]['temp1'];
+						$temp2=$acc_list[$index]['temp2'];
+						$temp3=$acc_list[$index]['env_temp'];
+						$index_time =$acc_list[$index]['time']; 
+						$cur_time = date('Y-m-d H:i:s',$index_time);
+						$cur_date = date('Y-m-d',$index_time);
+						if($ntemp>$hlevl1){
+								if($ntemp>$hlevl2){
+									$level=2;
+								}else{
+									$level=1;
+								}
+						}else{
+							$level=0;
+						}
+						if($level>0){
+							$sickinfo['devid']=$devid;
+							$sickinfo['temp']=$ntemp;
+							$sickinfo['time']=$cur_time;
+							$sickinfo['date']=$cur_date;
+							$sickinfo['avg']=$avg;
+							$sicklist[]=$sickinfo;
+							//dump($sickinfo);
+						}
+						
+						
+						//dump('devid:'.$devid.':'.$level);
+						//dump('devid:'.$devid.':'.$hcount);
+					}
+				}
+			}
+			
+			//dump($sicklist);
+			$this->assign('sicklist',$sicklist);
+			$this->display();
+	}
 }

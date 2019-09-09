@@ -70,8 +70,8 @@ class ProductController extends HomeController {
 		public function scanfactory(){
 			$psnid=$_GET['psnid'];
 			$productno=$_GET['productno'];
-			$delay = 4*3600;
-			$delay_sub = 2*3600;
+			$delay = 1*3600;
+			$delay_sub = 1*3600;
 
 			if($productno==NULL){
 				echo 'PRODUCTNO ERR.';
@@ -88,8 +88,8 @@ class ProductController extends HomeController {
     	$first_time = $cur_time-$delay+$start_time;
     	$last_time = $cur_time-$delay+$start_time-$delay-$delay_sub;
     	
-    	//dump(date('Y-m-d H:s:i',$first_time));
-    	//dump(date('Y-m-d H:s:i',$last_time));
+    	dump(date('Y-m-d H:s:i',$first_time));
+    	dump(date('Y-m-d H:s:i',$last_time));
 			//var_dump($first_time);
 			
     	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
@@ -109,7 +109,7 @@ class ProductController extends HomeController {
 				}
 				$acc_size=count($acc_list);
 				//dump('devid:'.$devid.' count:'.$acc_size);
-				if($acc_size<4){
+				if($acc_size<2){
 						if($acc_size==0){
       		  		$dev_none[]=$devid;
       			}else{
@@ -147,8 +147,8 @@ class ProductController extends HomeController {
 		public function factorytempeor(){
 			$psnid=$_GET['psnid'];
 			$productno=$_GET['productno'];
-			$delay = 4*3600;
-			$delay_sub = 2*3600;
+			$delay = 1*3600;
+			$delay_sub = 1*3600;
 
 			if($productno==NULL){
 				echo 'PRODUCTNO ERR.';
@@ -215,8 +215,8 @@ class ProductController extends HomeController {
  		public function devtempnow(){
 			$psnid=$_GET['psnid'];
 			$productno=$_GET['productno'];
-			$delay = 4*3600;
-			$delay_sub = 2*3600;
+			$delay = 3600;
+			$delay_sub = 3600;
 
 			if($productno==NULL){
 				echo 'PRODUCTNO ERR.';
@@ -282,8 +282,8 @@ class ProductController extends HomeController {
 		public function devtempnext(){
 			$psnid=$_GET['psnid'];
 			$productno=$_GET['productno'];
-			$delay = 4*3600;
-			$delay_sub = 2*3600;
+			$delay = 1*3600;
+			$delay_sub = 1*3600;
 
 			if($productno==NULL){
 				echo 'PRODUCTNO ERR.';
@@ -464,8 +464,8 @@ class ProductController extends HomeController {
 		
 		public function factorytempeorall(){
 			$psnid=$_GET['psnid'];
-			$delay = 4*3600;
-			$delay_sub = 2*3600;
+			$delay = 1*3600;
+			$delay_sub = 1*3600;
 
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now));
@@ -514,8 +514,8 @@ class ProductController extends HomeController {
 		
 		public function deveorall(){
 			$psnid=$_GET['psnid'];
-			$delay = 4*3600;
-			$delay_sub = 2*3600;
+			$delay = 1*3600;
+			$delay_sub = 1*3600;
 
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now));
@@ -565,8 +565,8 @@ class ProductController extends HomeController {
 
 		public function scandevlow(){
 			$psnid=$_GET['psnid'];
-			$delay = 4*3600;
-			$delay_sub = 2*3600;
+			$delay = 1*3600;
+			$delay_sub = 1*3600;
 
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now));
