@@ -260,6 +260,7 @@ class AddController extends HomeController {
     	if(!empty($devid)&&!empty($psnid)){
 				$sn = $_POST['sn'];
 	    	$flag = $_POST['flag'];
+	    	$shed = $_POST['shed'];
 				if($sn==null&&$flag==null){
 					$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200,'dev'=>$dev));
 					$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
@@ -269,6 +270,10 @@ class AddController extends HomeController {
 				$devsave['flag']=$flag ;
 				
     		$devsave['sn']=$sn;
+    		
+    		if(!empty($shed)){
+    			 $devsave['shed']=$shed;
+    		}
 
     		if($have=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->save($devsave)){
     			$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000201,'devsave'=>$devsave));
