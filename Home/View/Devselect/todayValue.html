@@ -43,13 +43,13 @@
        var temp1 = JSON.parse('<%$temp1Arr%>');
        var temp2 = JSON.parse('<%$temp2Arr%>');
        var min1 = Math.min.apply(null, temp1);
-       var min2 = Math.min.apply(null, temp2);
+       //var min2 = Math.min.apply(null, temp2);
 
-       var min;
-       if (min1<min2){
-           min = min1;
+       var cur_min;
+       if (min1<36){
+           cur_min = 0;
        }else {
-           min = min2;
+           cur_min = 36;
        }
 
       	//console.log(date,temp1,temp2);
@@ -101,7 +101,7 @@
                 axisLabel: {
                     formatter: '{value}°C'
                 },
-                min:36,
+                min:cur_min,
                 max:42,
             },
             series: [
