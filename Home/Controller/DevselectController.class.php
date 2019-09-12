@@ -83,11 +83,13 @@ class DevselectController extends HomeController {
 				$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->limit(2,2)->order('devid asc')->select();
 				$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->limit(2,1)->order('devid asc')->select();
 				$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(2,1)->order('devid asc')->select();
+				$devSelect4=M('lostacc')->where(array('psnid'=>$psnid,'state'=>3))->order('devid asc')->select();
 			}else{
 				$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psn'=>$psnid))->count();
 				$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->order('devid asc')->select();
 				$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
 				$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(0,1)->order('devid asc')->select();
+				$devSelect4=M('lostacc')->where(array('psnid'=>$psnid,'state'=>3))->order('devid asc')->select();
 			}
 			$temparr=array('temp1'=>$temp1,'temp2'=>$temp2);
 			$devarr=array('dev1'=>$devSelect1,'dev2'=>$devSelect2,'dev3'=>$devSelect3);
@@ -108,11 +110,13 @@ class DevselectController extends HomeController {
 			$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->limit(2,2)->order('devid asc')->select();
 			$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->limit(2,1)->order('devid asc')->select();
 			$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(2,1)->order('devid asc')->select();
+			$devSelect4=M('lostacc')->where(array('psnid'=>$psnid,'state'=>3))->order('devid asc')->select();
 		}else{
 			$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psn'=>$psnid))->count();
 			$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->order('devid asc')->select();
 			$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
 			$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(0,1)->order('devid asc')->select();
+			$devSelect4=M('lostacc')->where(array('psnid'=>$psnid,'state'=>3))->order('devid asc')->select();
 		}
 		if($rel_uid==2){
 			$this->assign('devcount',50);
@@ -123,6 +127,7 @@ class DevselectController extends HomeController {
 		$this->assign('devSelect1',$devSelect1);
 		$this->assign('devSelect2',$devSelect2);
 		$this->assign('devSelect3',$devSelect3);
+		$this->assign('devSelect4',$devSelect4);
 		$this->display();
 	}
 	
@@ -2280,4 +2285,155 @@ class DevselectController extends HomeController {
       $this->display();
 
 	}
+	
+	public function startlost(){
+    	$psn= $_GET['psnid'];
+    	$now = time();
+			$start_time = strtotime(date('Y-m-d',$now))-86400;
+			$cur_time = strtotime(date('Y-m-d H:s:i',$now));
+    	dump($start_time);
+    	$end_time = strtotime(date('Y-m-d',$now));
+			$com_count=8;
+			$loweor_count=2;
+
+			$psnfind = M('psn')->where(array('id'=>$psn))->find();
+			if(empty($psnfind)){
+				echo "PSN NULL.";
+				exit;
+			}
+			$btemp=$psnfind['base_temp'];
+    	$hlevl1=$psnfind['htemplev1'];
+    	$hlevl2=$psnfind['htemplev2'];
+    	$llevl1=$psnfind['ltemplev1'];
+    	$llevl2=$psnfind['ltemplev2'];
+			$temp_value=$psnfind['check_value'];
+
+			dump($btemp);
+			dump($hlevl1);
+			dump($hlevl2);
+			dump($llevl1);
+			dump($llevl2);
+			dump($temp_value);
+			
+			$devs = M('device')->where(array('psn'=>$psn,'flag'=>1,'dev_type'=>0))->select();
+			
+			if(empty($devs)){
+				echo "DEV NULL.";
+				exit;
+			}
+    	foreach($devs as $dev){
+    		$devidlist[]=$dev['devid'];
+    	}
+    	//dump($devidlist);
+    	
+    	$wheredev['devid']=array('in',$devidlist);
+    	
+    	$accSelect=M('access')->where($wheredev)->where('time >='.$start_time.' and time <='.$end_time)->where(array('psn'=>$psn))->order('time desc')->select();
+    	
+    	$sickSelect=D('lostacc')->where($wheredev)->where(array('psnid'=>$psn))->select();
+    	
+    	//dump($sickSelect);
+
+			dump('LOST:');
+			foreach($devs as $dev){
+				$devid=$dev['devid'];
+				$avg=$dev['avg_temp'];
+				$acc_size=0;
+				unset($acc_list);
+				$acc_list = array();
+				foreach($accSelect as $acc){
+					if($acc['devid']==$devid){
+						$acc_list[]=$acc;
+					}
+				}
+				$acc_size=count($acc_list);
+				
+				if($acc_size==0){
+					dump($devid);
+					$find_sick=false;
+					$sick=NULL;
+					foreach($sickSelect as $s){
+						if($s['devid']==$devid){
+							$find_sick=true;
+							$sick=$s;
+							dump('find sick.');
+							dump($sick);
+							break;
+						}
+					}
+					$findacc=M('access')->where(array('devid'=>$devid,'psn'=>$psn))->order('time desc')->find();
+					$index_time=$findacc['time'];
+					$days= (int)(($end_time-$index_time)/86400);
+					$date= date('Y-m-d H:i:s',$index_time);
+					if($days< 1){
+						$days=1;
+					}
+					if($sick==NULL){
+							if($index_time<=$end_time){
+								if($avg==0){
+									$ntemp=$findacc['temp1'];
+								}else{
+				    			$temp1=$findacc['temp1'];
+									$temp2=$findacc['temp2'];
+									$a=array($temp1,$temp2);
+									$t=max($a);
+									$vt=(float)$t;
+									if($vt < 30){
+										$ntemp=$vt;
+									}else{
+										$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
+									}
+								}
+								dump($ntemp);
+								if($ntemp<=$llevl1){
+										if($ntemp<=$llevl2){
+											$level=2;
+										}else{
+											$level=1;
+										}
+								}else if($ntemp>$hlevl1){
+										if($ntemp>$hlevl2){
+											$level=4;
+										}else{
+											$level=3;
+										}
+								}else{
+									$level=0;
+								}
+			        	$sk=array(
+						   	  'psnid'=>$psn,
+						  		'devid'=>$devid,
+						  		'sn'=>$dev['sn'],
+						  		'shed'=>$dev['shed'],
+						  		'fold'=>$dev['fold'],
+						  		'temp1'=>$findacc['temp1'],
+									'time'=>$index_time,
+									'level'=>$level,
+									'date'=>$date,
+									'state'=>3,
+									'days'=>$days,
+						  		);
+						  	echo "add:";
+						  	dump($sk);
+	  			  	 	$addSql=D('lostacc')->add($sk);
+							}
+					}else{
+						if($index_time<=$end_time){
+    					$sk=array(
+									'time'=>$index_time,
+									'date'=>$date,
+									'state'=>3,
+									'days'=>$days,
+						  		);
+						  echo "save2:";
+					  	$saveSql=D('lostacc')->where(array('devid'=>$devid,'psnid'=>$psn))->save($sk);
+						  dump($sk);
+						}else{
+							 echo "dell1:";
+							 $saveSql=D('lostacc')->where(array('devid'=>$devid,'psnid'=>$psn))->delete();
+						}
+					}
+				}
+			}
+	}	
 }

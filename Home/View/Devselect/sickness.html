@@ -28,9 +28,11 @@
     <p id="sicktitle1" style="text-align:center;font-size:60px;display:none"><%count($devSelect1)%></p>
     <p id="sicktitle2" style="text-align:center;font-size:60px;display:none"><%count($devSelect2)%></p>
     <p id="sicktitle3" style="text-align:center;font-size:60px;display:none"><%count($devSelect3)%></p>
+    <p id="sicktitle4" style="text-align:center;font-size:60px;display:none"><%count($devSelect4)%></p>
     <p id="tab1sick" style="text-align:center;color:orange;display:none">异常数量</p>
     <p id="tab2recover" style="text-align:center;color:green;display:none">治疗数量</p>
     <p id="tab3recycle" style="text-align:center;color:blue;display:none">异常数量</p>
+    <p id="tab4recycle" style="text-align:center;color:blue;display:none">异常数量</p>
 </div>
 
 <div class="weui-tab">
@@ -39,6 +41,7 @@
             <a id="navbar1" class="weui-navbar__item" href="#tab1"> 温度异常 </a>
             <a id="navbar2" class="weui-navbar__item" href="#tab2"> 治疗中 </a>
             <a id="navbar3" class="weui-navbar__item" href="#tab3"> 低温异常 </a>
+            <a id="navbar4" class="weui-navbar__item" href="#tab4"> 数据异常 </a>
         </div>
         <div class="weui-tab__panel">
             <div id="tab1" class="weui_tab_bd_item" style="display:none">
@@ -289,6 +292,100 @@
                 <%/foreach%>
                 <p style="text-align:center">已到达底部</p>
             </div>
+            <div id="tab4" class="weui_tab_bd_item" style="display:none">
+                <%foreach $devSelect4 as $value%>
+                <a
+                   class="weui-media-box weui-media-box_appmsg">
+                    <table style="width: 100%;" cellspacing="1" cellpadding="1" border="0"
+                           align="left">
+                        <tbody>
+                        <tr>
+                           	<td style="font-size:larger;font-weight:bold;">SN:<%$value['sn']%>
+                            </td>
+                            <td style="font-size:larger">ID:<%$value['devid']%></td>
+                            <td>
+                                <div id="battery"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                        		<%if $value["level"] eq 2  %>
+                            <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/todayValue?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:lightblue;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                                </a>
+                            </td>
+                            <%else if $value["level"] eq 1 %>
+                            <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/todayValue?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:lightgray;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                                </a>
+                            </td>
+                            <%else if $value["level"] eq 3 %>
+                            <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/todayValue?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:gold;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                                </a>
+                            </td>
+                            <%else if $value["level"] eq 4 %>
+                            <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/todayValue?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:darkorange;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                                </a>
+                            </td>
+                            <%else%>
+                            <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/todayValue?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
+                            	  <button id="checktemp" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="font-size:larger;background-color:lightgreen;height:35px;color:White;border-radius:3px;">
+                                   <%number_format($value["temp1"],2)%>℃
+                                </button>
+                                </a>
+                            </td>                     
+                            <%/if%>
+                            <td style="font-weight:bold;">异常:<%$value['days']%>天</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>
+                            	<div style="height:25px;margin-top:10px;">
+                            	<label class="weui-form-preview__label"><%date('Y-m-d H:i:s',$value['time'])%></label>
+                            	</div>
+                            </td>
+                            
+                            <td>&nbsp;</td>
+                            <td>
+                            		<a href="<%$smarty.const.__APP__%>/devselect/todayValue?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">
+                                <button id="TableOperate" type="button"
+                                        class="btn btn-lg btn-primary" onclick="OperateSelect()"
+                                        style="background-color:CornflowerBlue;width:80px;height:25px;color:White;border-radius:4px;">
+                                    查看
+                                </button>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </a>
+                <%/foreach%>
+                <p style="text-align:center">已到达底部</p>
+            </div>            
         </div>
     </div>
 </div>
@@ -322,26 +419,42 @@
                 $("#sicktitle1").css("display","none");
                 $("#sicktitle2").css("display","");
                 $("#sicktitle3").css("display","none");
+                $("#sicktitle4").css("display","none");
                 $("#tab1sick").css("display","none");
                 $("#tab2recover").css("display","");
                 $("#tab3recycle").css("display","none");
+                $("#tab4recycle").css("display","none");
             }else if(data_toggle=="#tab3"){
                 //console.log("tab3recycle");
                 $("#sicktitle1").css("display","none");
                 $("#sicktitle2").css("display","none");
                 $("#sicktitle3").css("display","");
+                $("#sicktitle4").css("display","none");
                 $("#tab1sick").css("display","none");
                 $("#tab2recover").css("display","none");
                 $("#tab3recycle").css("display","");
+                $("#tab4recycle").css("display","none");
+            }else if(data_toggle=="#tab4"){
+                //console.log("tab3recycle");
+                $("#sicktitle1").css("display","none");
+                $("#sicktitle2").css("display","none");
+                $("#sicktitle3").css("display","none");
+                $("#sicktitle4").css("display","");
+                $("#tab1sick").css("display","none");
+                $("#tab2recover").css("display","none");
+                $("#tab3recycle").css("display","none");
+                $("#tab4recycle").css("display","");
             }else{
                 //console.log("other");
                 //console.log("data_toggle: ",data_toggle);
                 $("#sicktitle1").css("display","");
                 $("#sicktitle2").css("display","none");
                 $("#sicktitle3").css("display","none");
+                $("#sicktitle4").css("display","none");
                 $("#tab1sick").css("display","");
                 $("#tab2recover").css("display","none");
                 $("#tab3recycle").css("display","none");
+                $("#tab4recycle").css("display","none");
             }
         });
     });
@@ -357,18 +470,23 @@
 					$("#navbar1").removeClass('weui-bar__item_on');
 					$("#navbar2").removeClass('weui-bar__item_on');
 					$("#navbar3").removeClass('weui-bar__item_on');
+					$("#navbar4").removeClass('weui-bar__item_on');
           $("#tab1").removeClass("weui_tab_bd_item_active");
           $("#tab2").removeClass('weui_tab_bd_item_active');
           $("#tab3").removeClass('weui_tab_bd_item_active');
+          $("#tab4").removeClass('weui_tab_bd_item_active');
 					$("#tab1").css("display","none");
 					$("#tab2").css("display","none");
 					$("#tab3").css("display","none");
+					$("#tab4").css("display","none");
 					$("#sicktitle1").css("display","none");
 					$("#sicktitle2").css("display","none");
 					$("#sicktitle3").css("display","none");
+					$("#sicktitle4").css("display","none");
 					$("#tab1sick").css("display","none");
 					$("#tab2recover").css("display","none");
 					$("#tab3recycle").css("display","none");
+					$("#tab4recycle").css("display","none");
 					
 					$("#navbar2").addClass('weui-bar__item_on');
           $("#tab2").addClass("weui_tab_bd_item_active");	
@@ -379,40 +497,77 @@
 					$("#navbar1").removeClass('weui-bar__item_on');
 					$("#navbar2").removeClass('weui-bar__item_on');
 					$("#navbar3").removeClass('weui-bar__item_on');
+					$("#navbar4").removeClass('weui-bar__item_on');
           $("#tab1").removeClass("weui_tab_bd_item_active");
           $("#tab2").removeClass('weui_tab_bd_item_active');
           $("#tab3").removeClass('weui_tab_bd_item_active');
+          $("#tab4").removeClass('weui_tab_bd_item_active');
 					$("#tab1").css("display","none");
 					$("#tab2").css("display","none");
 					$("#tab3").css("display","none");
+					$("#tab4").css("display","none");
 					$("#sicktitle1").css("display","none");
 					$("#sicktitle2").css("display","none");
 					$("#sicktitle3").css("display","none");
+					$("#sicktitle4").css("display","none");
 					$("#tab1sick").css("display","none");
 					$("#tab2recover").css("display","none");
 					$("#tab3recycle").css("display","none");
+					$("#tab4recycle").css("display","none");
 					
 					$("#navbar3").addClass('weui-bar__item_on');
           $("#tab3").addClass("weui_tab_bd_item_active");
           $("#tab3").css("display","");
           $("#sicktitle3").css("display","");
           $("#tab3recycle").css("display","");
+			}else if(tab=="4"){
+					$("#navbar1").removeClass('weui-bar__item_on');
+					$("#navbar2").removeClass('weui-bar__item_on');
+					$("#navbar3").removeClass('weui-bar__item_on');
+					$("#navbar4").removeClass('weui-bar__item_on');
+          $("#tab1").removeClass("weui_tab_bd_item_active");
+          $("#tab2").removeClass('weui_tab_bd_item_active');
+          $("#tab3").removeClass('weui_tab_bd_item_active');
+          $("#tab4").removeClass('weui_tab_bd_item_active');
+					$("#tab1").css("display","none");
+					$("#tab2").css("display","none");
+					$("#tab3").css("display","none");
+					$("#tab4").css("display","none");
+					$("#sicktitle1").css("display","none");
+					$("#sicktitle2").css("display","none");
+					$("#sicktitle3").css("display","none");
+					$("#sicktitle4").css("display","none");
+					$("#tab1sick").css("display","none");
+					$("#tab2recover").css("display","none");
+					$("#tab3recycle").css("display","none");
+					$("#tab4recycle").css("display","none");
+					
+					$("#navbar4").addClass('weui-bar__item_on');
+          $("#tab4").addClass("weui_tab_bd_item_active");
+          $("#tab4").css("display","");
+          $("#sicktitle4").css("display","");
+          $("#tab4recycle").css("display","");
 			}else{
 					$("#navbar1").removeClass('weui-bar__item_on');
 					$("#navbar2").removeClass('weui-bar__item_on');
 					$("#navbar3").removeClass('weui-bar__item_on');
+					$("#navbar4").removeClass('weui-bar__item_on');
           $("#tab1").removeClass("weui_tab_bd_item_active");
           $("#tab2").removeClass('weui_tab_bd_item_active');
           $("#tab3").removeClass('weui_tab_bd_item_active');
+          $("#tab4").removeClass('weui_tab_bd_item_active');
 					$("#tab1").css("display","none");
 					$("#tab2").css("display","none");
 					$("#tab3").css("display","none");
+					$("#tab4").css("display","none");
 					$("#sicktitle1").css("display","none");
 					$("#sicktitle2").css("display","none");
 					$("#sicktitle3").css("display","none");
+					$("#sicktitle4").css("display","none");
 					$("#tab1sick").css("display","none");
 					$("#tab2recover").css("display","none");
 					$("#tab3recycle").css("display","none");
+					$("#tab4recycle").css("display","none");
 					
 					$("#navbar1").addClass('weui-bar__item_on');
           $("#tab1").addClass("weui_tab_bd_item_active");
