@@ -92,7 +92,7 @@ class DevselectController extends HomeController {
 				$devSelect4=M('lostacc')->where(array('psnid'=>$psnid,'state'=>3))->order('devid asc')->select();
 			}
 			$temparr=array('temp1'=>$temp1,'temp2'=>$temp2);
-			$devarr=array('dev1'=>$devSelect1,'dev2'=>$devSelect2,'dev3'=>$devSelect3);
+			$devarr=array('dev1'=>$devSelect1,'dev2'=>$devSelect2,'dev3'=>$devSelect3,'dev4'=>$devSelect4);
 			$wx_count=200;
 			if($rel_uid==5){
 				$wx_count=500;

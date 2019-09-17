@@ -1066,4 +1066,55 @@ class AddController extends HomeController {
 				exit;
 			}
 		}
+		
+		public function setting4wx(){
+			$aip = $_POST['aip'];
+			if($aip=='ios'){
+				$devid = $_POST['devid'];
+				$psnid= $_POST['psnid'];
+				$temp = $_POST['temp1'];
+			}
+			$msg= $_POST['msg'];
+	  	$state =(int)$_POST['flag'];
+
+	  	$this->assign('name',$name);
+	 		//var_dump($state);
+	 		//var_dump($msg);
+			if(!empty($msg)){
+			 $rec = array(
+			 					'devid'=>$devid,
+			 					'psnid'=>$psnid,
+			 					'temp1'=>$temp,
+			 					'msg'=>$msg,
+			 				);
+			 $rd = D('recovery')->add($rec);	
+			 $sk=array(
+					'state'=>0,
+					);
+			 $saveSql=D('lostacc')->where(array('devid'=>$devid,'psnid'=>$psnid))->save($sk);
+			}
+			$jarr=array('ret'=>array("ret_message"=>'success','status_code'=>10000200));
+			$this ->redirect('',array(),1,json_encode(array('Dev'=>$jarr)));
+			exit;
+		}
+		
+ 	  public function recoverylist(){
+				$psnid=$_GET['psnid'];
+				//dump($psnid);
+	    	if(!empty($psnid)){
+		      $devSelect=M('recovery')->where(array('psnid'=>$psnid))->order('devid asc')->group('devid')->select();
+		      //dump($devSelect);
+					$this->assign('devSelect',$devSelect);
+					$this->display();
+				}
+    }
+    
+    public function recoveryfun(){
+    		$devid=$_GET['devid'];
+    		$psnid=$_GET['psnid'];
+    		$delSql=D('device')->where(array('devid'=>$devid,'psn'=>$psnid))->delete();
+    		$delrec=D('recovery')->where(array('devid'=>$devid,'psnid'=>$psnid))->delete();
+    		$this ->redirect('/add/recoverylist',array('psnid'=>$psnid),0,'');
+    }
+    
 }
