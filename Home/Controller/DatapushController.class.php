@@ -1906,6 +1906,8 @@ class DatapushController extends Controller {
    	$now = $now-$today;
    	
    	$re_devs =D('device')->where(array('psn'=>$psnid,'re_flag'=>1))->limit(0,64)->select();
+
+   	$cur_devs =D('device')->where(array('psn'=>$psnid))->select();
    	
    	//var_dump($re_devs);
     for($i=0 ; $i < $count ; $i++){
@@ -2110,10 +2112,8 @@ class DatapushController extends Controller {
 			 	 	}
 		 		}
 		    	//var_dump('temp3:'.$temp3);
-		    	$acc_value=D('access')->where(array('time'=>$up_time,'psn'=>$psnid,'devid'=>$snint))->find();
-
-		    	if(empty($acc_value)){
-			  		$access=D('access')->add(array(
+		    	//$acc_value=D('access')->where(array('time'=>$up_time,'psn'=>$psnid,'devid'=>$snint))->find();
+					$acc_add=array(
 			  				'psn'=>$psnid,
 					  		'devid'=>$snint,
 					  		'temp1'=>$temp1,
@@ -2125,16 +2125,16 @@ class DatapushController extends Controller {
 					  		'delay'=>$delay,
 					  		'time' =>$up_time,
 					  		'sid' =>$sid,
-					  	));
-
-				  	 	$saveSql=M('device')->where(array('devid'=>$snint,'psn'=>$psnid))->save(array(
-				  	 																																	'state'=>1,
-				  	 																																	'battery'=>$battery,
-																																				  	 	'dev_state'=>$state,
-																																				  	 	'version'=>$cvs)
-																															  	 						);
-					}
-					
+					  	);
+					$dev_save=array(
+								'state'=>1,
+								'battery'=>$battery,
+					  	 	'dev_state'=>$state,
+					  	 	'version'=>$cvs);
+					  	 	
+					$accadd_list[]=$acc_add;
+					$devsave_list[]=$dev_save;
+	
 				}else{
 						if($j==0){
 					    $temp1str1 = substr($tempstr,3,1);
@@ -2219,35 +2219,70 @@ class DatapushController extends Controller {
 		 	 	}
 		    //var_dump('temp3:'.$temp3);
 		    
-					$tacc_value=D('taccess')->where(array('time'=>$up_time,'psn'=>$psnid,'devid'=>$snint))->find();
+			  	$acc_add2=array(
+			   	  'psn'=>$psnid,
+			  		'devid'=>$snint,
+			  		'temp1'=>$temp1,
+			  		'temp2'=>$temp2,
+		  			'env_temp'=>$temp3,
+		  			'sign'=>$sign,
+			  		'cindex'=>$cindex,
+			  		'lcount'=>$lcount,
+			  		'delay'=>$delay,
+			  		'time' =>$up_time,
+			  		'sid' =>$sid,
+			  	);
 
-					if(empty($tacc_value)){
-					   $access=D('taccess')->add(array(
-					   	  'psn'=>$psnid,
-					  		'devid'=>$snint,
-					  		'temp1'=>$temp1,
-					  		'temp2'=>$temp2,
-				  			'env_temp'=>$temp3,
-				  			'sign'=>$sign,
-					  		'cindex'=>$cindex,
-					  		'lcount'=>$lcount,
-					  		'delay'=>$delay,
-					  		'time' =>$up_time,
-					  		'sid' =>$sid,
-					  	));
+					$dev_save2=array(
+													'state'=>1,
+													'battery'=>$battery,
+										  	 	'dev_state'=>$state,
+										  	 	'version'=>$cvs);
 
-				  	 	$saveSql=M('device')->where(array('devid'=>$snint,'psn'=>$psnid))->save(array(
-				  	 																																	'state'=>1,
-				  	 																																	'battery'=>$battery,
-																																				  	 	'dev_state'=>$state,
-																																				  	 	'version'=>$cvs)
-																																				  	 	);
-					}
+					$accadd_list2[]=$acc_add2;
+					$devsave_list[]=$dev_save2;
 				}
 			}
 			//var_dump($temp1);
     	//var_dump($temp2);
     }
+    
+    $user=D('access');
+		$access1=$user->addAll($accadd_list);
+		
+    $user2=D('taccess');
+		$access2=$user2->addAll($accadd_list2);
+		//dump($user->getlastsql());
+		//dump("acc add 1:");
+		//dump($access1);
+		
+		foreach($cur_devs as $dev){
+			$devid = $dev['devid'];
+			$state= $dev['state'];
+			$battery= $dev['battery'];
+			$dev_state= $dev['dev_state'];
+			$version= $dev['version'];
+			foreach($devsave_list as $devsave){
+				if($devid==$devsave['devid']){
+					if($state!=$devsave['state']){
+						$mysave['state']=$devsave['state'];
+					}
+					if($battery!=$devsave['battery']){
+						$mysave['battery']=$devsave['battery'];
+					}
+					if($dev_state!=$devsave['dev_state']){
+						$mysave['dev_state']=$devsave['dev_state'];
+					}
+					if($version!=$devsave['version']){
+						$mysave['version']=$devsave['version'];
+					}
+					if(!empty($mysave)){
+						$dev1=D('device')->save($mysave);
+						//dump($mysave);
+					}
+				}
+			}
+		}
 
     //未解包比对
     
