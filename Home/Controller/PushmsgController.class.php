@@ -53,7 +53,9 @@ class PushmsgController extends Controller {
      	//dump(iconv_get_encoding());
      	dump($msg);
      	dump($phone);
-     	send163msg($phone,$msg);
+     	if($phone&&$other){
+     		  send163msg($phone,$msg);
+     	}
      	exit;
     }
 }

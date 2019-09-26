@@ -41,66 +41,39 @@
 		<ul class="nav navbar-nav" >
 			<li class="active"><a href="<%$smarty.const.__APP__%>/devselect/select"><b >首页</b></a></li>
 			<li><a href="<%$smarty.const.__APP__%>/acadd/checkrssi"><b>基站RSSI</b></a></li>
-			<li><a href="<%$smarty.const.__APP__%>/manager/logout"><b>退出登陆</b></a></li>
 			</ul>
 		</div>
 		</div>
 		
 		<div class="container" >
 		  <div class="weui-btn-area">
-		    <button class="weui-btn weui-btn_primary" onclick="addserver()">添加牧场</button>
+		    <button class="weui-btn weui-btn_primary" onclick="addstation()">添加配种</button>
 		  </div>
      <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
      <thead>
 			<tr>
-				<th>信息</th>
-				<th>统编</th>
+				<th>设备ID</th>
 				<th>SN</th>
-				<th>研发管理</th>
-				<th>牧场管理</th>
-				<th>生产信息</th>
+				<th>舍</th>
+				<th>配种时间</th>
 			</tr>
 		</thead>
 		  <tbody>
-			<%foreach $psnSelect as $value%>
+			<%foreach $devSelect as $value%>
 			<tr>
-				<td><%$value['info']%></td>
-				<td><%$value['tsn']%></td>
+				<td><%$value['devid']%></td>
 				<td><%$value['sn']%></td>
+				<td><%$value['shed']%></td>
+				<td><%$value['time']%></td>
 				<td>
-					<a href="<%$smarty.const.__APP__%>/devselect/devlist?psnid=<%$value['id']%>">设备信息</a>
-					<!--a href="<%$smarty.const.__APP__%>/acadd/select?psnid=<%$value['id']%>">|设备温度</a-->
-					<a href="<%$smarty.const.__APP__%>/devselect/station?psnid=<%$value['id']%>">|基站信息</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/devmove?psnid=<%$value['id']%>">|1301信息</a>
-					<a href="<%$smarty.const.__APP__%>/add/recoverylist?psnid=<%$value['id']%>">|回收设备</a>
+					<a href="<%$smarty.const.__APP__%>/add/delstation?autoid=<%$value['autoid']%>">删除</a>
 				</td>
-				<td>
-					<a href="<%$smarty.const.__APP__%>/devmanager/devlist?psnid=<%$value['id']%>">设备编辑</a>
-					<!--a href="<%$smarty.const.__APP__%>/product/scanfactoryall?psnid=<%$value['id']%>">扫描设备</a-->
-					<!--a href="<%$smarty.const.__APP__%>/product/factorytempeorall?psnid=<%$value['id']%>">|错误设备</a-->
-					<!--a href="<%$smarty.const.__APP__%>/product/scandevlow?psnid=<%$value['id']%>">|低温设备</a-->
-				</td>
-				<td>
-					<a href="<%$smarty.const.__APP__%>/product/productlist?psnid=<%$value['id']%>">查看</a>
-				</td>
-				<!--td>
-					<a href="<%$smarty.const.__APP__%>/devselect/checkfactory?psnid=<%$value['id']%>">重新扫描</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factoryfail?psnid=<%$value['id']%>">|次数不足</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factorypass?psnid=<%$value['id']%>">|成功设备</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factorynone?psnid=<%$value['id']%>">|未上报</a>
-				</td>
-				<td>
-					<a href="<%$smarty.const.__APP__%>/devselect/factoryfailout?psnid=<%$value['id']%>">次数不足</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factorynoneout?psnid=<%$value['id']%>">|未上报</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factoryhigh?psnid=<%$value['id']%>">|高温</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/factorylow?psnid=<%$value['id']%>">|低温</a>
-				</td-->
 			</tr>
 			<%/foreach%>
 		</tbody>
 		</table>
 		</div>
-	<!--div class="container" style="margin-top: 50px"-->
+	<!--div class="container" style="margin-top: 50px"->
 </body>
 <!-- Required datatable js -->
 <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jquery.dataTables.min.js"></script>
@@ -110,26 +83,16 @@
           //Buttons examples
           var table = $('#datatable-buttons').DataTable({
               lengthChange: true,
-              info: false,
+              iDisplayLength: 25,
+              info: true,
               buttons: ['excel'],
               bSort: false,
 							columnDefs: [ 
-								{
-							      "targets": 0,
-							      "searchable": false
-								},
-								{
-							      "targets": 1,
-							      "searchable": false
-								},
-								{
-							      "targets": 3,
-							      "searchable": false
-								},
-								{
-							      "targets": 4,
-							      "searchable": false
-								},
+									{
+								      "targets": 6,
+								      "searchable": false
+									},
+		
 							],
               language: {
                   "sProcessing": "处理中...",
@@ -155,12 +118,13 @@
                       "sSortDescending": ": 以降序排列此列"
                   }
               }
-          });;
+          });
+
           table.buttons().container()
                   .appendTo('#datatable-buttons_wrapper .col-md-6:eq(0)');
       } );
-      function addserver(){
-          window.location.href="<%$smarty.const.__APP__%>/add/addserver";
+      function addstation(){
+          window.location.href="<%$smarty.const.__APP__%>/add/addstation?psnid=<%$psnid%>";
       }
 </script>
 </html>

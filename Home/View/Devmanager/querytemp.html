@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>add</title>
+	<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script>
+	
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+	<!--<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css">-->
+				<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
+        <!-- DataTables -->
+        <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <!-- Responsive datatable examples -->
+        <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <!-- Buttons examples -->
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.buttons.min.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jszip.min.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/pdfmake.min.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/vfs_fonts.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.html5.min.js"></script>
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.print.min.js"></script>
+        <!-- Responsive examples -->
+        <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
+				<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+				<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+				
+				<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+				<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
+  <style>
+    b {color: #23527C;}
+  </style>
+</head>
+<body>
+<div class="header" >
+ 	<div class="container" >
+ 	<div class="navbar navbar-default navbar-fixed-left" >
+		<ul class="nav navbar-nav" >
+			<li><a href="<%$smarty.const.__APP__%>/devselect/select"><b >首页</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/acadd/checkrssi"><b>基站RSSI</b></a></li>
+			</ul>
+		</div>
+		</div>
+
+<div class="container">
+
+  <form class="form-horizontal" name="f1"      action=""   method="post" >
+    <fieldset>
+    <div class="control-group" >
+	      <label class="control-label" style="margin-top: 5px">查询日期</label>
+	      <div class="controls"  style="margin-top: 10px">
+	      <input name="time" type="date"  value="<%$date%>">
+				</div>
+				<!--label class="control-label" style="margin-top: 5px">日期结束</label>
+				<div class="controls"  style="margin-top: 10px">
+				<input name="time2" type="date"  value="<%$date2%>">
+				</div-->
+		</div>
+    </fieldset>
+  <div class="form-actions"  style="margin-top: 10px">
+    <button type="submit" class="btn btn-primary">查询</button>
+  </div>
+  </form>
+
+ </div>
+    <div class="container">
+		 <form class="" name="f1" action="<%$smarty.const.__APP__ %>/devmanager/edittemp"  method="post" >
+			<input type="hidden" id="psnid" name="psnid" value="<%$psnid%>">
+			<input type="hidden" id="devid" name="devid" value="<%$devid%>">
+			<input type="hidden" id="time" name="time" value="<%$date%>"> 
+			<input type="hidden" id="time2" name="time2" value="<%$date2%>"> 
+		  <div class="weui-btn-area">
+		    <button class="weui-btn weui-btn_primary" type="submit">保存本页</button>
+		  </div>
+	     <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
+	     <thead>
+		     <tr>
+		        <th>DevId</th>
+		        <th>温度</th>
+		        <th>温度</th>
+		        <th>温度</th>
+		        <th>环境温度</th>
+		        <th>环境湿度</th>    
+		        <th>时间</th>
+		        <th>状态</th>
+		        <th>实测温度</th> 
+		     </tr>
+	     </thead>
+	     <tbody>
+		    <%foreach $selectSql as $v%>
+		    <tr>
+		      <td><%$v.devid%></td>
+		      <td><%$v.temp1%></td>
+		      <td><%$v.temp2%></td>
+		      <%if $v.env_temp eq 255 %>
+		      <td>空</td>
+		      <%else%>
+		      <td><%$v.env_temp%></td>
+		      <%/if%>
+					<td><%$v.env_temp1%></td>
+					<td><%$v.env_temp2%></td>
+		      <td><%date("Y-m-d H:i:s",$v.time)%></td>
+		      <td>
+              <div id="state">
+              <select style="width:100px;" name="state-<%$v['id']%>" id="state-<%$v['id']%>" onchange="kindChange(selectedIndex,<%$v['id']%>);" class="form-control" data-style="btn-light" >
+                      <option value ="0">正常</option>
+											<option value ="1">高温</option>
+											<option value ="2">低温</option>
+              </select>
+              </div>
+              <div id="kind_view0-<%$v['id']%>" style="display:none;">
+              <select name="kind0-<%$v['id']%>" id="kind0-<%$v['id']%>" class="form-control" data-style="btn-light" style="width:100px;">
+                  <%foreach $kind0 as $k0%>
+                      <option value ="<%$k0['type']%>"><%$k0['name']%></option>
+                  <%/foreach%>
+              </select>
+              </div>
+              <div id="kind_view1-<%$v['id']%>" style="display:none;">
+              <select name="kind1-<%$v['id']%>" id="kind1-<%$v['id']%>" class="form-control" data-style="btn-light" style="width:100px;">
+                  <%foreach $kind1 as $k1%>
+                      <option value ="<%$k1['type']%>"><%$k1['name']%></option>
+                  <%/foreach%>
+              </select>
+              </div>
+              <div id="kind_view2-<%$v['id']%>" style="display:none">
+              <select name="kind2-<%$v['id']%>" id="kind2-<%$v['id']%>" class="form-control" data-style="btn-light" style="width:100px;">
+                  <%foreach $kind2 as $k2%>
+                      <option value ="<%$k2['type']%>"><%$k2['name']%></option>
+                  <%/foreach%>
+              </select>
+              </div>
+					</td>
+		      <td><input style="width:80px;" type="text" id="real_temp-<%$v['id']%>" name="real_temp-<%$v['id']%>" value="<%$v['real_temp']%>"/></td>
+		    </tr>
+		    <%/foreach%>
+	     </tbody>
+	    </table>
+    </form>
+    </div>
+</div>
+</body>
+    <!-- jQuery  -->
+    <!-- Required datatable js -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.js"></script>
+    <!-- Buttons examples -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.buttons.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jszip.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/pdfmake.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/vfs_fonts.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.html5.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.print.min.js"></script>
+    <!-- Responsive examples -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/responsive.bootstrap4.min.js"></script>
+
+<script type="text/javascript">
+            $(document).ready(function() {
+                //Buttons examples
+                var table = $('#datatable-buttons').DataTable({
+                    lengthChange: true,
+                    iDisplayLength: 25,
+                    info: false,
+                    buttons: ['excel'],
+                    language: {
+                        "sProcessing": "处理中...",
+                        "sLengthMenu": "显示 _MENU_ 项结果",
+                        "sZeroRecords": "没有匹配结果",
+                        "sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                        "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                        "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
+                        "sInfoPostFix": "",
+                        "sSearch": "搜索:",
+                        "sUrl": "",
+                        "sEmptyTable": "表中数据为空",
+                        "sLoadingRecords": "载入中...",
+                        "sInfoThousands": ",",
+                        "oPaginate": {
+                            "sFirst": "首页",
+                            "sPrevious": "上页",
+                            "sNext": "下页",
+                            "sLast": "末页"
+                        },
+                        "oAria": {
+                            "sSortAscending": ": 以升序排列此列",
+                            "sSortDescending": ": 以降序排列此列"
+                        }
+                    }
+                });
+
+                table.buttons().container()
+                        .appendTo('#datatable-buttons_wrapper .col-md-6:eq(0)');
+            });
+         		<%foreach $selectSql as $v%>
+         			var id = "<%$v['id']%>";
+         			var state = "<%$v['state']%>";
+         			var view = "state-"+id;
+         			var kind_view0="kind_view0-"+id;
+         			var kind_view1="kind_view1-"+id;
+         			var kind_view2="kind_view2-"+id;
+         			var kind_select0="kind0-"+id;
+         			var kind_select1="kind1-"+id;
+         			var kind_select2="kind2-"+id;
+         			console.log(state);
+         			//console.log(kind_view1);
+         			//console.log(kind_view2);
+         			if(state==0){
+         				document.getElementById(view)[0].selected=true;
+         				document.getElementById(kind_view0).style.display="";
+         				document.getElementById(kind_view1).style.display="none";
+         				document.getElementById(kind_view2).style.display="none";
+         			}else{
+         				var typeindex=0;
+         				<%foreach $kind0 as $k0%>
+         					var type = "<%$k0['type']%>";
+         					if(state==type){
+		         				document.getElementById(view)[0].selected=true;
+		         				console.log(kind_select0);
+		         				console.log(typeindex);
+		         				document.getElementById(kind_select0)[typeindex].selected=true;
+		         				document.getElementById(kind_view0).style.display="";
+		         				document.getElementById(kind_view1).style.display="none";
+		         				document.getElementById(kind_view2).style.display="none";
+         					}
+									typeindex=typeindex+1;
+         				<%/foreach%>
+         				var typeindex=0;
+         				<%foreach $kind1 as $k1%>
+         					var type = "<%$k1['type']%>";
+         					if(state==type){
+		         				document.getElementById(view)[1].selected=true;
+		         				console.log(kind_select1);
+		         				console.log(typeindex);
+		         				document.getElementById(kind_select1)[typeindex].selected=true;
+		         				document.getElementById(kind_view0).style.display="none";
+		         				document.getElementById(kind_view1).style.display="";
+		         				document.getElementById(kind_view2).style.display="none";
+         					}
+									typeindex=typeindex+1;
+         				<%/foreach%>
+         				typeindex=0;
+         				<%foreach $kind2 as $k2%>
+         					var type = "<%$k2['type']%>";
+         					if(state==type){
+		         				document.getElementById(view)[2].selected=true;
+		         				console.log(kind_select2);
+		         				console.log(typeindex);
+		         				document.getElementById(kind_select2)[typeindex].selected=true;
+		         				document.getElementById(kind_view0).style.display="none";
+		         				document.getElementById(kind_view1).style.display="none";
+		         				document.getElementById(kind_view2).style.display="";
+         					}
+									typeindex=typeindex+1;
+         				<%/foreach%>
+         			}
+         			
+         		<%/foreach%>
+            
+            
+            
+        function getLocalTime(nS) {  
+            return new Date(parseInt(nS) * 1000).Format("yyyy-MM-dd hh:mm:ss");  
+        }
+        
+				function kindChange(index,id){
+						var view0="kind_view0-"+id;
+       			var view1="kind_view1-"+id;
+       			var view2="kind_view2-"+id;
+         		if(index==1){
+         			document.getElementById(view0).style.display="none";
+         			document.getElementById(view1).style.display="";
+         			document.getElementById(view2).style.display="none";
+         		}else if(index==2){
+         			document.getElementById(view0).style.display="none";
+         			document.getElementById(view1).style.display="none";
+         			document.getElementById(view2).style.display="";
+         		}else{
+         			document.getElementById(view0).style.display="";
+         			document.getElementById(view1).style.display="none";
+         			document.getElementById(view2).style.display="none";
+         		}
+     				//alert(values);
+     		}; 
+</script>
+</html>

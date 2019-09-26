@@ -70,10 +70,15 @@
         <th>温度</th>
         <th>温度</th>
         <th>温度</th>
+        <th>环境温度</th>
+        <th>环境湿度</th>
         <th>延迟</th>
         <th>信号</th>
         <th>频点</th>
-        <th>丢失</th>       
+        <th>丢失</th>
+        <th>基站ID</th>
+        <th>状态</th>
+        <th>实测温度</th>
         <th>时间</th>
      </tr>
      </thead>
@@ -88,10 +93,15 @@
       <%else%>
       <td><%$v.env_temp%></td>
       <%/if%>
+			<td><%$v.env_temp1%></td>
+			<td><%$v.env_temp2%></td>
       <td><%$v.delay%></td>
       <td><%$v.sign%></td>
       <td><%$v.cindex%></td>
       <td><%$v.lcount%></td>
+      <td><%$v.sid%></td>
+      <td><%$v.state%></td>
+      <td><%$v.real_temp%></td>
       <td><%date("Y-m-d H:i:s",$v.time)%></td>
     </tr>
     <%/foreach%>

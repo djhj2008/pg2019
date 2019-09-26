@@ -88,7 +88,7 @@ class DevselectController extends HomeController {
 				$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psn'=>$psnid))->count();
 				$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->order('devid asc')->select();
 				$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
-				$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(0,1)->order('devid asc')->select();
+				$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->order('devid asc')->select();
 				$devSelect4=M('lostacc')->where(array('psnid'=>$psnid,'state'=>3))->order('devid asc')->select();
 			}
 			$temparr=array('temp1'=>$temp1,'temp2'=>$temp2);
@@ -115,7 +115,7 @@ class DevselectController extends HomeController {
 			$devdount=M('device')->where('flag > 0 and dev_type=0')->where(array('psn'=>$psnid))->count();
 			$devSelect1=M('sickness')->where(array('psnid'=>$psnid,'state'=>1,'flag'=>0))->order('devid asc')->select();
 			$devSelect2=M('sickness')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
-			$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->limit(0,1)->order('devid asc')->select();
+			$devSelect3=M('sickness')->where(array('psnid'=>$psnid,'state'=>2,'flag'=>0))->order('devid asc')->select();
 			$devSelect4=M('lostacc')->where(array('psnid'=>$psnid,'state'=>3))->order('devid asc')->select();
 		}
 		if($rel_uid==2){
@@ -1030,8 +1030,8 @@ class DevselectController extends HomeController {
 				$temp=NULL;
 				$count = count($accss);
 				if($count==0){
-					var_dump($devid);
-					var_dump(count($accss));
+					dump('devid count 0 :'.$devid);
+					//var_dump(count($accss));
 					//continue;
 				}
 				$sum=0;
@@ -1065,9 +1065,10 @@ class DevselectController extends HomeController {
 				$avg= round($sum/$count,2);
 				//dump($avg);
 				if($avg< 30){
-					dump('avg:'.$avg);
+					dump('devid:'.$devid.' avg:'.$avg);
 					//$avg=0;
 				}else{
+					dump('devid:'.$devid.' avg:'.$avg);
 			  	$devSave=M('device')->where(array('psn'=>$psnid,'devid'=>$devid))->save(array('avg_temp'=>$avg));
 				}
 
@@ -1103,7 +1104,7 @@ class DevselectController extends HomeController {
 			dump($llevl2);
 			dump($temp_value);
 
-			$devs = M('device')->where(array('psn'=>$psn,'flag'=>1,'dev_type'=>0))->select();
+			$devs = M('device')->where(array('psn'=>$psn,'flag'=>1,'dev_type'=>0))->where('devid >=400')->select();
 			
 			if(empty($devs)){
 				echo "DEV NULL.";
@@ -2291,6 +2292,7 @@ class DevselectController extends HomeController {
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now))-86400;
 			$cur_time = strtotime(date('Y-m-d H:s:i',$now));
+			$pre_time = strtotime(date('Y-m-d H:s:i',$now))-3600*4;
     	dump($start_time);
     	$end_time = strtotime(date('Y-m-d',$now));
 			$com_count=8;
@@ -2315,7 +2317,11 @@ class DevselectController extends HomeController {
 			dump($llevl2);
 			dump($temp_value);
 			
-			$devs = M('device')->where(array('psn'=>$psn,'flag'=>1,'dev_type'=>0))->select();
+			if($psnid==12){
+				$devs = M('device')->where(array('psn'=>$psn,'flag'=>1,'dev_type'=>0))->select();
+			}else{
+				$devs = M('device')->where(array('psn'=>$psn,'flag'=>1,'dev_type'=>0))->where('devid>=400')->select();
+			}
 			
 			if(empty($devs)){
 				echo "DEV NULL.";
@@ -2329,6 +2335,8 @@ class DevselectController extends HomeController {
     	$wheredev['devid']=array('in',$devidlist);
     	
     	$accSelect=M('access')->where($wheredev)->where('time >='.$start_time.' and time <='.$end_time)->where(array('psn'=>$psn))->order('time desc')->select();
+    	
+    	$accSelect2=M('access')->where($wheredev)->where('time >='.$pre_time.' and time <='.$cur_time)->where(array('psn'=>$psn))->order('time desc')->select();
     	
     	$sickSelect=D('lostacc')->where($wheredev)->where(array('psnid'=>$psn))->select();
     	
@@ -2347,6 +2355,16 @@ class DevselectController extends HomeController {
 					}
 				}
 				$acc_size=count($acc_list);
+
+				$acc_size2=0;
+				unset($acc_list2);
+				$acc_list2 = array();
+				foreach($accSelect2 as $acc){
+					if($acc['devid']==$devid){
+						$acc_list2[]=$acc;
+					}
+				}
+				$acc_size2=count($acc_list2);
 				
 				if($acc_size==0){
 					dump($devid);
@@ -2433,6 +2451,77 @@ class DevselectController extends HomeController {
 							 $saveSql=D('lostacc')->where(array('devid'=>$devid,'psnid'=>$psn))->delete();
 						}
 					}
+				}
+				
+				if($acc_size2==0&&$acc_size>0){
+					$find_sick=false;
+					$sick=NULL;
+					foreach($sickSelect as $s){
+						if($s['devid']==$devid){
+							$find_sick=true;
+							$sick=$s;
+							dump('find sick.');
+							dump($sick);
+							break;
+						}
+					}
+					
+					if($sick==NULL){
+						$findacc=M('access')->where(array('devid'=>$devid,'psn'=>$psn))->order('time desc')->find();
+						$index_time=$findacc['time'];
+						$days= 1;
+						$date= date('Y-m-d H:i:s',$index_time);
+						if($days< 1){
+							$days=1;
+						}
+								if($avg==0){
+									$ntemp=$findacc['temp1'];
+								}else{
+				    			$temp1=$findacc['temp1'];
+									$temp2=$findacc['temp2'];
+									$a=array($temp1,$temp2);
+									$t=max($a);
+									$vt=(float)$t;
+									if($vt < 30){
+										$ntemp=$vt;
+									}else{
+										$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
+									}
+								}
+								dump($ntemp);
+								if($ntemp<=$llevl1){
+										if($ntemp<=$llevl2){
+											$level=2;
+										}else{
+											$level=1;
+										}
+								}else if($ntemp>$hlevl1){
+										if($ntemp>$hlevl2){
+											$level=4;
+										}else{
+											$level=3;
+										}
+								}else{
+									$level=0;
+								}
+			        	$sk=array(
+						   	  'psnid'=>$psn,
+						  		'devid'=>$devid,
+						  		'sn'=>$dev['sn'],
+						  		'shed'=>$dev['shed'],
+						  		'fold'=>$dev['fold'],
+						  		'temp1'=>$findacc['temp1'],
+									'time'=>$index_time,
+									'level'=>$level,
+									'date'=>$date,
+									'state'=>3,
+									'days'=>$days,
+						  		);
+						  	echo "add today:";
+						  	dump($sk);
+	  			  	 	$addSql=D('lostacc')->add($sk);
+					}
+					
 				}
 			}
 	}	
