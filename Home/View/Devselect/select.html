@@ -57,7 +57,9 @@
 				<th>统编</th>
 				<th>SN</th>
 				<th>研发管理</th>
+				<%if $admin_userid eq 100 %>
 				<th>牧场管理</th>
+				<%/if%>
 				<th>生产信息</th>
 			</tr>
 		</thead>
@@ -74,12 +76,14 @@
 					<a href="<%$smarty.const.__APP__%>/devselect/devmove?psnid=<%$value['id']%>">|1301信息</a>
 					<a href="<%$smarty.const.__APP__%>/add/recoverylist?psnid=<%$value['id']%>">|回收设备</a>
 				</td>
+				<%if $admin_userid eq 100 %>
 				<td>
 					<a href="<%$smarty.const.__APP__%>/devmanager/devlist?psnid=<%$value['id']%>">设备编辑</a>
 					<!--a href="<%$smarty.const.__APP__%>/product/scanfactoryall?psnid=<%$value['id']%>">扫描设备</a-->
 					<!--a href="<%$smarty.const.__APP__%>/product/factorytempeorall?psnid=<%$value['id']%>">|错误设备</a-->
 					<!--a href="<%$smarty.const.__APP__%>/product/scandevlow?psnid=<%$value['id']%>">|低温设备</a-->
 				</td>
+				<%/if%>
 				<td>
 					<a href="<%$smarty.const.__APP__%>/product/productlist?psnid=<%$value['id']%>">查看</a>
 				</td>

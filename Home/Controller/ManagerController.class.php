@@ -226,21 +226,6 @@ class ManagerController extends HomeController {
 		}
 		
 		public function loginbase(){
-			$code = $_GET['code'];
-			if($code){
-				//var_dump($code);
-				$url="https://api.weixin.qq.com/sns/oauth2/access_token?appid=wx4dba4ec159da3bf7&secret=bf6fac869e348f3454d68ef9956cd61b&code=".$code."&grant_type=authorization_code";
-				$ret=http($url);
-				$ret=json_decode($ret,true);
-				//var_dump($ret);
-				$openid=$ret['openid'];
-				//var_dump($openid);
-				$userFind=M('useropenid')->where(array('openid'=>$openid))->find();
-			}
-			//var_dump($userFind);
-			
-			if(empty($userFind)){
-				
 				if($_POST['pwd']!=NULL&&$_POST['name']!=NULL){
 					$openid = $_SESSION['openid'];
 					//var_dump($openid);
@@ -252,31 +237,27 @@ class ManagerController extends HomeController {
 						'name'=>$name,
 						'pwd' =>md5($pwd)
 					);
+					//dump($nameArr);
+					//exit;
 					$userFind=M('user')->where($nameArr)->find();
 					if($userFind){
-							if($openid){
-								$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$userFind['id']));
-							}
-							session('userid',	$userFind['id']);
+							//if($openid){
+								//$userset=M('useropenid')->add(array('openid'=>$openid,'userid'=>$userFind['id']));
+							//}
+							//dump($userFind);
+							//exit;
+							session('admin_userid',	$userFind['id']);
             	$this ->redirect('/Devselect/select',array(),0,'');
             	exit;
               	
 					}else{
 							echo "<script type='text/javascript'>alert('用户名或密码错误.');distory.back();</script>";
-							$this->display();
+							//$this->display();
 	          	exit;
 					}
-				}else{
-					session('openid', 	$openid);	
 				}
 				$this->display();
-			}
-			else{
-				//$user=M('user')->where(array('id'=>$userFind['userid']))->find();
-				session('userid',	$userFind['userid']);
-      	$this ->redirect('/Devselect/select',array(),0,'');
       	exit;
-			}
 		}
 		
 		public function relogin(){

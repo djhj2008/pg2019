@@ -44,7 +44,6 @@
 		</div>
 
 <div class="container">
-
   <form class="form-horizontal" name="f1"      action=""   method="post" >
     <fieldset>
     <div class="control-group" >
@@ -62,10 +61,14 @@
     <button type="submit" class="btn btn-primary">查询</button>
   </div>
   </form>
-
+  <div class="control-group" style="margin-top: 10px">
+    <a href="<%$smarty.const.__APP__%>/devmanager/devlist?psnid=<%$psnid%>">
+    	<button class="btn btn-primary">返回设备列表</button>
+    </a>
+	</div>
  </div>
     <div class="container">
-		 <form class="" name="f1" action="<%$smarty.const.__APP__ %>/devmanager/edittemp"  method="post" >
+		 <form class="" name="f1" action="<%$smarty.const.__APP__ %>/devmanager/edittemp?psnid=<%$psnid%>"  method="post" >
 			<input type="hidden" id="psnid" name="psnid" value="<%$psnid%>">
 			<input type="hidden" id="devid" name="devid" value="<%$devid%>">
 			<input type="hidden" id="time" name="time" value="<%$date%>"> 
@@ -190,9 +193,6 @@
                     }
                 });
 
-                table.buttons().container()
-                        .appendTo('#datatable-buttons_wrapper .col-md-6:eq(0)');
-            });
          		<%foreach $selectSql as $v%>
          			var id = "<%$v['id']%>";
          			var state = "<%$v['state']%>";
@@ -258,8 +258,10 @@
          			
          		<%/foreach%>
             
-            
-            
+                table.buttons().container()
+                        .appendTo('#datatable-buttons_wrapper .col-md-6:eq(0)');
+            });
+  
         function getLocalTime(nS) {  
             return new Date(parseInt(nS) * 1000).Format("yyyy-MM-dd hh:mm:ss");  
         }
@@ -283,5 +285,10 @@
          		}
      				//alert(values);
      		}; 
+     		
+     		
+		    function jumpdev(){
+		        window.location.href="<%$smarty.const.__APP__ %>/devmanager/devlist?psnid=<%$psnid%>";
+		    }
 </script>
 </html>

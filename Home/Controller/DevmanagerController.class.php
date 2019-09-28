@@ -4,8 +4,13 @@ use Think\Controller;
 class DevmanagerController extends Controller {
 	public function devlist(){
 		$psnid = $_GET['psnid'];
+		$uid= $_SESSION['admin_userid'];
 		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->where('devid>=400')->order('devid asc')->select();
 		//dump($dev);
+		if($uid!=100){
+			echo "<script type='text/javascript'>alert('Not Admin.');distory.back();</script>";
+			exit;
+		}
 		$this->assign('psnid',$psnid);
 		$this->assign('devSelect',$devSelect);
 		$this->display();
@@ -14,6 +19,12 @@ class DevmanagerController extends Controller {
 	public function changevalue(){
 		$len = $_POST['datatable-buttons_length'];
 		$psnid = $_POST['psnid'];
+		$uid= $_SESSION['admin_userid'];
+
+		if($uid!=100){
+			echo "<script type='text/javascript'>alert('Not Admin.');distory.back();</script>";
+			exit;
+		}
 		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->where('devid>=400')->order('devid asc')->select();
 		
 		foreach($devSelect as $dev){
@@ -121,14 +132,23 @@ class DevmanagerController extends Controller {
 		$psnid=$_POST['psnid'];
 		$devid=$_POST['devid'];
 		$time=$_POST['time'];
-		
+		$uid= $_SESSION['admin_userid'];
   	$start_time = strtotime($time);
   	$end_time = strtotime($time)+86400-1;
   	
+  	$dev=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->find();
+  	
+  	if(empty($dev)||$uid!=100)
+		{
+			echo "<script type='text/javascript'>alert('Not Admin.');distory.back();</script>";
+			exit;
+		}  	
+  	
 		$selectSql=M('access')->group('time')->where('devid ='.$devid.' and psn= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select();
-
+		
 		foreach($selectSql as $acc){
 			$id=$acc['id'];
+			$cur_time=$acc['time'];
 			$state=$_POST['state-'.$id];
 			if($state==1){
 				$state=$_POST['kind1-'.$id];
@@ -145,6 +165,7 @@ class DevmanagerController extends Controller {
 			if($acc['real_temp']!=$real_temp){
 				$saveacc['real_temp']=$real_temp;
 			}
+			
 			if(!empty($saveacc)){
 				//dump('save:');
 				//dump(date('Y-m-d H:s:i',$acc['time']));
@@ -152,10 +173,9 @@ class DevmanagerController extends Controller {
 				$ret=M('access')->where(array('id'=>$id))->save($saveacc);
 			}
 		}
-
-
-		
-		
+		$lastacc=M('access')->where(array('devid'=>$devid,'psn'=>$psnid))->where('state>0')->order('time desc')->find();
+		$lastsate=$lastacc['state'];
+		$ret=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->save(array('state'=>$lastsate));
 		
 		$this ->redirect('/Devmanager/querytemp',array('psnid'=>$psnid,'devid'=>$devid,'time'=>$time),0,'');
 		exit;

@@ -6,16 +6,17 @@ class DevselectController extends HomeController {
 	
 	public function select(){
 		$tab = $_GET['tab'];
-  	$uid= $_SESSION['userid'];
+  	$uid= $_SESSION['admin_userid'];
   	//var_dump($uid);
   	//$psnSelect=M('psn')->where(array('userid'=>$uid))->select();
-  	if($uid==18){
+  	if($uid==18||$uid==100){
   		$psnSelect=M('psn')->select();
  		}else{
  			$psnSelect=M('psn')->where(array('userid'=>$uid))->select();
  		}
   	//var_dump($psnSelect);
 		//dump($dev);
+		$this->assign('admin_userid',$uid);
 		$this->assign('psnSelect',$psnSelect);
 		$this->display();
 	}

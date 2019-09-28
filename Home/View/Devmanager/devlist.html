@@ -57,6 +57,7 @@
 				<th>SN</th>
 				<th>舍</th>
 				<th>激活状态</th>
+				<th>标记状态</th>
 				<th>操作</th>
 			</tr>
 		</thead>
@@ -73,6 +74,7 @@
          	  <input type="checkbox"  name="flag-<%$value['id']%>">
          	  <%/if%>
 				</td>
+				<td><%$value['state']%></td>
 				<td>
 					<a href="<%$smarty.const.__APP__%>/devmanager/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">查看温度</a>	
 				</td>
