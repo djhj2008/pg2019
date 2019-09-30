@@ -11,6 +11,8 @@ class DevmanagerController extends Controller {
 			echo "<script type='text/javascript'>alert('Not Admin.');distory.back();</script>";
 			exit;
 		}
+		$sicktype=M('sicktype')->order('type asc')->select();
+		$this->assign('sicktype',$sicktype);
 		$this->assign('psnid',$psnid);
 		$this->assign('devSelect',$devSelect);
 		$this->display();
