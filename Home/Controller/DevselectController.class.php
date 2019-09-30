@@ -2559,8 +2559,13 @@ class DevselectController extends HomeController {
 				foreach($accSelect2 as $acc){
 					if($devid==$acc['devid']){
 						$al_find=false;
-						foreach($acclist2 as $al){
-							if($devid==$al['devid']){
+						for($i=0;$i< count($acclist2);$i++){
+							if($devid==$acclist2[$i]['devid']){
+								if($acc['sid']==1){
+									$acclist2[$i]['sid']=$acc['sid'].','.$acclist2[$i]['sid'];
+								}else{
+									$acclist2[$i]['sid']=$acclist2[$i]['sid'].','.$acc['sid'];
+								}
 								$al_find=true;
 								break;
 							}
