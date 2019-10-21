@@ -2612,7 +2612,7 @@ class DatapushController extends Controller {
 			}
 			if($changeid_find==false)
 			{
-					$havedev =D('changeidlog')->where(array('old_psn'=>$dev_psn,'old_devid'=>$snint))->find();
+					$havedev =D('changeidlog')->where(array('old_psn'=>$dev_psn,'old_devid'=>$snint,'psnid'=>$psnid))->find();
 					if(empty($havedev)){
 						$tmp_dev=array('psnid'=>$psnid,
 								'old_psn'=>$dev_psn,
@@ -2620,7 +2620,7 @@ class DatapushController extends Controller {
 								'sid'=>$sid,
 							);
 						$ret =D('changeidlog')->add($tmp_dev);
-					}	
+					}
 					//var_dump($ret);
 				}
     	//var_dump($cvs);
@@ -2814,7 +2814,7 @@ class DatapushController extends Controller {
 																															  	 						);
 					
 					}
-					$acc1301=D('access1301')->where(array('time'=>$up_time,'psn'=>$dev_psn,'devid'=>$snint))->find();
+					$acc1301=D('access1301')->where(array('time'=>$up_time,'psn'=>$dev_psn,'psnid'=>$psnid,'devid'=>$snint))->find();
 					if(empty($acc1301)){
 			  		$access=D('access1301')->add(array(
 			  				'psn'=>$dev_psn,
