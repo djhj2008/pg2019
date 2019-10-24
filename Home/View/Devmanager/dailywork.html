@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>设备展示</title>
+
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+	<!-- <link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css"> -->
+	<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
+	
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>assets/css/icons.css" rel="stylesheet" type="text/css" />
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>assets/css/metismenu.min.css" rel="stylesheet" type="text/css" />
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/modernizr.min.js"></script>
+        
+  <link href="<%$smarty.const.ACSS_URL%>fileinput.css" media="all" rel="stylesheet" type="text/css"/>
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>themes/explorer/theme.css" media="all" rel="stylesheet" type="text/css"/>
+  
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+	
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.min.js"></script>
+  <script src="<%$smarty.const.AJS_URL%>fileinput.js?version=00.00.01" type="text/javascript"></script>
+  <script src="<%$smarty.const.AJS_URL%>locales/zh.js?version=00.00.01" type="text/javascript"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>themes/explorer/theme.js?version=00.00.02" type="text/javascript"></script>
+        
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
+</head>
+<style>
+	b {color: #23527C;}
+</style>
+<body>
+	<!-- <h1>设备展示页面</h1>
+ -->
+ 	<div class="container" >
+ 	<div class="navbar navbar-default navbar-fixed-left" >
+		<ul class="nav navbar-nav" >
+			<li class="active"><a href="<%$smarty.const.__APP__%>/devselect/select"><b >首页</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/acadd/checkrssi"><b>基站RSSI</b></a></li>
+		</ul>
+	</div>
+	</div>
+
+	<div class="container" >
+  <div class="control-group" style="margin-top: 10px">
+    <a href="<%$smarty.const.__APP__%>/devmanager/dailyworklist?psnid=<%$psnid%>&devid=<%$devid%>">
+    	<button class="btn btn-primary">返回日志列表</button>
+    </a>
+	</div>			
+		<form class="" name="f1" action="<%$smarty.const.__APP__ %>/devmanager/adddailywork"  method="post" >
+			<input type="hidden" id="psnid" name="psnid" value="<%$psnid%>">
+			<input type="hidden" id="devid" name="devid" value="<%$devid%>"> 
+		  <div class="row">
+ 			<div class="form-group col-md-6">
+        	<label for="inputZip" class="col-form-label">日期-时间</label>
+       	 	<input class="form-control" type="date" id="bdate" name="bdate" value="<%$date%>">
+       	 	<input class="form-control" type="time" id="btime" name="btime" value="<%$time%>">
+      </div>
+      </div>
+      
+		  <div class="row">
+
+			<div class="form-group col-md-6">
+					<label for="info" class="col-form-label">备注</label>
+			    <textarea class="form-control" name="info" id="info" onkeyup="checkLen(this)" required ></textarea>
+			    <div>您还可以输入 <span id="count">200</span> 个文字</div>
+			</div>
+			</div>
+			<div class="row">
+  		<div class="form-group col-md-6">
+   	 			<label for="file1"  class="col-form-label">照片(选择图片后请点击上传):</label>
+          <input id="file1" name="file_data[]" type="file" multiple data-preview-file-type="any" data-show-caption="false">
+          <input class="form-control" id="picurl" name="picurl" type="hidden"/>	
+      </div>
+      </div>
+		  <div class="weui-btn-area">
+		    <button class="weui-btn weui-btn_primary" type="submit">提交</button>
+		  </div>
+		</form>
+	</div>
+	<!--div class="container" style="margin-top: 50px"-->
+</body>
+    <!--script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.min.js"></script-->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/popper.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/bootstrap.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/metisMenu.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/waves.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.slimscroll.js"></script>
+
+    <!-- Init js -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/pages/jquery.form-pickers.init.js"></script>
+
+    <!-- App js -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.core.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.app.js"></script>
+<script type="text/javascript">
+        $(document).ready(function () {
+        		var strsn;
+            $("#file1").fileinput({
+                language: 'zh',
+                theme: 'explorer',
+                uploadUrl: "<%$smarty.const.__CONTROLLER__%>/upload2?psnid=<%$psnid%>&devid=<%$devid%>",//上传路径
+                uploadAsync: false,//是否异步传输
+                maxFileCount: 5,//最大文件上传数量
+                showZoom: false,
+                allowedFileExtensions: ['jpg', 'png','jpeg', 'gif'],
+
+            }).on('filebatchpreupload', function(event, data, id, index) {
+
+            }).on('filebatchuploadsuccess', function(event, data) {
+                var pic_url = document.getElementById("picurl");
+                pic_url.value="";
+								for(var i=0;i<data.response.length;i++){
+									//alert(data.response[i].flag);
+									pic_url.value =pic_url.value + data.response[i].flag+';'
+								}
+                //pic_url2.value = "上传成功.";
+                //alert(path);
+            }).on("filecleared",function(event, data, msg){
+								var pic_url = document.getElementById("picurl");
+								pic_url.value="";
+						});
+            
+            /*
+             $("#test-upload").on('fileloaded', function(event, file, previewId, index) {
+             alert('i = ' + index + ', id = ' + previewId + ', file = ' + file.name);
+             });
+             */
+        });
+				function checkLen(obj)
+				{
+					var maxChars = 200;//最多字符数
+					if (obj.value.length > maxChars)
+					obj.value = obj.value.substring(0,maxChars);
+					var curr = maxChars - obj.value.length;
+					document.getElementById("count").innerHTML = curr.toString();
+				}
+</script>
+</html>

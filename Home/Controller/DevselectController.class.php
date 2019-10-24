@@ -318,14 +318,10 @@ class DevselectController extends HomeController {
 	}
 	
 	public function stopdevice(){
-			$this->display();
-			exit;
-			/*
 			$psn = $_GET['psnid'];
 	  	$id=$_GET['devid'];
 			$psnid = $_GET['psnid'];
-			
-			
+						
 			$where=array(
 										'psn'=>$psn,
 										'devid'=>$id,
@@ -334,7 +330,7 @@ class DevselectController extends HomeController {
 			$ret=M('device')->where($where)->save($re_flag);
 			
 			$this ->redirect('/Devselect/devlist',array('psnid'=>$psn),0,'');
-			*/
+			
 			
 	}
 	

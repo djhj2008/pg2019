@@ -110,6 +110,7 @@
                       <option value ="0">正常</option>
 											<option value ="1">高温</option>
 											<option value ="2">低温</option>
+											<option value ="3">淘汰</option>
               </select>
               </div>
               <div id="kind_view0-<%$v['id']%>" style="display:none;">
@@ -211,6 +212,11 @@
          				document.getElementById(kind_view0).style.display="";
          				document.getElementById(kind_view1).style.display="none";
          				document.getElementById(kind_view2).style.display="none";
+         			}else if(state==51){
+         				document.getElementById(view)[3].selected=true;
+         				document.getElementById(kind_view0).style.display="none";
+         				document.getElementById(kind_view1).style.display="none";
+         				document.getElementById(kind_view2).style.display="none";
          			}else{
          				var typeindex=0;
          				<%foreach $kind0 as $k0%>
@@ -278,8 +284,12 @@
          			document.getElementById(view0).style.display="none";
          			document.getElementById(view1).style.display="none";
          			document.getElementById(view2).style.display="";
-         		}else{
+         		}else if(index==0){
          			document.getElementById(view0).style.display="";
+         			document.getElementById(view1).style.display="none";
+         			document.getElementById(view2).style.display="none";
+         		}else if(index==3){
+         			document.getElementById(view0).style.display="none";
          			document.getElementById(view1).style.display="none";
          			document.getElementById(view2).style.display="none";
          		}

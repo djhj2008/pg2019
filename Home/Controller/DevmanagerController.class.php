@@ -5,7 +5,12 @@ class DevmanagerController extends Controller {
 	public function devlist(){
 		$psnid = $_GET['psnid'];
 		$uid= $_SESSION['admin_userid'];
-		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->where('devid>=400')->order('devid asc')->select();
+		if($psnid==12){
+			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->where('devid>=400')->order('devid asc')->select();
+		}else{
+			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
+		}
+		
 		//dump($dev);
 		if($uid!=100){
 			echo "<script type='text/javascript'>alert('Not Admin.');distory.back();</script>";
@@ -27,28 +32,28 @@ class DevmanagerController extends Controller {
 			echo "<script type='text/javascript'>alert('Not Admin.');distory.back();</script>";
 			exit;
 		}
-		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->where('devid>=400')->order('devid asc')->select();
+		if($psnid==12){
+			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->where('devid>=400')->order('devid asc')->select();
+		}else{
+			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
+		}
 		
 		foreach($devSelect as $dev){
 			$id=$dev['id'];
 			$sn=$_POST['sn-'.$id];
 			$shed=$_POST['shed-'.$id];
 			$flag_check=$_POST['flag-'.$id];
+			
 			if($flag_check=="on"){
 				$flag=1;
 			}else{
 				$flag=0;
 			}
 			unset($savedev);
-			if(empty($sn)||empty($shed)){
+			if(empty($sn)&&empty($shed)){
 				continue;
 			}
-			//dump('submit:');
-			//dump($sn);
-			//dump($shed);
-			//dump('local:');
-			//dump($dev['sn']);
-			//dump($dev['shed']);
+
 			if($dev['sn']!=$sn){
 				$savedev['sn']=$sn;
 			}
@@ -156,8 +161,10 @@ class DevmanagerController extends Controller {
 				$state=$_POST['kind1-'.$id];
 			}else if($state==2){
 				$state=$_POST['kind2-'.$id];
-			}else{
+			}else if($state==0){
 				$state=$_POST['kind0-'.$id];
+			}else if($state==3){
+				$state=51;
 			}
 			$real_temp=$_POST['real_temp-'.$id];
 			unset($saveacc);
@@ -182,4 +189,97 @@ class DevmanagerController extends Controller {
 		$this ->redirect('/Devmanager/querytemp',array('psnid'=>$psnid,'devid'=>$devid,'time'=>$time),0,'');
 		exit;
 	}
+	
+	public function dailywork()
+	{
+		$psnid = $_GET['psnid'];
+		$devid = $_GET['devid'];
+		
+	  $now = time();
+	  $v = strtotime(date('Y-m-d H:s:i',$now));
+	  $date =date('Y-m-d',$v);
+    $time =date('H:s:i',$v);
+    
+		$this->assign('date',$date);
+		$this->assign('time',$time);
+		$this->assign('psnid',$psnid);
+		$this->assign('devid',$devid);
+		$this->display();
+	}
+	
+	public function adddailywork()
+	{
+		$psnid = $_POST['psnid'];
+		$devid = $_POST['devid'];
+
+	  $time=$_POST['bdate'].' '.$_POST['btime'];
+		$msg=$_POST['info'];
+		$picurl=$_POST['picurl'];
+	  
+	  $savedw=array(
+	  	'psnid'=>$psnid,
+	  	'devid'=>$devid,
+	  	'time'=>$time,
+	  	'msg'=>$msg,
+	  	'picurl'=>$picurl,
+	  );
+
+    $ret=M('dailywork')->add($savedw);
+
+		$this ->redirect('/Devmanager/dailyworklist',array('psnid'=>$psnid,'devid'=>$devid),0,'');
+	}
+	
+	public function deldailywork()
+	{
+		$id = $_GET['id'];
+		$psnid = $_GET['psnid'];
+		$devid = $_GET['devid'];
+		
+    $ret=M('dailywork')->where(array('id'=>$id))->delete();
+
+		$this ->redirect('/Devmanager/dailyworklist',array('psnid'=>$psnid,'devid'=>$devid),0,'');
+	}
+	
+	public function dailyworklist()
+	{
+		$psnid = $_GET['psnid'];
+		$devid = $_GET['devid'];
+
+		$dwSelect=M('dailywork')->where(array('psnid'=>$psnid,'devid'=>$devid))->order('time desc')->select();
+
+		$this->assign('psnid',$psnid);
+		$this->assign('devid',$devid);
+    $this->assign('dw',$dwSelect);
+		$this->display();
+	}
+	
+	public function upload2()
+  {
+      $psnid=$_GET['psnid'];
+  		$devid=$_GET['devid'];
+
+  		
+      $upload = new \Think\Upload();// 实例化上传类
+      $upload->maxSize = 31457280;// 设置附件上传大小
+      $upload->exts = array('jpg', 'gif', 'png', 'jpeg', 'pdf');// 设置附件上传类型
+      $upload->rootPath = 'Home/Public/uploads/'; // 设置附件上传根目录
+      $upload->savePath = $psnid.'/'.$devid .'/'; // 设置附件上传（子）目录ch
+      $upload->subName = '';
+      // 上传文件
+      $info = $upload->upload();
+      $i=0;
+
+      if(!$info) {// 上传错误提示错误信息
+          $a[$i]['flag']="no";
+          $a[$i]['err']=$upload->getError();
+          $this->ajaxReturn($a,'JSON');
+      }else{// 上传成功 获取上传文件信息
+          foreach($info as $file){
+              $a[$i]['flag']=$file['savename'];
+              $i++;
+          }
+      }
+
+      $this->ajaxReturn($a,'JSON');
+  }
 }

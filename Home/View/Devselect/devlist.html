@@ -85,8 +85,8 @@
 				</td>
 				<td><%$value['avg_temp']%></td>
 				<td>
-					<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|查看温度</a>
-					<a href="<%$smarty.const.__APP__%>/collect/monthValue?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">温度图</a>
+					<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">查看温度</a>
+					<a href="<%$smarty.const.__APP__%>/collect/monthValue?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|温度图</a>
 					
 					<%if $value['re_flag'] eq 0 %>
 					<a href="<%$smarty.const.__APP__%>/devselect/stopdevice?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|回收</a>
