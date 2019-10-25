@@ -254,6 +254,19 @@ class DevmanagerController extends Controller {
 		$this->display();
 	}
 	
+	public function dwlist()
+	{
+		$psnid = $_GET['psnid'];
+		$devid = $_GET['devid'];
+
+		$dwSelect=M('dailywork')->where(array('psnid'=>$psnid,'devid'=>$devid))->order('id desc')->select();
+
+		$this->assign('psnid',$psnid);
+		$this->assign('devid',$devid);
+    $this->assign('dw',$dwSelect);
+		$this->display();
+	}
+	
 	public function querydwpic()
 	{
 		$id = $_GET['id'];
