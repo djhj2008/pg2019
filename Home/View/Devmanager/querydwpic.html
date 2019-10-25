@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>设备展示</title>
+
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+	<!-- <link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css"> -->
+	<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
+	
+  
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+	
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>assets/css/icons.css" rel="stylesheet" type="text/css" />
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>assets/css/metismenu.min.css" rel="stylesheet" type="text/css" />
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/modernizr.min.js"></script>
+
+  <link rel="stylesheet" href="<%$smarty.const.ACSS_URL%>main.css?version=1.01.02" id="color-switcher-link">
+  <link rel="stylesheet" href="<%$smarty.const.ACSS_URL%>animations.css">
+  <link rel="stylesheet" href="<%$smarty.const.ACSS_URL%>fonts.css">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
+</head>
+<style>
+	b {color: #23527C;}
+</style>
+<body>
+	<!-- <h1>设备展示页面</h1>
+ -->
+ 	<div class="container" >
+ 	<div class="navbar navbar-default navbar-fixed-left" >
+		<ul class="nav navbar-nav" >
+			<li class="active"><a href="<%$smarty.const.__APP__%>/devselect/select"><b >首页</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/acadd/checkrssi"><b>基站RSSI</b></a></li>
+		</ul>
+	</div>
+	</div>
+
+
+  <div class="control-group" style="margin-top: 10px">
+    <a href="<%$smarty.const.__APP__%>/devmanager/dailyworklist?psnid=<%$psnid%>&devid=<%$devid%>">
+    	<button class="btn btn-primary">返回日志列表</button>
+    </a>
+	</div>
+                <div class="ls section_padding_top_30">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-lg">
+                                <div class="page-about__title-wrapper">
+                                    <h3 class="content-block__title"><span class="content-block__title-block"><span>设备ID:<%$devid%></span></span></h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ls section_padding_bottom_25">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <ul id="gallery_blog-carousel" class="gallery_item-carousel home-blog__carousel">
+                                    <%foreach $piclist as $v%>
+                                    <li>
+                                        <div class="home-blog__carousel-wrapper">
+                                            <figure class="home-blog__carousel-img">
+                                                <a  href="#">
+                                                    <img src="<%$smarty.const.PUBLIC_ROOT_URL%>uploads/<%$psnid%>/<%$devid%>/<%$v%>" >
+                                                </a>
+                                            </figure>
+                                            <!--div class="post__content">
+                                                <div class="post__meta">
+                                                    <ul class="post__meta-list">
+                                                        <li>
+                                                            <div class="price">
+                                                            <p  style="color:#959595"><del>零售价</del></p>
+                                                            </div>
+                                                        </li>
+                                                        <li>
+                                                            <div class="price">
+                                                            <p  style="float:right;color:#0D4D78">订货价</p>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <h3 class="post__title">
+                                                    <a href="#" rel="bookmark"><%$v["name"]%></a>
+                                                </h3>
+                                                <div class="post__text-content">
+                                                    <p></p>
+                                                </div>
+
+                                                <div class="shop-item__block ">
+                                                    <a href="">购买</a>
+                                                </div>
+                                            </div-->
+                                        </div>
+                                    </li>
+                                    <%/foreach%>
+                                </ul>
+                            </div>
+                        </div>
+                </div>
+	<!--div class="container" style="margin-top: 50px"-->
+</body>
+
+<!-- jQuery  -->
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.min.js"></script>
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/popper.min.js"></script>
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/bootstrap.min.js"></script>
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/metisMenu.min.js"></script>
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/waves.js"></script>
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.slimscroll.js"></script>
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/waypoints/lib/jquery.waypoints.min.js"></script>
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/counterup/jquery.counterup.min.js"></script>
+
+<!-- Chart JS -->
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/chart.js/chart.bundle.js"></script>
+
+<!-- init dashboard -->
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/pages/jquery.dashboard.init.js"></script>
+
+<!-- App js -->
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.core.js"></script>
+<script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.app.js"></script>
+
+<script src="<%$smarty.const.AJS_URL%>compressed.js"></script>
+<script src="<%$smarty.const.AJS_URL%>main.js"></script>
+    
+<script type="text/javascript">
+        $(document).ready(function () {
+
+        });
+</script>
+</html>

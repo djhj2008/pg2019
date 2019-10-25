@@ -25,6 +25,8 @@
   <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
 	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
 	<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+	
+	<link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/sweet-alert/sweetalert2.min.css" rel="stylesheet" type="text/css" />
 </head>
 <style>
 	b {color: #23527C;}
@@ -59,6 +61,7 @@
 				<th>Assert</th>
 				<th>回收标志</th>
 				<th>基础温度</th>
+				<th>查看</th>
 				<th>操作</th>
 			</tr>
 		</thead>
@@ -87,9 +90,11 @@
 				<td>
 					<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">查看温度</a>
 					<a href="<%$smarty.const.__APP__%>/collect/monthValue?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|温度图</a>
-					
+				</td>
+				
+				<td>	
 					<%if $value['re_flag'] eq 0 %>
-					<a href="<%$smarty.const.__APP__%>/devselect/stopdevice?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|回收</a>
+					<button type="button" class="btn btn-danger mt-2" onclick="stopdevice(<%$value['psn']%>,<%$value['devid']%>)">停止设备</button>
 					<%/if%>
 				</td>
 			</tr>
@@ -124,6 +129,9 @@
     <!-- App js -->
     <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.core.js"></script>
     <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.app.js"></script>
+    
+    <!-- Sweet Alert Js  -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/sweet-alert/sweetalert2.min.js"></script>
 <script type="text/javascript">
       $(document).ready(function() {
           //Buttons examples
@@ -193,5 +201,37 @@
                   .appendTo('#datatable-buttons_wrapper .col-md-6:eq(0)');
       } );
 
+      function stopdevice(psnid,devid){
+      		swal({
+              title: '确定要删除该条记录吗?',
+              text: "该操作无法还原.",
+              type: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#4fa7f3',
+              cancelButtonColor: '#d57171',
+              confirmButtonText: '确定,删除!',
+              cancelButtonText: '取消'
+          }).then(function () {
+          	window.location.href="<%$smarty.const.__APP__%>/devselect/stopdevice?devid="+devid+"&psnid="+psnid;
+          }); 
+      }
+        
+		!function ($) {
+	    "use strict";
+
+	    var SweetAlert = function () {
+    	};
+
+    //examples
+
+        //init
+    $.SweetAlert = new SweetAlert, $.SweetAlert.Constructor = SweetAlert
+		}(window.jQuery),
+
+//initializing
+    function ($) {
+        "use strict";
+        //$.SweetAlert.init()
+    }(window.jQuery);
 </script>
 </html>
