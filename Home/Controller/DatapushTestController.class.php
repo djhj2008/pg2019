@@ -46,7 +46,7 @@ class DatapushTestController extends Controller {
     $strarr    =unpack("H*", $post);//unpack() 函数从二进制字符串对数据进行解包。
     $str       =implode("", $strarr);
 
-		$str = "323031393039313831313031303031323038363735363330300000e0010250000000000000000000cb0000e02e67020401015893359902ffffffffffffffffffffffffff0000e02f6e020401015333358702ffffffffffffffffffffffffff0000e0307e020400014543349602ffffffffffffffffffffffffff0000e03875020401014143335202ffffffffffffffffffffffffff0000e03986020401016143363303ffffffffffffffffffffffffff0000e03a6c020401015021155101ffffffffffffffffffffffffff0000e03c71020481015803363603ffffffffffffffffffffffffff0000e03f7c020401016433371403ffffffffffffffffffffffffff0000e0407d020403016143358502ffffffffffffffffffffffffff0000e04267020401017003374703ffffffffffffffffffffffffff0000e0437102040101610336000affffffffffffffffffffffffff0000e04469020401015613361003ffffffffffffffffffffffffff0000e04567020481016253364503ffffffffffffffffffffffffff0000e04a69020401016693358902ffffffffffffffffffffffffff0000e04d69020401016203368902ffffffffffffffffffffffffff0000e0566e020401016323369502ffffffffffffffffffffffffff0000e05864020401016901176901ffffffffffffffffffffffffff0000e05972020401015933363803ffffffffffffffffffffffffff0000e05a76020402016253361703ffffffffffffffffffffffffff0000e05b68020401013011133401ffffffffffffffffffffffffff0000e05c65020401016781166901ffffffffffffffffffffffffff0000e05d80020401015463358402ffffffffffffffffffffffffff0000e05e86020400015503368702ffffffffffffffffffffffffff0000e06472020402015253358702ffffffffffffffffffffffffff0000e0654c020401014651144501ffffffffffffffffffffffffff0000e06672020400015973350103ffffffffffffffffffffffffff0000e06875020401013653344903ffffffffffffffffffffffffff0000e0696e02040102425335885234568328ffffffffffffffffff0000e06a75020403015253357902ffffffffffffffffffffffffff0000e06b76020400016493354903ffffffffffffffffffffffffff0000e06c7d020481010792211602ffffffffffffffffffffffffff0000e06d71020481013703348002ffffffffffffffffffffffffff0000e06f5b020401017151177201ffffffffffffffffffffffffff0000e07076020401016453363903ffffffffffffffffffffffffff0000e07374020481017213371003ffffffffffffffffffffffffff0000e07472020400015653359102ffffffffffffffffffffffffff0000e07870020481015003350003ffffffffffffffffffffffffff0000e07967020401016871155901ffffffffffffffffffffffffff0000e07a6b020402019501a09601ffffffffffffffffffffffffff0000e07b6b020403012733338002ffffffffffffffffffffffffff0000e07c68020401014853358402ffffffffffffffffffffffffff0000e07d6e020481015093348202ffffffffffffffffffffffffff0000e07e78020481014403358402ffffffffffffffffffffffffff0000e07f76020481013443285702ffffffffffffffffffffffffff0000e08051020401014223347102ffffffffffffffffffffffffff0000e0826c020401016573359902ffffffffffffffffffffffffff0000e08577020402010232200302ffffffffffffffffffffffffff0000e08682020481016473352103ffffffffffffffffffffffffff0000e08889020400014901155001ffffffffffffffffffffffffff0000e08970020401013193321503ffffffffffffffffffffffffff0000e08b47020400014341143901ffffffffffffffffffffffffff0000e08c51020400018311188701ffffffffffffffffffffffffff0000e08e71020481016552275602ffffffffffffffffffffffffff0000e09072020400015973350203ffffffffffffffffffffffffff0000e09268020400015803369502ffffffffffffffffffffffffff0000e09376020400015913368802ffffffffffffffffffffffffff0000e09464020401016103361503ffffffffffffffffffffffffff0000e09876020400011661111601ffffffffffffffffffffffffff0000e09971020401014112244002ffffffffffffffffffffffffff0000e09a48020401013131133901ffffffffffffffffffffffffff0000e09b67020481015993350803ffffffffffffffffffffffffff0000e09d71020401013803341303ffffffffffffffffffffffffff0000e09e7e020400017303374803ffffffffffffffffffffffffff0000e09f71020402016693353503ffffffffffffffffffffffffff0000e0a08a020402014533307302ffffffffffffffffffffffffff0000e0a14c020400014651144501ffffffffffffffffffffffffff0000e0a571020401016503367102ffffffffffffffffffffffffff0000e0a671020481016003360503ffffffffffffffffffffffffff0000e0a76e020402014503348502ffffffffffffffffffffffffff0000e0a87e020400013283327402ffffffffffffffffffffffffff0000e0aa76020400014991144901ffffffffffffffffffffffffff0000e0ac85020401017733371003ffffffffffffffffffffffffff0000e0af5f020400016461166701ffffffffffffffffffffffffff0000e0b081020401016823370403ffffffffffffffffffffffffff0000e0b283020481016723373303ffffffffffffffffffffffffff0000e0cc6f020401017073361603ffffffffffffffffffffffffff0000e0d181020400015933358602ffffffffffffffffffffffffff0000e0d571020400017283361203ffffffffffffffffffffffffff0000e0d670020400014823353203ffffffffffffffffffffffffff0000e0d756020401014171144701ffffffffffffffffffffffffff0000e0d87b020401017263360103ffffffffffffffffffffffffff0000e0db6e020400017013371503ffffffffffffffffffffffffff0000e0e066020481015593359002ffffffffffffffffffffffffff0000e0e15f020481016243354603ffffffffffffffffffffffffff0000e0e46a020402014143343603ffffffffffffffffffffffffff0000e0e66b020401012881122901ffffffffffffffffffffffffff0000e0e866020402016203360903ffffffffffffffffffffffffff0000e0eb6c020401015663357302ffffffffffffffffffffffffff0000e0ec64020401016403364703ffffffffffffffffffffffffff0000e0ed71020401013773307902ffffffffffffffffffffffffff0000e10b70020400014143346802ffffffffffffffffffffffffff0000e10c68020401015343358402ffffffffffffffffffffffffff0000e10d58020402013561134201ffffffffffffffffffffffffff0000e10e65020400014893340203ffffffffffffffffffffffffff0000e10f52020400013941144001ffffffffffffffffffffffffff0000e1125e020402015963358402ffffffffffffffffffffffffff0000e11375020401016983361603ffffffffffffffffffffffffff0000e1184b020481014331143201ffffffffffffffffffffffffff0000e11958020400014611155401ffffffffffffffffffffffffff0000e11e70020402015923350103ffffffffffffffffffffffffff0000e11f88020401016813373803ffffffffffffffffffffffffff0000e1236a020402017383371703ffffffffffffffffffffffffff0000e13d59020400013781133601ffffffffffffffffffffffffff0000e14566020400015331155201ffffffffffffffffffffffffff0000e1466d020400019942253802ffffffffffffffffffffffffff0000e1474f020400013711133801ffffffffffffffffffffffffff0000e14a77020402015443359102ffffffffffffffffffffffffff0000e14c60020401014593344003ffffffffffffffffffffffffff0000e14d3f020400017561178201ffffffffffffffffffffffffff0000e14e76020400016733369902ffffffffffffffffffffffffff0000e14f52020400013321133101ffffffffffffffffffffffffff0000e15282020481016663361303ffffffffffffffffffffffffff0000e1538a020400016643363003ffffffffffffffffffffffffff0000e1557f020401015993359302ffffffffffffffffffffffffff0000e1586b020481016513365502ffffffffffffffffffffffffff0000e15970020400010223338202ffffffffffffffffffffffffff0000e15f3d020400017881178301ffffffffffffffffffffffffff0000e16077020401016133369702ffffffffffffffffffffffffff0000e0146d027c0102447145002014570400ffffffffffffffffff0000e19176030400014893348502ffffffffffffffffffffffffff0000e19556030481015263348802ffffffffffffffffffffffffff0000e19672030401017213375703ffffffffffffffffffffffffff0000e19761030481014103346902ffffffffffffffffffffffffff0000e19861030400016083359502ffffffffffffffffffffffffff0000e19b65030400016813363303ffffffffffffffffffffffffff0000e19c7103040002676336158336670332ffffffffffffffffff0000e19e62030481016673365303ffffffffffffffffffffffffff0000e19f67030400016083359602ffffffffffffffffffffffffff0000e1a069030400015883351103ffffffffffffffffffffffffff0000e1a174030401016253351303ffffffffffffffffffffffffff0000e1a275030481016913364703ffffffffffffffffffffffffff0000e1a372030481016543366203ffffffffffffffffffffffffff0000e1a476030400014493349902ffffffffffffffffffffffffff0000e1a572030401016183359702ffffffffffffffffffffffffff0000e1a675030401017223375703ffffffffffffffffffffffffff0000e1a770030481015373348402ffffffffffffffffffffffffff0000e1aa6f030400014273338202ffffffffffffffffffffffffff0000e1ac6d030401016043369902ffffffffffffffffffffffffff0000e1ad7d030481016033359502ffffffffffffffffffffffffff0000e1ae75030400015483352803ffffffffffffffffffffffffff0000e1b085030400014843350603ffffffffffffffffffffffffff0000e1b16f030400016053351103ffffffffffffffffffffffffff0000e1b272030401016483363503ffffffffffffffffffffffffff0000e1b47e030400015273350703ffffffffffffffffffffffffff0000e1b583030401015783350803ffffffffffffffffffffffffff0000e1b764030400014383348102ffffffffffffffffffffffffff0000e1b85b030401016923375603ffffffffffffffffffffffffff0000e1b971030400016953361103ffffffffffffffffffffffffff0000e1be7d030401017583376603ffffffffffffffffffffffffff0000e1bf80030401016803373303ffffffffffffffffffffffffff0000e1c17d030401016873361503ffffffffffffffffffffffffff0000e1c275030481017343374003ffffffffffffffffffffffffff0000e1c36d030400015663359702ffffffffffffffffffffffffff0000e1c67c030401016283359802ffffffffffffffffffffffffff0000e1c789030402017513372503ffffffffffffffffffffffffff0000e1c876030481016533361203ffffffffffffffffffffffffff0000e1ce6f030400016803373203ffffffffffffffffffffffffff0000e1cf6e03040002582335877235510329ffffffffffffffffff0000e1d277030481016353360903ffffffffffffffffffffffffff0000e1d376030400017313372603ffffffffffffffffffffffffff0000e1d583030401016013364303ffffffffffffffffffffffffff0000e1db70030400016323360903ffffffffffffffffffffffffff0000e1dc70030400015013348102ffffffffffffffffffffffffff0000e1e375030401015353359202ffffffffffffffffffffffffff0000e1e577030400015553350703ffffffffffffffffffffffffff0000e1e683030400016123369002ffffffffffffffffffffffffff0000e1ea7d030400014833358502ffffffffffffffffffffffffff0000e1eb70030401016893350603ffffffffffffffffffffffffff0000e1ee81030401015413356502ffffffffffffffffffffffffff0000e1f188030401016703372103ffffffffffffffffffffffffff0000e1f275030481016413363903ffffffffffffffffffffffffff0000e1f37b030400016223362503ffffffffffffffffffffffffff0000e1f57d030401015363358802ffffffffffffffffffffffffff0000e1f677030400016193364003ffffffffffffffffffffffffff0000e1f881030400017553377003ffffffffffffffffffffffffff0000e1f975030481015963359602ffffffffffffffffffffffffff0000e1fa7b030400016133359102ffffffffffffffffffffffffff0000e1fb70030400015293348802ffffffffffffffffffffffffff0000e1fd88030401017573362903ffffffffffffffffffffffffff0000e1fe77030401017093364303ffffffffffffffffffffffffff0000e2016d030400017993376603ffffffffffffffffffffffffff0000e1e280030400015543359902ffffffffffffffffffffffffff0000e2037603040102425334841234444328ffffffffffffffffff0000e2046e030481016893360803ffffffffffffffffffffffffff0000e20565030400017033373403ffffffffffffffffffffffffff0000e2066a030400016793363203ffffffffffffffffffffffffff0000e20770030400016163350103ffffffffffffffffffffffffff0000e2097c030401015603358602ffffffffffffffffffffffffff0000e20b85030400014883346502ffffffffffffffffffffffffff0000e20d85030400015453358602ffffffffffffffffffffffffff0000e20e74030401015263348902ffffffffffffffffffffffffff0000e20f76030400016373361303ffffffffffffffffffffffffff0000e21182030401016813361503ffffffffffffffffffffffffff0000e2127e030400016093359402ffffffffffffffffffffffffff0000e21571030401013733333302ffffffffffffffffffffffffff0000e21776030401015543347902ffffffffffffffffffffffffff0000e21876030401015673359602ffffffffffffffffffffffffff0000e21b6f030402015263358302ffffffffffffffffffffffffff0000e21c7e030401015283348502ffffffffffffffffffffffffff0000e21e82030401014873337002ffffffffffffffffffffffffff0000e21f7d030401015413358702ffffffffffffffffffffffffff0000e2206e030401015943359002ffffffffffffffffffffffffff0000e2257c030400015543359402ffffffffffffffffffffffffff000caf1f";
+		$str = "323031393130323831363030313031313038363735363330300000a00103500000000000000000000c0000a00230730400012572222502ffffffffffffffffffffffffff0000a00435730400012762222302ffffffffffffffffffffffffff0000a00534730401012462222502ffffffffffffffffffffffffff0000a00738730401012472222502ffffffffffffffffffffffffff0000a00947730400012772222602ffffffffffffffffffffffffff0000a00a41730400012642222502ffffffffffffffffffffffffff0000a00b64730481012662222502ffffffffffffffffffffffffff0000a00e39730400013002232802ffffffffffffffffffffffffff0000a00f3e730400012562222502ffffffffffffffffffffffffff0000a0103c730400012752222402ffffffffffffffffffffffffff0000a0114073040102254222254222224222ffffffffffffffffff0000a01237730401012972222502ffffffffffffffffffffffffff0000b8b8";
 
 		if(strlen($str) < $CDATA_START){
     	echo "OKF".date('YmdHis')."00101";
@@ -131,7 +131,7 @@ class DatapushTestController extends Controller {
     	$delay_time  = str_pad($uptime,4,'0',STR_PAD_LEFT).$dev_freq;
     	if($bdevinfo['version']!=$bvs){
     		//var_dump($bdevinfo['version']);
-    		$saveSql=M('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->save(array('version'=>$bvs));	
+    		//$saveSql=M('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->save(array('version'=>$bvs));	
     	}
     	$url_flag = $bdevinfo['url_flag'];
 			$url = $bdevinfo['url'];
@@ -180,11 +180,14 @@ class DatapushTestController extends Controller {
     $today = strtotime(date('Y-m-d',$now).'00:00:00');
    	$now = $now-$today;
    	
-   	$re_devs =D('device')->where(array('psn'=>$psnid,'re_flag'=>1))->limit(0,64)->select();
+   	$re_devs =D('device')->where(array('psn'=>$psnid,'re_flag'=>1))->order('devid asc')->limit(0,64)->select();
    	
-   	$cur_devs =D('device')->where(array('psn'=>$psnid))->select();
+   	$re_devs2 =D('device')->where(array('psn'=>$psnid,'re_flag'=>2))->order('devid asc')->limit(0,64)->select();
    	
-   	//var_dump($re_devs);
+   	$cur_devs =D('device')->where(array('psn'=>$psnid))->order('devid asc')->select();
+   	
+   	dump($re_devs);
+   	dump($re_devs2);
     for($i=0 ; $i < $count ; $i++){
     	$snstr   =substr($data, $i*$DATA_LEN,$CSN_LEN*2);
     	//var_dump($snstr);
@@ -227,7 +230,7 @@ class DatapushTestController extends Controller {
     	$state=$state&$stmp;
     	
     	//var_dump($ast);
-    	//var_dump($state);
+    	//dump($state);
     	//var_dump($type);
     	
     	if($type>0){
@@ -246,6 +249,9 @@ class DatapushTestController extends Controller {
 						'fold'=>1,
 						'flag'=>0,
 						'state'=>0,
+						'battery'=>$battery,
+			  	 	'dev_state'=>$state,
+			  	 	'version'=>$cvs,
 						's_count'=>0,
 						'rid'=>$snint,
 						'age'=>1,
@@ -338,7 +344,6 @@ class DatapushTestController extends Controller {
 				    	$temp3str3 = substr($tempstr,32,1);
 				    	$temp3int =base_convert($temp3str1,16,10);					    	
 			    	}
-	    		
 		    if(($temp1int&0x08)==0x08){
 	    		$temp1str1=$temp1int&0x07;
 	    		if($temp1str1==0){
@@ -402,7 +407,8 @@ class DatapushTestController extends Controller {
 					  		'sid' =>$sid,
 					  	);
 					$dev_save=array(
-								'state'=>1,
+								'devid'=>$snint,
+								'psn'=>$psnid,
 								'battery'=>$battery,
 					  	 	'dev_state'=>$state,
 					  	 	'version'=>$cvs);
@@ -509,7 +515,8 @@ class DatapushTestController extends Controller {
 			  	);
 
 					$dev_save2=array(
-													'state'=>1,
+													'devid'=>$snint,
+													'psn'=>$psnid,
 													'battery'=>$battery,
 										  	 	'dev_state'=>$state,
 										  	 	'version'=>$cvs);
@@ -523,25 +530,23 @@ class DatapushTestController extends Controller {
     }
     
     $user=D('access');
-		$access1=$user->addAll($accadd_list);
+		//$access1=$user->addAll($accadd_list);
 		
     $user2=D('taccess');
-		$access2=$user2->addAll($accadd_list2);
+		//$access2=$user2->addAll($accadd_list2);
 		//dump($user->getlastsql());
 		//dump("acc add 1:");
-		//dump($access1);
+		//dump($devsave_list);
 		
 		foreach($cur_devs as $dev){
 			$devid = $dev['devid'];
-			$state= $dev['state'];
 			$battery= $dev['battery'];
 			$dev_state= $dev['dev_state'];
 			$version= $dev['version'];
+			$psnid=$dev['psn'];
 			foreach($devsave_list as $devsave){
 				if($devid==$devsave['devid']){
-					if($state!=$devsave['state']){
-						$mysave['state']=$devsave['state'];
-					}
+					dump($devid);
 					if($battery!=$devsave['battery']){
 						$mysave['battery']=$devsave['battery'];
 					}
@@ -552,8 +557,8 @@ class DatapushTestController extends Controller {
 						$mysave['version']=$devsave['version'];
 					}
 					if(!empty($mysave)){
-						$dev1=D('device')->save($mysave);
-						//dump($mysave);
+						$dev1=D('device')->where(array('devid'=>$devid,'psn'=>$psnid))->save($mysave);
+						dump($mysave);
 					}
 				}
 			}
@@ -583,6 +588,7 @@ class DatapushTestController extends Controller {
 		}
 		$sum=$sum&0xffffffff;
 
+		dump($devbuf);
   	foreach($re_devs as $redev){
   			$devid_tmp=$redev['devid'];
   			foreach($devbuf as $devre){
@@ -593,6 +599,16 @@ class DatapushTestController extends Controller {
   			}
   	}
 
+  	foreach($re_devs2 as $redev){
+  			$devid_tmp=$redev['devid'];
+  			foreach($devbuf as $devre){
+  				if($devre==$devid_tmp){
+						$devres2[]=$devre;
+						break;
+  				}
+  			}
+  	}
+  	
 		$devres_count=count($devres);
 		$devres_count=str_pad($devres_count,2,'0',STR_PAD_LEFT);
 		$devres_str=$devres_count.'';
@@ -602,33 +618,23 @@ class DatapushTestController extends Controller {
 				$devres_str=$devres_str.$devre_id;
 		}
 
+		if(!empty($devres)){
+			$whereredev['devid']=array('in',$devres);
+			dump($whereredev);
+			$dev1=D('device')->where($whereredev)->where(array('psn'=>$psnid))->save(array(re_flag=>2));
+		}
+
+		if(!empty($devres2)){
+			$whereredev2['devid']=array('in',$devres2);
+			dump($whereredev2);
+			$dev1=D('device')->where($whereredev2)->where(array('psn'=>$psnid))->save(array(re_flag=>3));
+		}
+		
 		if($crc==$sum){
 			$header="OK1".date('YmdHis');
 		}else{
 			$header="OK2".date('YmdHis');
 		}
-  	{
-        $imgDir = "lora_req30/";
-        if(!file_exists("lora_req30")){
-               mkdir("lora_req30");
-        }
-        if(!file_exists($imgDir)){
-           mkdir($imgDir);
-        }
-        //要生成的图片名字
-        $ctime = date("Ymd_His_").mt_rand(10, 99);
-        $lnewFilePath = $imgDir.$ctime."/";//图片存入路径
-        if(!file_exists($lnewFilePath)){
-        	mkdir($lnewFilePath);
-        }
-        			
-        $filename = date("Ymd_His_").mt_rand(10, 99).".bmp"; //新图片名称
-        $newFilePath = $lnewFilePath.$filename;//图片存入路径
-        $newFile = fopen($newFilePath,"w"); //打开文件准备写入
-        fwrite($newFile,$header.$delay_time.$rate.$footer.$devres_str);
-        fclose($newFile); //关闭文件
-         
-  	}
 
 		echo $header.$delay_time.$rate.$footer.$devres_str;
 

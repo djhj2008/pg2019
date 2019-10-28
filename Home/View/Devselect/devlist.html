@@ -59,7 +59,7 @@
 				<th>设备状态</th>
 				<th>标记状态</th>
 				<th>Assert</th>
-				<th>回收标志</th>
+				<th>停止标志</th>
 				<th>基础温度</th>
 				<th>查看</th>
 				<th>操作</th>
@@ -77,13 +77,17 @@
 				<td><%$value['dev_assert']%></td>
 				<td>
 					<%if $value['re_flag'] eq 1 %>
-					准备回收
+					停止回收
 					<%else if $value['re_flag'] eq 2 %>
-					回收中
-					<%else if $value['re_flag'] eq 2 %>
-					回抽成功
-					<%else%>
+					停止中
+					<%else if $value['re_flag'] eq 3 %>
+					停止失败
+					<%else if $value['re_flag'] eq 0 %>
 					正常
+					<%else if $value['re_flag'] eq 4 %>
+					停止成功
+					<%else%>
+					状态异常
 					<%/if%>
 				</td>
 				<td><%$value['avg_temp']%></td>
@@ -96,6 +100,8 @@
 				<td>	
 					<%if $value['re_flag'] eq 0 %>
 					<button type="button" class="btn btn-danger mt-2" onclick="stopdevice(<%$value['psn']%>,<%$value['devid']%>)">停止设备</button>
+					<%else if $value['re_flag'] eq 3 %>
+					<button type="button" class="btn btn-danger mt-2" onclick="stopdevice(<%$value['psn']%>,<%$value['devid']%>)">重试停止</button>
 					<%/if%>
 				</td>
 			</tr>

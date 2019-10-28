@@ -1905,9 +1905,11 @@ class DatapushController extends Controller {
     $today = strtotime(date('Y-m-d',$now).'00:00:00');
    	$now = $now-$today;
    	
-   	$re_devs =D('device')->where(array('psn'=>$psnid,'re_flag'=>1))->limit(0,64)->select();
-
-   	$cur_devs =D('device')->where(array('psn'=>$psnid))->select();
+   	$re_devs =D('device')->where(array('psn'=>$psnid,'re_flag'=>1))->order('devid asc')->limit(0,64)->select();
+   	
+   	$re_devs2 =D('device')->where(array('psn'=>$psnid,'re_flag'=>2))->order('devid asc')->limit(0,64)->select();
+   	
+   	$cur_devs =D('device')->where(array('psn'=>$psnid))->order('devid asc')->select();
    	
    	//var_dump($re_devs);
     for($i=0 ; $i < $count ; $i++){
@@ -1971,6 +1973,9 @@ class DatapushController extends Controller {
 						'fold'=>1,
 						'flag'=>0,
 						'state'=>0,
+						'battery'=>$battery,
+			  	 	'dev_state'=>$state,
+			  	 	'version'=>$cvs,
 						's_count'=>0,
 						'rid'=>$snint,
 						'age'=>1,
@@ -2127,7 +2132,8 @@ class DatapushController extends Controller {
 					  		'sid' =>$sid,
 					  	);
 					$dev_save=array(
-								'state'=>1,
+								'devid'=>$snint,
+								'psn'=>$psnid,
 								'battery'=>$battery,
 					  	 	'dev_state'=>$state,
 					  	 	'version'=>$cvs);
@@ -2234,7 +2240,8 @@ class DatapushController extends Controller {
 			  	);
 
 					$dev_save2=array(
-													'state'=>1,
+													'devid'=>$snint,
+													'psn'=>$psnid,
 													'battery'=>$battery,
 										  	 	'dev_state'=>$state,
 										  	 	'version'=>$cvs);
@@ -2258,15 +2265,11 @@ class DatapushController extends Controller {
 		
 		foreach($cur_devs as $dev){
 			$devid = $dev['devid'];
-			$state= $dev['state'];
 			$battery= $dev['battery'];
 			$dev_state= $dev['dev_state'];
 			$version= $dev['version'];
 			foreach($devsave_list as $devsave){
 				if($devid==$devsave['devid']){
-					if($state!=$devsave['state']){
-						$mysave['state']=$devsave['state'];
-					}
 					if($battery!=$devsave['battery']){
 						$mysave['battery']=$devsave['battery'];
 					}
@@ -2277,7 +2280,8 @@ class DatapushController extends Controller {
 						$mysave['version']=$devsave['version'];
 					}
 					if(!empty($mysave)){
-						$dev1=D('device')->save($mysave);
+						$dev1=D('device')->where(array('devid'=>$devid,'psn'=>$psnid))->save($mysave);
+						//$dev1=D('device')->save($mysave);
 						//dump($mysave);
 					}
 				}
@@ -2285,7 +2289,6 @@ class DatapushController extends Controller {
 		}
 
     //未解包比对
-    
     $len=strlen($str);
     $crc=substr($str,$len-$CRC_LEN*2);//收到发来的crc
     //var_dump($crc);
@@ -2302,12 +2305,21 @@ class DatapushController extends Controller {
 		}
 		$sum=$sum&0xffffffff;
 
-
   	foreach($re_devs as $redev){
   			$devid_tmp=$redev['devid'];
   			foreach($devbuf as $devre){
   				if($devre==$devid_tmp){
 						$devres[]=$devre;
+						break;
+  				}
+  			}
+  	}
+
+  	foreach($re_devs2 as $redev){
+  			$devid_tmp=$redev['devid'];
+  			foreach($devbuf as $devre){
+  				if($devre==$devid_tmp){
+						$devres2[]=$devre;
 						break;
   				}
   			}
@@ -2322,6 +2334,16 @@ class DatapushController extends Controller {
 				$devres_str=$devres_str.$devre_id;
 		}
 
+		if(!empty($devres)){
+			$whereredev['devid']=array('in',$devres);
+			$dev1=D('device')->where($whereredev)->where(array('psn'=>$psnid))->save(array(re_flag=>2));
+		}
+
+		if(!empty($devres2)){
+			$whereredev2['devid']=array('in',$devres2);
+			$dev1=D('device')->where($whereredev2)->where(array('psn'=>$psnid))->save(array(re_flag=>3));
+		}
+		
 		if($crc==$sum){
 			$header="OK1".date('YmdHis');
 		}else{
@@ -2340,18 +2362,15 @@ class DatapushController extends Controller {
         $lnewFilePath = $imgDir.$ctime."/";//图片存入路径
         if(!file_exists($lnewFilePath)){
         	mkdir($lnewFilePath);
-        }
-        			
+        }			
         $filename = date("Ymd_His_").mt_rand(10, 99).".bmp"; //新图片名称
         $newFilePath = $lnewFilePath.$filename;//图片存入路径
         $newFile = fopen($newFilePath,"w"); //打开文件准备写入
         fwrite($newFile,$header.$delay_time.$rate.$footer.$devres_str);
-        fclose($newFile); //关闭文件
-         
+        fclose($newFile); //关闭文件 
   	}
 
 		echo $header.$delay_time.$rate.$footer.$devres_str;
-
 		exit;
 	}
 
