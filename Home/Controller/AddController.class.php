@@ -97,7 +97,6 @@ class AddController extends HomeController {
 					exit;
 				}
 				$psnid=$psnSelect[0]['id'];
-				
 				$devid = $_POST['devid'];
 	    	if(!empty($devid)){
 	    		$postArr=array();
@@ -693,7 +692,7 @@ class AddController extends HomeController {
     	$uptime=$_POST['uptime'];
     	$count=$_POST['count'];
     	$rate_id=$_POST['rate_id'];
-    	$url="pg.51elook.com";
+    	$url="iot.xunrun.com.cn";
     	
     	$psn=M('psn')->where(array('id'=>$psnid))->find();
     	if(empty($psn)){

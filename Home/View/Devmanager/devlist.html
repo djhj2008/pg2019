@@ -82,7 +82,8 @@
 				<td><%$value['state']%></td>
 				<td>
 					<a href="<%$smarty.const.__APP__%>/devmanager/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">查看温度</a>
-					<a href="<%$smarty.const.__APP__%>/devmanager/dailyworklist?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|查看日志</a>	
+					<a href="<%$smarty.const.__APP__%>/devmanager/dailyworklist?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|查看日志</a>
+					<a href="<%$smarty.const.__APP__%>/devmanager/statelist?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|标记记录</a>
 				</td>
 			</tr>
 			<%/foreach%>

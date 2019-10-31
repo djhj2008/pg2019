@@ -157,6 +157,9 @@ class DevmanagerController extends Controller {
 			$id=$acc['id'];
 			$cur_time=$acc['time'];
 			$state=$_POST['state-'.$id];
+			//dump($state);
+			//dump($_POST['kind0-'.$id]);
+			
 			if($state==1){
 				$state=$_POST['kind1-'.$id];
 			}else if($state==2){
@@ -182,7 +185,9 @@ class DevmanagerController extends Controller {
 				$ret=M('access')->where(array('id'=>$id))->save($saveacc);
 			}
 		}
+		
 		$lastacc=M('access')->where(array('devid'=>$devid,'psn'=>$psnid))->where('state>0')->order('time desc')->find();
+
 		$lastsate=$lastacc['state'];
 		$ret=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->save(array('state'=>$lastsate));
 		
@@ -246,7 +251,7 @@ class DevmanagerController extends Controller {
 		$psnid = $_GET['psnid'];
 		$devid = $_GET['devid'];
 
-		$dwSelect=M('dailywork')->where(array('psnid'=>$psnid,'devid'=>$devid))->order('id desc')->select();
+		$dwSelect=M('dailywork')->where(array('psnid'=>$psnid,'devid'=>$devid))->order('time desc')->select();
 
 		$this->assign('psnid',$psnid);
 		$this->assign('devid',$devid);
@@ -259,7 +264,7 @@ class DevmanagerController extends Controller {
 		$psnid = $_GET['psnid'];
 		$devid = $_GET['devid'];
 
-		$dwSelect=M('dailywork')->where(array('psnid'=>$psnid,'devid'=>$devid))->order('id desc')->select();
+		$dwSelect=M('dailywork')->where(array('psnid'=>$psnid,'devid'=>$devid))->order('time desc')->select();
 
 		$this->assign('psnid',$psnid);
 		$this->assign('devid',$devid);
@@ -312,4 +317,28 @@ class DevmanagerController extends Controller {
 
       $this->ajaxReturn($a,'JSON');
   }
+  
+	public function statelist()
+	{
+		$psnid = $_GET['psnid'];
+		$devid = $_GET['devid'];
+
+		$slist=M('access')->where(array('psnid'=>$psnid,'devid'=>$devid))->where('state > 0')->order('time desc')->select();
+		$sicktype=M('sicktype')->order('type asc')->select();
+		$this->assign('sicktype',$sicktype);
+		
+		for($i=0;$i < count($slist);$i++){
+			$state=$slist[$i]['state'];
+			foreach($sicktype as $type){
+				if($state==$type['type']){
+					$slist[$i]['state_name']=$type['name'];
+					break;
+				}
+			}
+			
+		}
+
+    $this->assign('slist',$slist);
+		$this->display();
+	}
 }
