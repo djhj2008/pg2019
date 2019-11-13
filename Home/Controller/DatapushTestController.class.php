@@ -640,4 +640,27 @@ class DatapushTestController extends Controller {
 
 		exit;
 	}
+	
+	public function pushnewsubV36(){
+
+    for($i=30;$i < 158;$i++)
+		{
+			$dev_psn=5;
+			$snint=$i;
+			$blpsn_str=str_pad($dev_psn,5,'0',STR_PAD_LEFT).str_pad($snint,4,'0',STR_PAD_LEFT);
+			$blacklist[]=$blpsn_str;
+		}
+
+		$blacklist_str=str_pad(count($blacklist),4,'0',STR_PAD_LEFT);
+		foreach($blacklist as $name){
+			$blacklist_str=$blacklist_str.$name;
+		}
+		
+		$changedev_str="00";
+		$header="OK1";
+
+
+		echo $header.$changedev_str.$blacklist_str;
+		exit;
+	}
 }

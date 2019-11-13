@@ -6,7 +6,7 @@ class DevmanagerController extends Controller {
 		$psnid = $_GET['psnid'];
 		$uid= $_SESSION['admin_userid'];
 		if($psnid==12){
-			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->where('devid>=400')->order('devid asc')->select();
+			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid,'flag'=>1))->order('devid asc')->select();
 		}else{
 			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
 		}
@@ -33,7 +33,7 @@ class DevmanagerController extends Controller {
 			exit;
 		}
 		if($psnid==12){
-			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->where('devid>=400')->order('devid asc')->select();
+			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid,'flag'=>1))->order('devid asc')->select();
 		}else{
 			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
 		}

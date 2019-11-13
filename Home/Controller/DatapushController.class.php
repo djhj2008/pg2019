@@ -1963,26 +1963,29 @@ class DatapushController extends Controller {
     	//echo "type:";
     	//var_dump($type);
     	$snint=$snint;
-    	$info    =D('device')->where(array('devid'=>$snint,'psn'=>$psnid))->find();//查询devce是否存在
-    	//var_dump($info);
-    	
-    	if(empty($info)){
-					$savedev=array(
-						'psn'=>$psnid,
-						'shed'=>1,
-						'fold'=>1,
-						'flag'=>0,
-						'state'=>0,
-						'battery'=>$battery,
-			  	 	'dev_state'=>$state,
-			  	 	'version'=>$cvs,
-						's_count'=>0,
-						'rid'=>$snint,
-						'age'=>1,
-						'devid'=>$snint,
-					);
-					$saveSql=M('device')->add($savedev);
-    			//continue;
+    	if($snint>0)
+    	{
+	    	$info    =D('device')->where(array('devid'=>$snint,'psn'=>$psnid))->find();//查询devce是否存在
+	    	//var_dump($info);
+	    	
+	    	if(empty($info)){
+						$savedev=array(
+							'psn'=>$psnid,
+							'shed'=>1,
+							'fold'=>1,
+							'flag'=>0,
+							'state'=>0,
+							'battery'=>$battery,
+				  	 	'dev_state'=>$state,
+				  	 	'version'=>$cvs,
+							's_count'=>0,
+							'rid'=>$snint,
+							'age'=>1,
+							'devid'=>$snint,
+						);
+						$saveSql=M('device')->add($savedev);
+	    			//continue;
+	    	}
     	}
     
 	    if($min_delay == 0){

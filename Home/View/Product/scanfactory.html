@@ -60,8 +60,12 @@
 				<td>数据丢失</td>
 				<%else if $value['state'] eq 2 %>
 				<td>成功</td>
-				<%else%>
+				<%else if $value['state'] eq 4 %>
 				<td>未上报</td>
+				<%else if $value['state'] eq 5 %>
+				<td>一周未上报</td>
+				<%else if $value['state'] eq 6 %>
+				<td>一月未上报</td>
 				<%/if%>
 				<td><%$value['fsn']%></td>
 				<td><%$value['time']%></td>
@@ -107,10 +111,10 @@
               iDisplayLength: 25,
               info: true,
               buttons: ['excel'],
-              bSort: false,
+              bSort: true,
 							columnDefs: [ 
 									{
-								      "targets": 3,
+								      "targets": 4,
 								      "searchable": false
 									},
 		

@@ -48,9 +48,9 @@ class ProductController extends HomeController {
   			//dump($psnid);
   			//dump($sn);
   			$devfind=M('factory')->where(array( 'psnid'=>$psnid,
-																      			'devid'=>$sn))->find();
+																      			'devid'=>$sn))->select();
 				$mytime=strtotime($v['time']);
-				//dump($mytime);						      			
+	
   			if(empty($devfind)){
   				$devadd = array( 
   											'psnid'=>$psnid,
@@ -60,8 +60,24 @@ class ProductController extends HomeController {
 						      			'fsn'=>"ABC",
 						      			'time'=>$v['time']);
 					dump('add dev:'.$sn);
-					$ret=M('factory')->add($devadd);      			
-  			}	    		
+					$ret=M('factory')->add($devadd); 
+					continue;     			
+  			}
+  			if(count($devfind)<2){
+  				//dump($devfind[0]['productno']);
+	  			if($devfind[0]['productno']!=$productno){
+	  				$devadd = array(
+	  											'psnid'=>$psnid,
+							      			'devid'=>$sn,
+							      			'productno'=>$productno,
+													'state'=>1,
+							      			'fsn'=>"ABC",
+							      			'time'=>$v['time']);
+						dump('add dev 2:'.$sn);
+						$ret=M('factory')->add($devadd); 
+	  			}
+	  			
+  			}
     	}
     	dump('finish!');
 			exit;
@@ -80,7 +96,8 @@ class ProductController extends HomeController {
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now));
     	//var_dump($start_time);
-    	$yes_time = $start_time;
+    	$month_time = $start_time-86400*30;
+    	$week_time = $start_time-86400*6;
     	$end_time = $start_time+86400;
     	$cur_time = $now - $start_time;
     	//var_dump($cur_time);
@@ -88,13 +105,18 @@ class ProductController extends HomeController {
     	$first_time = $cur_time-$delay+$start_time;
     	$last_time = $cur_time-$delay+$start_time-$delay-$delay_sub;
     	
-    	dump(date('Y-m-d H:s:i',$first_time));
-    	dump(date('Y-m-d H:s:i',$last_time));
+    	//dump(date('Y-m-d H:s:i',$yes_time));
+    	//dump(date('Y-m-d H:s:i',$end_time));
 			//var_dump($first_time);
 			
     	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
-    	//dump(count($devlist));
-			$accSelect=M('access')->where('time >='.$last_time.' and time <='.$first_time)->where(array('psn'=>$psnid))->order('time desc')->select();
+    	foreach($devlist as $dev){
+    		$devidlist[]=$dev['devid'];
+    	}
+    	
+    	$wheredev['devid']=array('in',$devidlist);
+    	
+    	$accSelect=M('access')->where($wheredev)->where('time >='.$last_time.' and time <='.$first_time)->where(array('psn'=>$psnid))->order('time desc')->select();
 			//dump(count($accSelect));
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
@@ -133,6 +155,44 @@ class ProductController extends HomeController {
 			if($dev_none){
 				$wherenone['devid']=array('in',$dev_none);
 				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wherenone)->save(array('state'=>4));
+				//week
+				$accweekSelect=M('access')->where($wherenone)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psn'=>$psnid))->order('time desc')->select();
+				foreach($dev_none as $dev_week_id){
+					$acc_week_size=0;
+					unset($acc_week_list);
+					$acc_week_list = array();
+					foreach($accweekSelect as $acc){
+						if($acc['devid']==$dev_week_id){
+							$acc_week_list[]=$acc;
+						}
+					}
+					$acc_week_size=count($acc_week_list);
+					if($acc_week_size==0){
+						$dev_week_none[]=$dev_week_id;
+					}
+				}
+				$whereweeknone['devid']=array('in',$dev_week_none);
+				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($whereweeknone)->save(array('state'=>5));
+				
+				//month
+				$accnoneSelect=M('access')->where($whereweeknone)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psn'=>$psnid))->order('time desc')->select();
+				foreach($dev_week_none as $dev_mon_id){
+					$acc_mon_size=0;
+					unset($acc_mon_list);
+					$acc_mon_list = array();
+					foreach($accmonSelect as $acc){
+						if($acc['devid']==$dev_mon_id){
+							$acc_mon_list[]=$acc;
+						}
+					}
+					$acc_mon_size=count($acc_mon_list);
+					if($acc_mon_size==0){
+						$dev_mon_none[]=$dev_mon_id;
+					}
+				}
+				$wheremonnone['devid']=array('in',$dev_mon_none);
+				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wheremonnone)->save(array('state'=>6));
+				
 			}
 			if($dev_pass){
 				$wherepass['devid']=array('in',$dev_pass);
