@@ -672,6 +672,7 @@ class AddController extends HomeController {
     	$psnsave['userid']=$userid;
     	$psnsave['tsn']=$tsn;
     	$psnsave['sn']=$sn;
+    	$psnsave['id']=$sn;
     	if(!empty($info)){
     		$psnsave['info']=$info;
     	}
@@ -796,21 +797,31 @@ class AddController extends HomeController {
     	$dev=M('changeidlog')->where(array('id'=>$id))->find();
     	$psnid=$dev['psnid'];
 	    	
+	    $change_devs = D('changeidlog')->where(array('psnid' => $psnid))->select();
+	    	
     	if(empty($old_psn)||empty($old_devid)||empty($new_devid)){
 	    	$old_psn=$dev['old_psn'];
 	    	$old_devid=$dev['old_devid'];
 	    	
-	    	$devlist=M('device')->where(array('psn'=>$psnid))->order('devid asc')->select();
+	    	$devlist=M('device')->where(array('psnid'=>$psnid))->order('devid asc')->select();
 	    	
-	    		for($i=2;$i<2000;$i++){
-	    			$finddev=0;
+	    		for($i=30;$i<2000;$i++){
+	    			$finddev=false;
 	    			foreach($devlist as $v){
 	    				if($i==$v['devid']){
-	    					$finddev=1;
+	    					$finddev=true;
 	    					break;
 	    				}
 	    			}
-	    			if($finddev==0){
+	    			foreach($change_devs as $ch_dev)
+	    			{
+	    				if($ch_dev['new_devid']==$i){
+	    					$finddev=true;
+	    					break;
+	    				}
+	    			}
+	    			
+	    			if($finddev==false){
 	    				$devids[]=$i;
 	    			}
 	    			if(count($devids)>19){
@@ -826,15 +837,16 @@ class AddController extends HomeController {
 			
 			$newdev=array('new_devid'=>$new_devid,
 										'flag'=>1);
-			$dev=M('changeidlog')->where(array('old_psn'=>$old_psn,'old_devid'=>$old_devid))->save($newdev);
-
+			//$dev=M('device')->where(array('psn'=>$old_psn,'devid'=>$old_devid))->find();
+			//$rfid=$dev['rfid'];
+			$ret=M('changeidlog')->where(array('id'=>$id))->save($newdev);
 			$this ->redirect('devselect/devmove',array('psnid'=>$psnid),0,'');
     }
     
     public function quitmovedev(){
 
     	$id=$_GET['changeid'];
-			$newdev=array('flag'=>0);
+			$newdev=array('flag'=>0,'new_devid'=>0);
     	$id=$_GET['changeid'];
     	$dev=M('changeidlog')->where(array('id'=>$id))->find();
     	$psnid=$dev['psnid'];

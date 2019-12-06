@@ -3,6 +3,48 @@ namespace Home\Controller;
 use Tools\HomeController; 
 use Think\Controller;
 class ProductController extends HomeController {
+		public function rfidscan(){
+			dump(date('Y-m-d H:i:s',time()));
+			//$access=M('access')->where(array('psn'=>2,'psnid'=>0))->save(array('psnid'=>2));
+			//$access=M('access')->where(array('psn'=>3,'psnid'=>0))->count();
+			dump(date('Y-m-d H:i:s',time()));
+			//$ret=M('access')->field('id')->where(array('psnid'=>0))->order('time desc')->count();
+			dump('OK:'.$access);
+			exit;
+		}
+	
+		public function devpsn(){
+			$devs=M('device')->field('id,psn,psnid,devid')->where(array('psnid'=>0))->order('id desc')->select();
+			foreach($devs as $dev){
+				$dev_psn=$dev['psn'];
+				$dev_psnid=$dev['psnid'];
+				$devid=$dev['devid'];
+				if($psnid==0){
+					//$ret=M('device')->where(array('id'=>$dev['id']))->save(array('psnid'=>$dev_psn));
+					dump('sn:'.$devid.' dev_psn:'.$dev_psn);
+				}
+			}
+			echo 'OK';
+			exit;
+		}
+		
+	  public function delrfid(){
+			$devs=M('device')->field('id,psn,psnid,devid,rid')->where(array('psnid'=>11))->select();
+			foreach($devs as $dev){
+				$rid = $dev['rid'];
+				foreach($devs as $dev2){
+					if($dev2['rid']==$rid&&$dev['id']!=$dev2['id']){
+						//dump($dev);
+						dump($dev2['rid']);
+						//$ret=M('device')->where(array('id'=>$dev2['id']))->delete();
+						break;
+					}
+				}
+			}
+			echo 'OK';
+			exit;
+		}
+		
 		public function devlist(){
 			$psnid = 12;//$_GET['psnid'];
 			$devSelect=M('access')->where(array('time'=>1557604800,'psn'=>$psnid))->order('devid asc')->select();
@@ -86,8 +128,15 @@ class ProductController extends HomeController {
 		public function scanfactory(){
 			$psnid=$_GET['psnid'];
 			$productno=$_GET['productno'];
-			$delay = 1*3600;
-			$delay_sub = 1*3600;
+			$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
+			$delay_str= $bdevinfo['uptime'];
+			$count= $bdevinfo['count'];
+			
+			$delay = substr($delay_str,0, 2);
+			$delay = (int)$delay;
+
+			$delay = 3600*$delay;
+			$delay_sub = 3600*($delay/$count);
 
 			if($productno==NULL){
 				echo 'PRODUCTNO ERR.';
@@ -107,7 +156,8 @@ class ProductController extends HomeController {
     	
     	//dump(date('Y-m-d H:s:i',$yes_time));
     	//dump(date('Y-m-d H:s:i',$end_time));
-			//var_dump($first_time);
+			//dump($last_time);
+			dump($first_time);
 			
     	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
     	foreach($devlist as $dev){
@@ -115,9 +165,9 @@ class ProductController extends HomeController {
     	}
     	
     	$wheredev['devid']=array('in',$devidlist);
-    	
-    	$accSelect=M('access')->where($wheredev)->where('time >='.$last_time.' and time <='.$first_time)->where(array('psn'=>$psnid))->order('time desc')->select();
-			//dump(count($accSelect));
+
+    	$accSelect=M('access')->where(array('psnid'=>$psnid))->where($wheredev)->where('time >='.$last_time.' and time <='.$first_time)->order('time desc')->select();
+
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
 				$psnid = $dev['psnid'];
@@ -141,9 +191,7 @@ class ProductController extends HomeController {
 				}
 				$dev_pass[]=$devid;
 			}
-			//dump($dev_lost);
-			//dump($dev_none);
-			//dump($dev_pass);
+
 			//$wherelost['devid']=array('in',$dev_lost);
 			//$wherenone['devid']=array('in',$dev_none);
 			//$wherepass['devid']=array('in',$dev_pass);
@@ -156,43 +204,51 @@ class ProductController extends HomeController {
 				$wherenone['devid']=array('in',$dev_none);
 				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wherenone)->save(array('state'=>4));
 				//week
-				$accweekSelect=M('access')->where($wherenone)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psn'=>$psnid))->order('time desc')->select();
-				foreach($dev_none as $dev_week_id){
-					$acc_week_size=0;
-					unset($acc_week_list);
-					$acc_week_list = array();
-					foreach($accweekSelect as $acc){
-						if($acc['devid']==$dev_week_id){
-							$acc_week_list[]=$acc;
+				/*
+				if(!empty($dev_none)){
+					$accweekSelect=M('access')->where($wherenone)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psnid'=>$psnid))->order('time desc')->select();
+					foreach($dev_none as $dev_week_id){
+						$acc_week_size=0;
+						unset($acc_week_list);
+						$acc_week_list = array();
+						foreach($accweekSelect as $acc){
+							if($acc['devid']==$dev_week_id){
+								$acc_week_list[]=$acc;
+							}
+						}
+						$acc_week_size=count($acc_week_list);
+						if($acc_week_size==0){
+							$dev_week_none[]=$dev_week_id;
 						}
 					}
-					$acc_week_size=count($acc_week_list);
-					if($acc_week_size==0){
-						$dev_week_none[]=$dev_week_id;
-					}
 				}
-				$whereweeknone['devid']=array('in',$dev_week_none);
-				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($whereweeknone)->save(array('state'=>5));
-				
-				//month
-				$accnoneSelect=M('access')->where($whereweeknone)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psn'=>$psnid))->order('time desc')->select();
-				foreach($dev_week_none as $dev_mon_id){
-					$acc_mon_size=0;
-					unset($acc_mon_list);
-					$acc_mon_list = array();
-					foreach($accmonSelect as $acc){
-						if($acc['devid']==$dev_mon_id){
-							$acc_mon_list[]=$acc;
+
+				if(!empty($dev_week_none)){
+					$whereweeknone['devid']=array('in',$dev_week_none);
+					$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($whereweeknone)->save(array('state'=>5));
+					
+					//month
+					$accnoneSelect=M('access')->where($whereweeknone)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psnid'=>$psnid))->order('time desc')->select();
+					foreach($dev_week_none as $dev_mon_id){
+						$acc_mon_size=0;
+						unset($acc_mon_list);
+						$acc_mon_list = array();
+						foreach($accmonSelect as $acc){
+							if($acc['devid']==$dev_mon_id){
+								$acc_mon_list[]=$acc;
+							}
+						}
+						$acc_mon_size=count($acc_mon_list);
+						if($acc_mon_size==0){
+							$dev_mon_none[]=$dev_mon_id;
 						}
 					}
-					$acc_mon_size=count($acc_mon_list);
-					if($acc_mon_size==0){
-						$dev_mon_none[]=$dev_mon_id;
-					}
 				}
-				$wheremonnone['devid']=array('in',$dev_mon_none);
-				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wheremonnone)->save(array('state'=>6));
-				
+				if(!empty($dev_week_none)){
+					$wheremonnone['devid']=array('in',$dev_mon_none);
+					$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wheremonnone)->save(array('state'=>6));
+				}
+				*/
 			}
 			if($dev_pass){
 				$wherepass['devid']=array('in',$dev_pass);
@@ -275,31 +331,45 @@ class ProductController extends HomeController {
  		public function devtempnow(){
 			$psnid=$_GET['psnid'];
 			$productno=$_GET['productno'];
-			$delay = 3600;
-			$delay_sub = 3600;
+			$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
+			$delay_str= $bdevinfo['uptime'];
+			$count= $bdevinfo['count'];
+			
+			$psninfo= M('psn')->where(array('psnid'=>$psnid))->find();
+			if($psninfo){
+			  $psn=$psninfo['sn'];
+			}else{
+				echo 'PSN ERR.';
+				exit;
+			}
+			
+			$delay = substr($delay_str,0, 2);
+			$delay = (int)$delay;
+			$delay = 3600*$delay;
+			$delay_sub = 3600*($delay/$count);
 
 			if($productno==NULL){
 				echo 'PRODUCTNO ERR.';
 				exit;
+		
 			}
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now));
-    	//var_dump($start_time);
     	$yes_time = $start_time;
     	$end_time = $start_time+86400;
     	$cur_time = $now - $start_time;
     	//dump($cur_time);
+    	//dump($start_time);
     	$cur_time = (int)($cur_time/$delay)*$delay;
     	$first_time = $cur_time-$delay+$start_time;
-			//dump($first_time);
+			//dump(date('Y-m-d H:s:i',$first_time));
 			
     	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
     	//dump(count($devlist));
-			$accSelect2=M('access')->where(array('psn'=>$psnid,'time'=>$first_time))->order('devid asc')->select();
+			$accSelect2=M('access')->where(array('psnid'=>$psnid,'time'=>$first_time))->order('devid asc')->select();
 			//dump(count($accSelect2));
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
-				$psnid = $dev['psnid'];
 				foreach($accSelect as $acc){
 					if($devid==$acc['devid']){
 						$al_find=false;
@@ -318,7 +388,6 @@ class ProductController extends HomeController {
 			//dump(count($acclist));
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
-				$psnid = $dev['psnid'];
 				foreach($accSelect2 as $acc){
 					if($devid==$acc['devid']){
 						$al_find=false;
@@ -342,8 +411,15 @@ class ProductController extends HomeController {
 		public function devtempnext(){
 			$psnid=$_GET['psnid'];
 			$productno=$_GET['productno'];
-			$delay = 1*3600;
-			$delay_sub = 1*3600;
+			$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
+			$delay_str= $bdevinfo['uptime'];
+			$count= $bdevinfo['count'];
+			
+			$delay = substr($delay_str,0, 2);
+			$delay = (int)$delay;
+
+			$delay = 3600*$delay;
+			$delay_sub = 3600*($delay/$count);
 
 			if($productno==NULL){
 				echo 'PRODUCTNO ERR.';
@@ -363,9 +439,9 @@ class ProductController extends HomeController {
 			//dump($pre_time);
     	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
     	//dump(count($devlist));
-			$accSelect=M('access')->where(array('psn'=>$psnid,'time'=>$pre_time))->order('devid asc')->select();
+			$accSelect=M('access')->where(array('psnid'=>$psnid,'time'=>$pre_time))->order('devid asc')->select();
 			//dump(count($accSelect));
-			$accSelect2=M('access')->where(array('psn'=>$psnid,'time'=>$first_time))->order('devid asc')->select();
+			$accSelect2=M('access')->where(array('psnid'=>$psnid,'time'=>$first_time))->order('devid asc')->select();
 			//dump(count($accSelect2));
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
@@ -450,10 +526,18 @@ class ProductController extends HomeController {
 		
 		public function scanfactoryall(){
 			$psnid=$_GET['psnid'];
-			$delay = 1*3600;
-			$delay_sub = 1*3600;
-			$scan_count=4;
 
+			$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
+			$delay_str= $bdevinfo['uptime'];
+			$count= $bdevinfo['count'];
+			
+			$delay = substr($delay_str,0, 2);
+			$delay = (int)$delay;
+
+			$delay = 3600*$delay;
+			$delay_sub = 3600*($delay/$count);
+			$scan_count=4;
+			
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now));
     	//dump($start_time);
@@ -468,7 +552,7 @@ class ProductController extends HomeController {
     	//dump(date('Y-m-d H:s:i',$last_time));
     	//dump(date('Y-m-d  H:s:i',$first_time));
     	
-    	$devlist=M('device')->where(array('psn'=>$psnid,'flag'=>1,'dev_type'=>0))->order('id asc')->select();
+    	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
     	foreach($devlist as $dev){
     		$devidlist[]=$dev['devid'];
     	}
@@ -476,8 +560,9 @@ class ProductController extends HomeController {
     	$wheredev['devid']=array('in',$devidlist);
     	
     	
-    	//dump(count($devlist));
-			$accSelect=M('access')->where($wheredev)->where('time >='.$last_time.' and time <='.$first_time)->where(array('psn'=>$psnid))->order('time desc')->select();
+    	dump(count($devlist));
+    	exit;
+			$accSelect=M('access')->where(array('psnid'=>$psnid))->where($wheredev)->where('time >='.$last_time.' and time <='.$first_time)->order('time desc')->select();
 			//dump(count($accSelect));
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];

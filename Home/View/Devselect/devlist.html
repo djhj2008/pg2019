@@ -77,11 +77,11 @@
 				<td><%$value['dev_assert']%></td>
 				<td>
 					<%if $value['re_flag'] eq 1 %>
-					停止回收
+					停止
 					<%else if $value['re_flag'] eq 2 %>
-					停止中
+					停止下发
 					<%else if $value['re_flag'] eq 3 %>
-					停止失败
+					停止执行
 					<%else if $value['re_flag'] eq 0 %>
 					正常
 					<%else if $value['re_flag'] eq 4 %>
@@ -92,10 +92,10 @@
 				</td>
 				<td><%$value['avg_temp']%></td>
 				<td>
-					<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">查看温度</a>
-					<a href="<%$smarty.const.__APP__%>/collect/monthValue?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|温度图</a>
-					<a href="<%$smarty.const.__APP__%>/devmanager/dwlist?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|查看日志</a>
-					<a href="<%$smarty.const.__APP__%>/devmanager/statelist?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">|标记记录</a>
+					<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">查看温度</a>
+					<a href="<%$smarty.const.__APP__%>/collect/monthValue?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">|温度图</a>
+					<a href="<%$smarty.const.__APP__%>/devmanager/dwlist?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">|查看日志</a>
+					<a href="<%$smarty.const.__APP__%>/devmanager/statelist?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">|标记记录</a>
 				</td>
 				
 				<td>	
@@ -150,7 +150,7 @@
               buttons: ['excel'],
               bSort: true,
               order: [[ 0, "desc" ]],
-							columnDefs: [ 
+							columnDefs: [
 									{
 								      "targets": 0,
 									},

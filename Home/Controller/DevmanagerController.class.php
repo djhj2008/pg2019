@@ -6,9 +6,9 @@ class DevmanagerController extends Controller {
 		$psnid = $_GET['psnid'];
 		$uid= $_SESSION['admin_userid'];
 		if($psnid==12){
-			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid,'flag'=>1))->order('devid asc')->select();
+			$devSelect=M('device')->where(array('dev_type'=>0,'psnid'=>$psnid))->order('devid asc')->select();
 		}else{
-			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
+			$devSelect=M('device')->where(array('dev_type'=>0,'psnid'=>$psnid))->order('devid asc')->select();
 		}
 		
 		//dump($dev);
@@ -33,9 +33,9 @@ class DevmanagerController extends Controller {
 			exit;
 		}
 		if($psnid==12){
-			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid,'flag'=>1))->order('devid asc')->select();
+			$devSelect=M('device')->where(array('dev_type'=>0,'psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
 		}else{
-			$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psnid))->order('devid asc')->select();
+			$devSelect=M('device')->where(array('dev_type'=>0,'psnid'=>$psnid))->order('devid asc')->select();
 		}
 		
 		foreach($devSelect as $dev){
@@ -89,13 +89,12 @@ class DevmanagerController extends Controller {
 		  	$time2 =  $_POST['time2'];
 		}
     {
-	  	$psn = $_GET['psnid'];
 	  	$id=$_GET['devid'];
 			$psnid = $_GET['psnid'];
     	
     	$start_time = strtotime($time);
     	$end_time = strtotime($time)+86400-1;
-        $dev=M('device')->where(array('devid'=>$id,'psn'=>$psn))->find();
+        $dev=M('device')->where(array('devid'=>$id,'psnid'=>$psnid))->find();
         if($dev==NULL){
             $date = date("Y-m-d");
             $this->assign('date',$date);
@@ -108,7 +107,7 @@ class DevmanagerController extends Controller {
         $shed = $dev['shed'];
         //var_dump($dev);
         
-        if($selectSql=M('access')->group('time')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
+        if($selectSql=M('access')->group('time')->where('devid ='.$id.' and psnid= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
             $this->assign('devid',$id);
             $this->assign('date',$time);
             $this->assign('date2',$time2);
@@ -143,7 +142,7 @@ class DevmanagerController extends Controller {
   	$start_time = strtotime($time);
   	$end_time = strtotime($time)+86400-1;
   	
-  	$dev=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->find();
+  	$dev=M('device')->where(array('devid'=>$devid,'psnid'=>$psnid))->find();
   	
   	if(empty($dev)||$uid!=100)
 		{
@@ -151,7 +150,9 @@ class DevmanagerController extends Controller {
 			exit;
 		}  	
   	
-		$selectSql=M('access')->group('time')->where('devid ='.$devid.' and psn= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select();
+  	$psn=$dev['psn'];
+  	
+		$selectSql=M('access')->group('time')->where('devid ='.$devid.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select();
 		
 		foreach($selectSql as $acc){
 			$id=$acc['id'];
@@ -186,10 +187,10 @@ class DevmanagerController extends Controller {
 			}
 		}
 		
-		$lastacc=M('access')->where(array('devid'=>$devid,'psn'=>$psnid))->where('state>0')->order('time desc')->find();
+		$lastacc=M('access')->where(array('devid'=>$devid,'psn'=>$psn))->where('state>0')->order('time desc')->find();
 
 		$lastsate=$lastacc['state'];
-		$ret=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->save(array('state'=>$lastsate));
+		$ret=M('device')->where(array('devid'=>$devid,'psnid'=>$psnid))->save(array('state'=>$lastsate));
 		
 		$this ->redirect('/Devmanager/querytemp',array('psnid'=>$psnid,'devid'=>$devid,'time'=>$time),0,'');
 		exit;
