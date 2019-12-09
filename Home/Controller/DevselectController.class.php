@@ -1875,7 +1875,7 @@ class DevselectController extends HomeController {
         	$ios_order='id desc';
         }
         
-        if($selectSql=M('access')->where('devid ='.$devid.' and psn= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)
+        if($selectSql=M('access')->where('devid ='.$devid.' and psn= '.$dev['psn'].' and time >= '.$start_time.' and time <= '.$end_time)
 													        ->group('time')
 													        ->order($ios_order)
 													        ->limit(0,24*7)

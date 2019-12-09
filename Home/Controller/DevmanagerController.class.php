@@ -33,7 +33,7 @@ class DevmanagerController extends Controller {
 			exit;
 		}
 		if($psnid==12){
-			$devSelect=M('device')->where(array('dev_type'=>0,'psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
+			$devSelect=M('device')->where(array('dev_type'=>0,'psnid'=>$psnid))->order('devid asc')->select();
 		}else{
 			$devSelect=M('device')->where(array('dev_type'=>0,'psnid'=>$psnid))->order('devid asc')->select();
 		}

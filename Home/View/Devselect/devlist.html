@@ -52,6 +52,7 @@
      <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
      <thead>
 			<tr>
+				<th>RFID</th>
 				<th>DEVID</th>
 				<th>SN</th>
 				<th>舍</th>
@@ -68,6 +69,7 @@
 		  <tbody>
 			<%foreach $devSelect as $value%>
 			<tr>
+				<td><%$value['rid']%></td>
 				<td><%$value['devid']%></td>
 				<td><%$value['sn']%></td>
 				<td><%$value['shed']%></td>
