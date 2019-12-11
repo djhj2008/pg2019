@@ -48,12 +48,16 @@
 <form class="form-horizontal"  method="post">
 <div class="weui-cells">
     <div class="weui-cell">
+    		<div class="weui-cell__hd"><label class="weui-label">RFID</label></div>
+        <input class="weui-input" disabled="disabled" value="<%$dev['rfid']%>" type="number">
+    </div>
+    <div class="weui-cell">
     		<div class="weui-cell__hd"><label class="weui-label">设备厂号</label></div>
-        <input class="weui-input" value="<%$dev['old_psn']%>" type="number" id="old_psn" name="old_psn">
+        <input class="weui-input"  value="<%$dev['old_psn']%>" type="number" id="old_psn" name="old_psn">
     </div>
     <div class="weui-cell">
     		<div class="weui-cell__hd"><label class="weui-label">设备ID</label></div>
-        <input class="weui-input" value="<%$dev['old_devid']%>" type="number" id="old_devid" name="old_devid">
+        <input class="weui-input"  value="<%$dev['old_devid']%>" type="number" id="old_devid" name="old_devid">
     </div>
     <div class="weui-cell">
         <div class="weui-cell__hd"><label class="weui-label">新设备ID</label></div>

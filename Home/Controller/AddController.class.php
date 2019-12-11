@@ -796,15 +796,33 @@ class AddController extends HomeController {
     	$id=$_GET['changeid'];
     	$dev=M('changeidlog')->where(array('id'=>$id))->find();
     	$psnid=$dev['psnid'];
-	    	
+    	$rfid=(int)$dev['rfid'];
+	    //dump($rfid);	
+	    //dump($dev);
 	    $change_devs = D('changeidlog')->where(array('psnid' => $psnid))->select();
-	    	
+			//dump($old_psn);	
+			//dump($old_devid);	
+			//dump($new_devid);	
     	if(empty($old_psn)||empty($old_devid)||empty($new_devid)){
 	    	$old_psn=$dev['old_psn'];
 	    	$old_devid=$dev['old_devid'];
-	    	
+	    	$pre_devs=M('device')->where(array('rid'=>$rfid))->select();
 	    	$devlist=M('device')->where(array('psnid'=>$psnid))->order('devid asc')->select();
-	    	
+	    	  //dump($pre_devs);
+	    	  $change_back=false;
+	    	  foreach($pre_devs as $pre_dev){
+	    	  	if($pre_dev['psn']!=$old_psn){
+	    	  		$change_back=true;
+	    	  		$devids[]=$pre_dev['devid'];
+	    	  		break;
+	    	  	}
+	    	  }
+	    	  if($change_back){
+	    				$this->assign('devids',$devids);
+				    	$this->assign('dev',$dev);
+				    	$this->display();
+				    	exit;
+	    	  }
 	    		for($i=30;$i<2000;$i++){
 	    			$finddev=false;
 	    			foreach($devlist as $v){

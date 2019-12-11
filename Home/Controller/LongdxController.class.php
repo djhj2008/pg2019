@@ -83,6 +83,36 @@ class LongdxController extends HomeController {
 			exit;		        
     }
     
+    public function sendsmscode(){
+    	$token=(int)ldx_decode($_GET['token']);
+    	$addr=ldx_decode($_GET['addr']);
+    	$now=time();
+
+    	if(!$token||$token< $now-60*5||$token>$now){
+    		$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
+    		echo json_encode($jarr);
+    		exit;
+    	}
+      $phone=$_POST['phone']; 
+      if(empty($sn)){
+      	$sn=$_GET['phone'];
+      }
+
+    	$now=time();
+    	$time_out=$now+60*10;
+    	$ret=sendldxmsg($phone);
+			if($ret['code']==200){
+				$data['obj']=$ret['obj'];
+				$data['timeout']=$time_out;
+	  		$jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100,'data'=>$data));
+	  		echo json_encode($jarr);
+			}else{
+    		$jarr=array('ret'=>array('ret_message'=>'send ','status_code'=>10000301));
+    		echo json_encode($jarr);
+    		exit;
+			}
+  		exit;
+    }
         
     public function test_encode(){
     	$data=$_GET['data'];

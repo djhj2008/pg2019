@@ -2518,8 +2518,16 @@ class DevselectController extends HomeController {
 	
 	public function devtempnow(){
 			$psnid=$_GET['psnid'];
-			$delay = 3600;
-			$delay_sub = 3600;
+			
+			$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
+			$delay_str= $bdevinfo['uptime'];
+			$count= $bdevinfo['count'];
+			
+			$delay = substr($delay_str,0, 2);
+			$delay = (int)$delay;
+
+			$delay = 3600*$delay;
+			$delay_sub = $delay/$count;
 
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now));
@@ -2533,7 +2541,7 @@ class DevselectController extends HomeController {
 			//dump($first_time);
     	if($psnid==12)
     	{
-    		$devlist=M('device')->where(array('psnid'=>$psnid,'flag'=>1))->where('devid>=400')->order('id asc')->select();
+    		$devlist=M('device')->where(array('psnid'=>$psnid,'flag'=>1))->order('id asc')->select();
     	}else{
     		$devlist=M('device')->where(array('psnid'=>$psnid,'flag'=>1))->order('id asc')->select();
     	}
@@ -2574,8 +2582,15 @@ class DevselectController extends HomeController {
 	
 	public function devtempnone(){
 			$psnid=$_GET['psnid'];
-			$delay = 3600;
-			$delay_sub = 3600;
+			$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
+			$delay_str= $bdevinfo['uptime'];
+			$count= $bdevinfo['count'];
+			
+			$delay = substr($delay_str,0, 2);
+			$delay = (int)$delay;
+
+			$delay = 3600*$delay;
+			$delay_sub = $delay/$count;
 
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now));
@@ -2590,12 +2605,12 @@ class DevselectController extends HomeController {
 			
     	if($psnid==12)
     	{
-    		$devlist=M('device')->where(array('psn'=>$psnid,'flag'=>1))->where('devid>=400')->order('id asc')->select();
+    		$devlist=M('device')->where(array('psnid'=>$psnid,'flag'=>1))->order('id asc')->select();
     	}else{
-    		$devlist=M('device')->where(array('psn'=>$psnid,'flag'=>1))->order('id asc')->select();
+    		$devlist=M('device')->where(array('psnid'=>$psnid,'flag'=>1))->order('id asc')->select();
     	}
     	//dump(count($devlist));
-			$accSelect2=M('access')->where(array('psn'=>$psnid,'time'=>$first_time))->order('devid asc')->select();
+			$accSelect2=M('access')->where(array('psnid'=>$psnid,'time'=>$first_time))->order('devid asc')->select();
 
 			//dump(count($acclist));
 			foreach($devlist as $dev){
@@ -2614,5 +2629,33 @@ class DevselectController extends HomeController {
 
 			$this->assign('devnone',$devnone);
 			$this->display();
+	}
+	
+	public function dev1301acc(){
+		$psnid=$_GET['psnid'];
+		//dump($psnid);
+		$psnSelect=M('psn')->field('sn')->where(array('id'=>$psnid))->find();
+		if($psnSelect){
+			$psn=$psnSelect['sn'];
+		}else{
+			echo 'PSN ERROR.';
+			exit;
+		}
+		if(empty($_POST['time'])||empty($_POST['time2'])){
+			  $now = time();
+			  $v = strtotime(date('Y-m-d',$now))-86400;
+			  $time =date('Y-m-d',$v);
+  			$time2 =date('Y-m-d',$now);
+		}else{
+		  	$time =  $_POST['time'];
+		  	$time2 =  $_POST['time2'];
+		}
+		$start_time = strtotime($time);
+		$end_time = strtotime($time2)+86400;
+		$selectSql=M('access1301')->where('psnid= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)->order('time desc')->select();
+    $this->assign('date',$time);
+    $this->assign('date2',$time2);
+		$this->assign('selectSql',$selectSql);
+		$this->display();
 	}
 }

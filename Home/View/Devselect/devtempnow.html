@@ -55,13 +55,13 @@
 				<th>温度2</th>
 				<th>温度3</th>
 				<th>基站ID</th>
-				<th>SN</th>
-				<th>舍号</th>
 				<th>状态</th>
         <th>延迟</th>
         <th>信号</th>
         <th>频点</th>
-        <th>丢失</th>    
+        <th>丢失</th>   
+        <th>时间</th>
+        <th>上报时间</th> 
 				<th>操作</th>
 			</tr>
 		</thead>
@@ -73,17 +73,15 @@
 				<td><%$value['temp2']%></td>
 				<td><%$value['env_temp']%></td>
 				<td><%$value['sid']%></td>
-				<td><%$value['sn']%></td>
-				<td><%$value['shed']%></td>
 				<td><%$value['state']%></td>
 	      <td><%$value['delay']%></td>
 	      <td><%$value['sign']%></td>
 	      <td><%$value['cindex']%></td>
 	      <td><%$value['lcount']%></td>
-				<!--td><%date('Y-m-d H:i:s',$value['time'])%></td>
-				<td><%$value['cur_time']%></td-->
+				<td><%date('Y-m-d H:i:s',$value['time'])%></td>
+				<td><%$value['cur_time']%></td>
 				<td>
-				<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">查看温度</a>
+				<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">查看温度</a>
 				</td>
 			</tr>
 			<%/foreach%>

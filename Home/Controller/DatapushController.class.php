@@ -416,7 +416,7 @@ class DatapushController extends Controller {
     	//echo "type:";
     	//var_dump($type);
     	$snint=$snint;
-    	$info    =D('device')->where(array('devid'=>$snint,'psn'=>$psn))->find();//查询devce是否存在
+    	$info =D('device')->where(array('devid'=>$snint,'psn'=>$psn))->find();//查询devce是否存在
     	//var_dump($info);
     	
     	if(!$info){
@@ -2474,7 +2474,7 @@ class DatapushController extends Controller {
 	        exit;
 	    }
 
-	    $psnallinfo = D('psn')->where(array('tsn' => $btsn))->select();
+	    $psnallinfo = D('psn')->select();
 	    //dump($psnallinfo);
 	    $dev_psnid_find = false;
 	    $psn_index = 0;
@@ -2703,6 +2703,10 @@ class DatapushController extends Controller {
 		        			 	}
 	        			 }
 	        			 if($change_add_find==false){
+	                	$dev_info=D('device')->field('rid')->where(array('devid'=>$snint,'psn'=>$dev_psn))->find();
+	                	if($dev_info){
+	                		$rfid=$dev_info['rid'];
+	                	}
 		                $change_dev = array('psnid' => $psnid,
 		                    'old_psn' => $dev_psn,
 		                    'old_devid' => $snint,
@@ -3322,7 +3326,7 @@ class DatapushController extends Controller {
 	        exit;
 	    }
 
-	    $psnallinfo = D('psn')->where(array('tsn' => $btsn))->select();
+	    $psnallinfo = D('psn')->select();
 	    //dump($psnallinfo);
 	    $dev_psnid_find = false;
 	    $psn_index = 0;
@@ -3562,6 +3566,10 @@ class DatapushController extends Controller {
 		        			 	}
 	        			 }
 	        			 if($change_add_find==false){
+	                	$dev_info=D('device')->field('rid')->where(array('devid'=>$snint,'psn'=>$dev_psn))->find();
+	                	if($dev_info){
+	                		$rfid=$dev_info['rid'];
+	                	}
 		                $change_dev = array('psnid' => $psnid,
 		                    'old_psn' => $dev_psn,
 		                    'old_devid' => $snint,

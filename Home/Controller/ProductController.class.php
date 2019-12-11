@@ -136,7 +136,7 @@ class ProductController extends HomeController {
 			$delay = (int)$delay;
 
 			$delay = 3600*$delay;
-			$delay_sub = 3600*($delay/$count);
+			$delay_sub = $delay/$count;
 
 			if($productno==NULL){
 				echo 'PRODUCTNO ERR.';
@@ -346,7 +346,7 @@ class ProductController extends HomeController {
 			$delay = substr($delay_str,0, 2);
 			$delay = (int)$delay;
 			$delay = 3600*$delay;
-			$delay_sub = 3600*($delay/$count);
+			$delay_sub = $delay/$count;
 
 			if($productno==NULL){
 				echo 'PRODUCTNO ERR.';
@@ -368,28 +368,13 @@ class ProductController extends HomeController {
     	//dump(count($devlist));
 			$accSelect2=M('access')->where(array('psnid'=>$psnid,'time'=>$first_time))->order('devid asc')->select();
 			//dump(count($accSelect2));
-			foreach($devlist as $dev){
-				$devid = $dev['devid'];
-				foreach($accSelect as $acc){
-					if($devid==$acc['devid']){
-						$al_find=false;
-						foreach($acclist as $al){
-							if($devid==$al['devid']){
-								$al_find=true;
-								break;
-							}
-						}
-						if($al_find==false){
-							$acclist[]=$acc;
-						}
-					}
-				}
-			}
 			//dump(count($acclist));
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
+				$dev_find=false;
 				foreach($accSelect2 as $acc){
 					if($devid==$acc['devid']){
+						$dev_find=true;
 						$al_find=false;
 						foreach($acclist2 as $al){
 							if($devid==$al['devid']){
@@ -402,9 +387,17 @@ class ProductController extends HomeController {
 						}
 					}
 				}
+				if($dev_find==false){
+					if($acc_lost){
+						$acc_lost=$acc_lost.','.$devid;
+					}else{
+						$acc_lost=$devid;
+					}
+				}
 			}
 
 			$this->assign('acclist',$acclist2);
+			$this->assign('devlost',$acc_lost);
 			$this->display();
 		}
 		
@@ -419,7 +412,7 @@ class ProductController extends HomeController {
 			$delay = (int)$delay;
 
 			$delay = 3600*$delay;
-			$delay_sub = 3600*($delay/$count);
+			$delay_sub = $delay/$count;
 
 			if($productno==NULL){
 				echo 'PRODUCTNO ERR.';
@@ -446,8 +439,10 @@ class ProductController extends HomeController {
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
 				$psnid = $dev['psnid'];
+				$dev_find=false;
 				foreach($accSelect as $acc){
 					if($devid==$acc['devid']){
+						$dev_find=true;
 						$al_find=false;
 						foreach($acclist as $al){
 							if($devid==$al['devid']){
@@ -466,9 +461,11 @@ class ProductController extends HomeController {
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
 				$psnid = $dev['psnid'];
+				$dev_find=false;
 				foreach($accSelect2 as $acc){
 					if($devid==$acc['devid']){
 						$al_find=false;
+						$dev_find=true;
 						foreach($acclist2 as $al){
 							if($devid==$al['devid']){
 								$al_find=true;
@@ -482,45 +479,37 @@ class ProductController extends HomeController {
 				}
 			}
 			$nowcount=count($acclist2);
-			//dump(count($acclist2));
-			if($precount>$nowcount){
-				foreach($acclist as $dev){
-					$devid = $dev['devid'];
-					$psnid = $dev['psnid'];
-					$find=false;
-					foreach($accSelect2 as $acc){
-						if($devid==$acc['devid']){
-							$find=true;
-							break;
-						}
+
+			foreach($devlist as $dev){
+				$devid=$dev['devid'];
+				$dev_find=false;
+				foreach($acclist as $acc){
+					if($devid==$acc['devid']){
+						$dev_find=true;
+						break;
 					}
-					if($find==false){
-						$nolist[]=$dev;
+				}
+				foreach($acclist2 as $acc){
+					if($devid==$acc['devid']){
+						$dev_find=true;
+						break;
 					}
-				}	
+				}
+				if($dev_find==false){
+					if($acc_lost){
+						$acc_lost=$acc_lost.','.$devid;
+					}else{
+						$acc_lost=$devid;
+					}
+				}
 			}
-			else if($precount< $nowcount){
-				foreach($acclist2 as $dev){
-					$devid = $dev['devid'];
-					$psnid = $dev['psnid'];
-					$find=false;
-					foreach($accSelect as $acc){
-						if($devid==$acc['devid']){
-							$find=true;
-							break;
-						}
-					}
-					if($find==false){
-						$nolist[]=$dev;
-					}
-				}	
-			}
-			//dump($nolist);
-			//dump($acclist);
-			//exit;
+
 			$this->assign('precount',$precount);
 			$this->assign('nowcount',$nowcount);
-			$this->assign('acclist',$nolist);
+			$this->assign('acclist',$acclist);
+			$this->assign('devlost',$acc_lost);
+			$this->assign('time1',date('Y-m-d H:i:s',$first_time));
+			$this->assign('time2',date('Y-m-d H:i:s',$pre_time));
 			$this->display();
 		}
 		
@@ -535,7 +524,7 @@ class ProductController extends HomeController {
 			$delay = (int)$delay;
 
 			$delay = 3600*$delay;
-			$delay_sub = 3600*($delay/$count);
+			$delay_sub = $delay/$count;
 			$scan_count=4;
 			
     	$now = time();

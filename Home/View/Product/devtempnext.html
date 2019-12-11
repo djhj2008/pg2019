@@ -44,7 +44,9 @@
 		<div class="container" >
 		 <h4>上次数量:<%$precount%></h4>
 		 <h4>本次数量:<%$nowcount%></h4>
-		 <h4>未上报名单:</h4>
+		 <h4>两次未上报:<%$devlost%></h4>
+		 <h4>本次<%$time1%>上报</h4>
+		 <h4>上次<%$time2%>上报:</h4>
      <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
      <thead>
 			<tr>
@@ -69,7 +71,7 @@
 				<td><%date('Y-m-d H:i:s',$value['time'])%></td>
 				<td><%$value['cur_time']%></td>
 				<td>
-				<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psn']%>">查看温度</a>
+				<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">查看温度</a>
 				</td>
 			</tr>
 			<%/foreach%>
