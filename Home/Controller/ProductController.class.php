@@ -152,12 +152,12 @@ class ProductController extends HomeController {
     	//var_dump($cur_time);
     	$cur_time = (int)($cur_time/$delay)*$delay;
     	$first_time = $cur_time-$delay+$start_time;
-    	$last_time = $cur_time-$delay+$start_time-$delay-$delay_sub;
-    	
-    	//dump(date('Y-m-d H:s:i',$yes_time));
-    	//dump(date('Y-m-d H:s:i',$end_time));
-			//dump($last_time);
-			dump($first_time);
+    	$pre_time = $cur_time-$delay+$start_time-$delay;
+    	$pre2_time = $cur_time-$delay+$start_time-$delay*2;
+    	$pre3_time = $cur_time-$delay+$start_time-$delay*3;
+			//dump(date('Y-m-d H:s:i',$first_time));
+			//dump(date('Y-m-d H:s:i',$pre_time));
+			//dump(date('Y-m-d H:s:i',$pre2_time));
 			
     	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
     	foreach($devlist as $dev){
@@ -166,22 +166,33 @@ class ProductController extends HomeController {
     	
     	$wheredev['devid']=array('in',$devidlist);
 
-    	$accSelect=M('access')->where(array('psnid'=>$psnid))->where($wheredev)->where('time >='.$last_time.' and time <='.$first_time)->order('time desc')->select();
-
+    	$accSelect1=M('access')->where(array('psnid'=>$psnid,'time'=>$first_time))->where($wheredev)->order('devid asc')->select();
+			$accSelect2=M('access')->where(array('psnid'=>$psnid,'time'=>$pre_time))->where($wheredev)->order('devid asc')->select();
+			$accSelect3=M('access')->where(array('psnid'=>$psnid,'time'=>$pre2_time))->where($wheredev)->order('devid asc')->select();
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
 				$psnid = $dev['psnid'];
 				$acc_size=0;
 				unset($acc_list);
 				$acc_list = array();
-				foreach($accSelect as $acc){
+				foreach($accSelect1 as $acc){
+					if($acc['devid']==$devid){
+						$acc_list[]=$acc;
+					}
+				}
+				foreach($accSelect2 as $acc){
+					if($acc['devid']==$devid){
+						$acc_list[]=$acc;
+					}
+				}
+				foreach($accSelect3 as $acc){
 					if($acc['devid']==$devid){
 						$acc_list[]=$acc;
 					}
 				}
 				$acc_size=count($acc_list);
-				//dump('devid:'.$devid.' count:'.$acc_size);
-				if($acc_size<2){
+				
+				if($acc_size< 3){
 						if($acc_size==0){
       		  		$dev_none[]=$devid;
       			}else{
@@ -192,9 +203,6 @@ class ProductController extends HomeController {
 				$dev_pass[]=$devid;
 			}
 
-			//$wherelost['devid']=array('in',$dev_lost);
-			//$wherenone['devid']=array('in',$dev_none);
-			//$wherepass['devid']=array('in',$dev_pass);
 			
 			if($dev_lost){
 				$wherelost['devid']=array('in',$dev_lost);

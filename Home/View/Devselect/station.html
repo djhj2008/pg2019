@@ -52,6 +52,7 @@
      <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
      <thead>
 			<tr>
+				<th>厂号</th>
 				<th>ID</th>
 				<th>版本</th>
 				<th>上报间隔</th>
@@ -65,6 +66,7 @@
 		  <tbody>
 			<%foreach $devSelect as $value%>
 			<tr>
+				<td><%$value['psn']%></td>
 				<td><%$value['id']%></td>
 				<td><%$value['version']%></td>
 				<td><%$value['uptime']%></td>

@@ -139,8 +139,55 @@
                     lengthChange: true,
                     iDisplayLength: 25,
                     info: true,
-                    bSort: false,
+                    bSort: true,
                     buttons: ['excel','pdf'],
+			              order: [[ 0, "desc" ]],
+										columnDefs: [
+												{
+											      "targets": 1,
+											      "searchable": false
+												},
+												{
+											      "targets": 2,
+											      "searchable": false
+												},
+												{
+											      "targets": 3,
+											      "searchable": false
+												},
+												{
+											      "targets": 4,
+											      "searchable": false
+												},
+												{
+											      "targets": 5,
+											      "searchable": false
+												},
+												{
+											      "targets": 6,
+											      "searchable": false
+												},
+												{
+											      "targets": 7,
+											      "searchable": false
+												},
+												{
+											      "targets": 8,
+											      "searchable": false
+												},
+												{
+											      "targets": 9,
+											      "searchable": false
+												},
+												{
+											      "targets": 10,
+											      "searchable": false
+												},
+												{
+											      "targets": 11,
+											      "searchable": false
+												},
+										],
                     language: {
                         "sProcessing": "处理中...",
                         "sLengthMenu": "显示 _MENU_ 项结果",

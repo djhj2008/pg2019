@@ -1915,6 +1915,16 @@ class DatapushController extends Controller {
 	    	foreach($cur_devs as $cur_dev){
 	    		if($cur_dev['rid']==$rfid){
 	    			$rfid_find=true;
+	    		  foreach($change_devs as $ch_dev){
+	    		  	if($ch_dev['psnid']==$psnid&&
+	    		  		$ch_dev['new_devid']==$snint){
+	    		  			if($ch_dev['flag']==2){
+	    		  				$change_dev_find=false;
+	    		  				$ret=M('changeidlog')->where(array('id'=>$ch_dev['id']))->save(array('flag'=>3));
+	    		  				break;
+	    		  			}
+	    		  		}
+	    		  }
 	    			break;
 	    		}
 	    	}
@@ -3532,6 +3542,7 @@ class DatapushController extends Controller {
 	                $changeid_find = true;
 	                if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
 	                    $change_buf_find=false;
+	                    /*
 							        foreach($change_buf as $ch_tmp)
 							        {
 				        			 	if($ch_tmp['id']==$ch_dev['id']){
@@ -3549,6 +3560,7 @@ class DatapushController extends Controller {
 		                    );
 		                    $change_buf[] = $tmp_dev;
 							        }
+							        */
 	                }else if($ch_dev['flag'] == 3){
 	                	$changeid_find = false;
 	                }
@@ -4019,7 +4031,29 @@ class DatapushController extends Controller {
 	    
 	    $chuser=D('changeidlog');
 	    $ret=$chuser->addAll($change_add);
-	    
+	     
+      foreach ($change_devs as $ch_dev) {
+          if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
+								if($ch_dev['flag'] == 1){
+									$ch_list_buf[]=$chdev['id'];
+								}
+                $tmp_dev = array(
+                		'id'=>$ch_dev['id'],
+                    'old_psn' => $dev_psn,
+                    'old_devid' => $snint,
+                    'new_devid' => $ch_dev['new_devid']
+                );
+                $change_buf[] = $tmp_dev;
+								if(count($change_buf)>=128){
+									break;
+								}
+          } 
+      }
+      if(count($ch_list_buf)>0){
+      	$where_ch_dev['id']=array('in',$ch_list_buf);
+      	$dev=M('changeidlog')->where($where_ch_dev)->save(array('flag'=>2));
+      }
+      	    
 	    $changedev_count=count($change_buf);
 	    $changedev_count=str_pad($changedev_count,2,'0',STR_PAD_LEFT);
 	    $changedev_str=$changedev_count.'';
@@ -4027,7 +4061,6 @@ class DatapushController extends Controller {
 	        $ch_psn = $chdev['old_psn'];
 	        $ch_devid=$chdev['old_devid'];
 	        $new_devid=$chdev['new_devid'];
-	        $dev=M('changeidlog')->where(array('id'=>$chdev['id']))->save(array('flag'=>2));
 	        $olddev_str=str_pad($ch_psn,5,'0',STR_PAD_LEFT).str_pad($ch_devid,4,'0',STR_PAD_LEFT);
 	        $newdev_str=str_pad($psn,5,'0',STR_PAD_LEFT).str_pad($new_devid,4,'0',STR_PAD_LEFT);
 	        $changedev_str=$changedev_str.$olddev_str.$newdev_str;

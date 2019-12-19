@@ -2643,8 +2643,8 @@ class DevselectController extends HomeController {
 		}
 		if(empty($_POST['time'])||empty($_POST['time2'])){
 			  $now = time();
-			  $v = strtotime(date('Y-m-d',$now))-86400;
-			  $time =date('Y-m-d',$v);
+			  //$v = strtotime(date('Y-m-d',$now))-86400;
+			  $time =date('Y-m-d',$now);
   			$time2 =date('Y-m-d',$now);
 		}else{
 		  	$time =  $_POST['time'];

@@ -148,21 +148,22 @@ class AcaddController extends HomeController {
         	$id = intval($_POST['devid']);
         	$time =  $_POST['time'];
         	$time2 =  $_POST['time2'];
-        	$psn = $_GET['psnid'];
+        	$psnid = $_GET['psnid'];
         	
         	$start_time = strtotime($time);
         	$end_time = strtotime($time2)+86400;
-            $dev=M('device')->where(array('devid'=>$id,'psn'=>$psn))->find();
-            /*
+            $dev=M('device')->where(array('devid'=>$id,'psnid'=>$psnid))->find();
+            $psn=$dev['psn'];
+            
             if($dev==NULL){
                 $date = date("Y-m-d");
                 $this->assign('date',$date);
                 $this->assign('date2',$date);
-                echo "<script type='text/javascript'>alert('设备不存在.');distory.back();</script>";
+                echo "<script type='text/javascript'>alert('No device.');distory.back();</script>";
                 $this->display();
                 exit;
             }
-            */
+            
             //$psn = $dev['psn'];
             //$shed = $dev['shed'];
             //var_dump($dev);
@@ -218,6 +219,7 @@ class AcaddController extends HomeController {
                 $this->assign('date',$time);
                 $this->assign('date2',$time2);
                 $this->assign('id',$id);
+                /*
                 for($i=0;$i<count($selectSql);$i++){
                     if($tmpSql!=NULL){
                     		$max=count($tmpSql)-1;
@@ -284,7 +286,7 @@ class AcaddController extends HomeController {
                     }                        
                                        
                 }
-
+								*/
                 $this->assign('selectSql',$selectSql);
                 //var_dump($selectSql);
 

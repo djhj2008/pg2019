@@ -7,30 +7,40 @@ class LongdxController extends HomeController {
     	$token=(int)ldx_decode($_GET['token']);
     	$addr=ldx_decode($_GET['addr']);
     	$now=time();
-    	//dump($token);
-    	//dump($now);
-    	//dump($addr);
+      $sn=$_POST['sn'];
+      if(empty($sn)){
+      	$sn=$_GET['sn'];
+      }
+      
     	if(!$token||$token< $now-60*5||$token>$now){
     		$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
     		echo json_encode($jarr);
     		exit;
     	}
-    	for($i=0;$i<1;$i++){
-    		$data[$i]['sn']=200480+$i;
-    		$data[$i]['health']=3;
-    		$data[$i]['survival']=2;
+    	if(!empty($sn)){
+					$data[0]['sn']=$sn;
+	    		$data[0]['health']=3;
+	    		$data[0]['survival']=2;
+    	}else{
+	    	for($i=0;$i<1;$i++){
+	    		$data[$i]['sn']=200480+$i;
+	    		$data[$i]['health']=3;
+	    		$data[$i]['survival']=2;
+	    	}
+	    	
+	    	for($i=8;$i<14;$i++){
+	    		$data[$i]['sn']=200480+$i;
+	    		$data[$i]['health']=2;
+	    		$data[$i]['survival']=1;
+	    	}
+	    	
+	    	for($i=14;$i<20;$i++){
+	    		$data[$i]['sn']=200480+$i;
+	    		$data[$i]['health']=1;
+	    		$data[$i]['survival']=3;
+	    	}
     	}
     	
-    	for($i=8;$i<14;$i++){
-    		$data[$i]['sn']=200480+$i;
-    		$data[$i]['health']=2;
-    		$data[$i]['survival']=1;
-    	}
-    	for($i=14;$i<20;$i++){
-    		$data[$i]['sn']=200480+$i;
-    		$data[$i]['health']=1;
-    		$data[$i]['survival']=3;
-    	}
     	
   		$jarr=array('ret'=>array('ret_message'=>'success','status_code'=>10000100,'data'=>$data));
   		echo json_encode($jarr);
@@ -41,9 +51,7 @@ class LongdxController extends HomeController {
     	$token=(int)ldx_decode($_GET['token']);
     	$addr=ldx_decode($_GET['addr']);
     	$now=time();
-    	//dump($token);
-    	//dump($now);
-    	//dump($addr);
+
     	if(!$token||$token< $now-60*5||$token>$now){
     		$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
     		echo json_encode($jarr);
@@ -94,8 +102,8 @@ class LongdxController extends HomeController {
     		exit;
     	}
       $phone=$_POST['phone']; 
-      if(empty($sn)){
-      	$sn=$_GET['phone'];
+      if(empty($phone)){
+      	$phone=$_GET['phone'];
       }
 
     	$now=time();
@@ -107,7 +115,7 @@ class LongdxController extends HomeController {
 	  		$jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100,'data'=>$data));
 	  		echo json_encode($jarr);
 			}else{
-    		$jarr=array('ret'=>array('ret_message'=>'send ','status_code'=>10000301));
+    		$jarr=array('ret'=>array('ret_message'=>'send error','status_code'=>10000301));
     		echo json_encode($jarr);
     		exit;
 			}
@@ -123,7 +131,7 @@ class LongdxController extends HomeController {
     
     public function test(){
     	$now=time();
-    	$token=ldx_encode($now);
+    	$token=ldx_encode(time());
     	dump($now);
     	echo $token;
     	dump(ldx_encode('ldx'));

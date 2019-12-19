@@ -77,6 +77,13 @@
             <input class="weui-input" placeholder="请输入数字(1-4)" type="number" id="count" name="count" value="<%$station['count']%>">
         </div>
     </div>
+    <!--div class="weui-cell weui-cell_switch">
+        <div class="weui-cell__hd"><label class="weui-label">1301状态</label></div>
+		      <select class="weui-select" name="slave_stop" id="slave_stop">
+		          <option value="0">正常</option>
+		          <option value="1">停止</option>
+		      </select>
+    </div-->
 	  <div class="weui-btn-area">
 	    <button class="weui-btn weui-btn_primary" type="submit" id="btn">提交</button>
 	  </div>
@@ -113,6 +120,8 @@
 					$(document).ready(function() {
 						var index=<%$station['rate_id']%>;
 						document.getElementById('rate_id')[index].selected=true;
+						//var slave_stop=<%$station['slave_stop']%>;
+						//document.getElementById('slave_stop')[slave_stop].selected=true;
       		});
     });
     

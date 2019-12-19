@@ -744,8 +744,10 @@ class AddController extends HomeController {
 			$uptime=$_POST['uptime'];
 			$count=$_POST['count'];
 			$rate_id=$_POST['rate_id'];
+			$slave_stop=$_POST['slave_stop'];
 			$have=M('bdevice')->where(array('autoid'=>$autoid))->find();
 			$psnid=$have['psnid'];
+			
 			
     	$psn=M('psn')->where(array('id'=>$psnid))->find();
     	if(empty($psn)){
@@ -776,6 +778,9 @@ class AddController extends HomeController {
 				if($rate_id!=$have['rate_id']){
 					$savedev['rate_id']=$rate_id;
 				}
+				//if($slave_stop!=$have['slave_stop']){
+				//	$savedev['slave_stop']=$slave_stop;
+				//}
 				if(empty($savedev)){
 					$this->assign('station',$have);
 				  $this->display();
@@ -800,9 +805,9 @@ class AddController extends HomeController {
 	    //dump($rfid);	
 	    //dump($dev);
 	    $change_devs = D('changeidlog')->where(array('psnid' => $psnid))->select();
-			//dump($old_psn);	
-			//dump($old_devid);	
-			//dump($new_devid);	
+			//dump($old_psn);
+			//dump($old_devid);
+			//dump($new_devid);
     	if(empty($old_psn)||empty($old_devid)||empty($new_devid)){
 	    	$old_psn=$dev['old_psn'];
 	    	$old_devid=$dev['old_devid'];
@@ -810,13 +815,15 @@ class AddController extends HomeController {
 	    	$devlist=M('device')->where(array('psnid'=>$psnid))->order('devid asc')->select();
 	    	  //dump($pre_devs);
 	    	  $change_back=false;
+	    	  /*
 	    	  foreach($pre_devs as $pre_dev){
 	    	  	if($pre_dev['psn']!=$old_psn){
+	    	  		dump($pre_dev);
 	    	  		$change_back=true;
 	    	  		$devids[]=$pre_dev['devid'];
 	    	  		break;
 	    	  	}
-	    	  }
+	    	  }*/
 	    	  if($change_back){
 	    				$this->assign('devids',$devids);
 				    	$this->assign('dev',$dev);
