@@ -1915,16 +1915,6 @@ class DatapushController extends Controller {
 	    	foreach($cur_devs as $cur_dev){
 	    		if($cur_dev['rid']==$rfid){
 	    			$rfid_find=true;
-	    		  foreach($change_devs as $ch_dev){
-	    		  	if($ch_dev['psnid']==$psnid&&
-	    		  		$ch_dev['new_devid']==$snint){
-	    		  			if($ch_dev['flag']==2){
-	    		  				$change_dev_find=false;
-	    		  				$ret=M('changeidlog')->where(array('id'=>$ch_dev['id']))->save(array('flag'=>3));
-	    		  				break;
-	    		  			}
-	    		  		}
-	    		  }
 	    			break;
 	    		}
 	    	}
@@ -3084,6 +3074,7 @@ class DatapushController extends Controller {
 	        $psn_buf_psn=$psn_buf['psn'];
 	        if(count($psn_buf['devid'])>0){
 	            $wheredev['devid']=array('in',$psn_buf['devid']);
+	            /*
 	            $acc_values=D('access')->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<='.$end)->select();
 	            //dump($acc_values);
 	            foreach($accadd_list as $accadd){
@@ -3105,7 +3096,7 @@ class DatapushController extends Controller {
 	                    }
 	                }
 	            }
-
+							*/
 
 	            $acc1301_values=D('access1301')->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<='.$end)->select();
 	            //dump($acc1301_values);
@@ -3150,9 +3141,9 @@ class DatapushController extends Controller {
 	        }
 	    }
 	    $user=D('access');
-	    $ret=$user->addAll($accaddall);
-	    //dump('accaddall list:');
-	    //dump($accaddall);
+	    $ret=$user->addAll($accadd_list);
+	    //dump('access list:');
+	    //dump($accadd_list);
 
 	    $user1301=D('access1301');
 	    $ret=$user1301->addAll($acc1301addall);
@@ -3949,6 +3940,7 @@ class DatapushController extends Controller {
 	        $psn_buf_psn=$psn_buf['psn'];
 	        if(count($psn_buf['devid'])>0){
 	            $wheredev['devid']=array('in',$psn_buf['devid']);
+	            /*
 	            $acc_values=D('access')->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<='.$end)->select();
 	            //dump($acc_values);
 	            foreach($accadd_list as $accadd){
@@ -3970,7 +3962,7 @@ class DatapushController extends Controller {
 	                    }
 	                }
 	            }
-
+							*/
 
 	            $acc1301_values=D('access1301')->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<='.$end)->select();
 	            //dump($acc1301_values);
@@ -4015,9 +4007,9 @@ class DatapushController extends Controller {
 	        }
 	    }
 	    $user=D('access');
-	    $ret=$user->addAll($accaddall);
-	    //dump('accaddall list:');
-	    //dump($accaddall);
+	    $ret=$user->addAll($accadd_list);
+	    //dump('access list:');
+	    //dump($accadd_list);
 
 	    $user1301=D('access1301');
 	    $ret=$user1301->addAll($acc1301addall);
@@ -4035,12 +4027,12 @@ class DatapushController extends Controller {
       foreach ($change_devs as $ch_dev) {
           if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
 								if($ch_dev['flag'] == 1){
-									$ch_list_buf[]=$chdev['id'];
+									$ch_list_buf[]=$ch_dev['id'];
 								}
                 $tmp_dev = array(
                 		'id'=>$ch_dev['id'],
-                    'old_psn' => $dev_psn,
-                    'old_devid' => $snint,
+                    'old_psn' => $ch_dev['old_psn'],
+                    'old_devid' => $ch_dev['old_devid'],
                     'new_devid' => $ch_dev['new_devid']
                 );
                 $change_buf[] = $tmp_dev;
@@ -4149,9 +4141,9 @@ class DatapushController extends Controller {
 	    $sndir = substr($str, ($TIME_LEN + $BTSN_LEN) * 2, $BDSN_LEN * 2);
 	    $sn_footer = hexdec($sndir) & 0x1fff;
 	    $sn_header = hexdec($sndir) >> 13;
-	    $logbase = "lora_backup46/";
-	    $logerror = "lora_error46/";
-	    $logreq = "lora_req46/";
+	    $logbase = "lora_backup47/";
+	    $logerror = "lora_error47/";
+	    $logreq = "lora_req47/";
 
 	    {
 	        $logdir = $logbase;
@@ -4835,6 +4827,7 @@ class DatapushController extends Controller {
 	        $psn_buf_psn=$psn_buf['psn'];
 	        if(count($psn_buf['devid'])>0){
 	            $wheredev['devid']=array('in',$psn_buf['devid']);
+	            /*
 	            $acc_values=D('access')->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<='.$end)->select();
 	            //dump($acc_values);
 	            foreach($accadd_list as $accadd){
@@ -4856,7 +4849,7 @@ class DatapushController extends Controller {
 	                    }
 	                }
 	            }
-
+							*/
 
 	            $acc1301_values=D('access1301')->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<='.$end)->select();
 	            //dump($acc1301_values);
@@ -4901,9 +4894,9 @@ class DatapushController extends Controller {
 	        }
 	    }
 	    $user=D('access');
-	    $ret=$user->addAll($accaddall);
-	    //dump('accaddall list:');
-	    //dump($accaddall);
+	    $ret=$user->addAll($accadd_list);
+	    //dump('access list:');
+	    //dump($accadd_list);
 
 	    $user1301=D('access1301');
 	    $ret=$user1301->addAll($acc1301addall);
@@ -4921,12 +4914,12 @@ class DatapushController extends Controller {
       foreach ($change_devs as $ch_dev) {
           if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
 								if($ch_dev['flag'] == 1){
-									$ch_list_buf[]=$chdev['id'];
+									$ch_list_buf[]=$ch_dev['id'];
 								}
                 $tmp_dev = array(
                 		'id'=>$ch_dev['id'],
-                    'old_psn' => $dev_psn,
-                    'old_devid' => $snint,
+                    'old_psn' => $ch_dev['old_psn'],
+                    'old_devid' => $ch_dev['old_devid'],
                     'new_devid' => $ch_dev['new_devid']
                 );
                 $change_buf[] = $tmp_dev;

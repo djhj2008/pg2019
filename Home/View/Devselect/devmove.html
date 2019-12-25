@@ -70,6 +70,8 @@
 					<a href="<%$smarty.const.__APP__%>/add/movedev?changeid=<%$value['id']%>">更改ID</a>
 					<%else if $value['flag'] eq 1 %>
 					<a href="<%$smarty.const.__APP__%>/add/quitmovedev?changeid=<%$value['id']%>">取消</a>
+					<%else if $value['flag'] eq 3 %>
+					<a href="<%$smarty.const.__APP__%>/devselect/querytempall?devid=<%$value['new_devid']%>&psnid=<%$value['psnid']%>&old_devid=<%$value['old_devid']%>&old_psn=<%$value['old_psn']%>">查看温度</a>
 					<%/if%>
 				</td>
 			</tr>
