@@ -74,4 +74,6 @@ class TimeController extends Controller {
 		}
 	   fclose($file);
     }
+    
+    
 }

@@ -44,7 +44,7 @@ class DatapushTestController extends Controller {
     $strarr    =unpack("H*", $post);//unpack() 函数从二进制字符串对数据进行解包。
     $str       =implode("", $strarr);
 
-		//$str = "";
+		//$str = "323032303231303130333031303031323038363735363330300000e002025001c800000000000000010000e1e283030400017463372203ffffffffffffffffffffffffff00001754";
     $sndir = substr($str, ($TIME_LEN+$BTSN_LEN)*2,$BDSN_LEN*2);
     $sn_footer = hexdec($sndir)&0x1fff;
     $sn_header = hexdec($sndir)>>13;
@@ -185,7 +185,7 @@ class DatapushTestController extends Controller {
     	$dev_psn = hexdec($snstr) >> 13;
     	
     	$rfid = $dev_psn*10000+$snint;
-
+			dump($rfid);
     	$signstr = substr($data, $i*$DATA_LEN+($CSN_LEN)*2,$SIGN_LEN*2);
     	$cvsstr = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN)*2,$CVS_LEN*2);
     	$stastr = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN)*2,$STATE_LEN*2);
@@ -536,7 +536,7 @@ class DatapushTestController extends Controller {
 			}
 
     }
-    
+    dump($accadd_list);
     $user=D('access');
 		//$access1=$user->addAll($accadd_list);
 		

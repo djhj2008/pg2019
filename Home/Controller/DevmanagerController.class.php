@@ -94,20 +94,21 @@ class DevmanagerController extends Controller {
     	
     	$start_time = strtotime($time);
     	$end_time = strtotime($time)+86400-1;
-        $dev=M('device')->where(array('devid'=>$id,'psnid'=>$psnid))->find();
-        if($dev==NULL){
-            $date = date("Y-m-d");
-            $this->assign('date',$date);
-            $this->assign('date2',$date);
-            echo "<script type='text/javascript'>alert('DEV NULL.');distory.back();</script>";
-            $this->display();
-            exit;
-        }
-        $psn = $dev['psn'];
-        $shed = $dev['shed'];
-        //var_dump($dev);
+      $dev=M('device')->where(array('devid'=>$id,'psnid'=>$psnid))->find();
+      if($dev==NULL){
+          $date = date("Y-m-d");
+          $this->assign('date',$date);
+          $this->assign('date2',$date);
+          echo "<script type='text/javascript'>alert('DEV NULL.');distory.back();</script>";
+          $this->display();
+          exit;
+      }
+      $psn = $dev['psn'];
+      $shed = $dev['shed'];
+      //var_dump($dev);
         
-        if($selectSql=M('access')->group('time')->where('devid ='.$id.' and psnid= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
+        $mydb='access_'.$psn;
+        if($selectSql=M($mydb)->group('time')->where('devid ='.$id.' and psnid= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
             $this->assign('devid',$id);
             $this->assign('date',$time);
             $this->assign('date2',$time2);

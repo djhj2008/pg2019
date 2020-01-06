@@ -116,8 +116,8 @@
           //Buttons examples
           var table = $('#datatable-buttons').DataTable({
               lengthChange: true,
-              info: false,
-              buttons: ['excel'],
+              iDisplayLength: 25,
+              info: true,
               bSort: false,
 							columnDefs: [ 
 								{
@@ -126,14 +126,6 @@
 								},
 								{
 							      "targets": 1,
-							      "searchable": false
-								},
-								{
-							      "targets": 3,
-							      "searchable": false
-								},
-								{
-							      "targets": 4,
 							      "searchable": false
 								},
 							],
