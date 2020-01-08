@@ -297,9 +297,12 @@ class DevselectController extends HomeController {
 	  $this->display();
 				
 	}
-		public function devlist(){
+	
+	public function devlist(){
 		$psnid = decode($_GET['psnid']);
-		$devSelect=M('device')->where(array('dev_type'=>0,'psnid'=>$psnid,'flag'=>1))->order('devid desc')->select();
+		$psninfo = M('psn')->where(array('id'=>$psnid))->find();
+		$psn=$psninfo['sn'];
+		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psn))->order('devid desc')->select();
 		$sicktype=M('sicktype')->order('type asc')->select();
 		$this->assign('sicktype',$sicktype);
 		//dump($dev);
@@ -417,7 +420,7 @@ class DevselectController extends HomeController {
 
         $mydb='access_'.$psn;
         if($devid==NULL){
-            if($selectSql=M($mydb)->field('temp1,temp2,env_temp,delay,sign,cindex,lcount,time,devid,sid,state,psnid')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select()){
+            if($selectSql=M($mydb)->field('temp1,temp2,env_temp,delay,sign,cindex,lcount,time,devid,sid,state,psnid,psn')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select()){
                 $this->assign('devid',$id);
                 $this->assign('date',$time);
                 $this->assign('date2',$time2);
@@ -2529,8 +2532,15 @@ class DevselectController extends HomeController {
 			
 			$delay = substr($delay_str,0, 2);
 			$delay = (int)$delay;
-
-			$delay = 3600*$delay;
+			if($delay==0){
+				$delay=substr($delay_str,2, 2);
+				$delay = (int)$delay*60;
+			}else{
+				$delay = 3600*$delay;
+			}
+			//dump($delay_str);
+			//dump($delay);
+			//$delay = 3600*$delay;
 			$delay_sub = $delay/$count;
 
     	$now = time();
@@ -2541,18 +2551,21 @@ class DevselectController extends HomeController {
     	$cur_time = $now - $start_time;
     	//dump($cur_time);
     	$cur_time = (int)($cur_time/$delay)*$delay;
+    	//dump($cur_time);
     	$first_time = $cur_time-$delay+$start_time;
-			//dump($first_time);
+			//dump(date('Y-m-d H:i:s',$first_time));
     	if($psnid==12)
     	{
-    		$devlist=M('device')->where(array('psnid'=>$psnid,'flag'=>1))->order('id asc')->select();
+    		$devlist=M('device')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
     	}else{
-    		$devlist=M('device')->where(array('psnid'=>$psnid,'flag'=>1))->order('id asc')->select();
+    		$devlist=M('device')->where(array('psnid'=>$psnid))->order('devid asc')->select();
     	}
     	//dump(count($devlist));
     	$mydb='access_'.$psn;
-			$accSelect2=M($mydb)->where(array('psnid'=>$psnid,'time'=>$first_time))->order('devid asc')->select();
-
+			$accSelect2=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->order('devid asc')->select();
+			//dump('accSelect2:');
+			//dump($accSelect2);
+			//dump($devlist);
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
 				$psnid = $dev['psnid'];
@@ -2561,10 +2574,11 @@ class DevselectController extends HomeController {
 						$al_find=false;
 						for($i=0;$i< count($acclist2);$i++){
 							if($devid==$acclist2[$i]['devid']){
-								if($acc['sid']==1){
-									$acclist2[$i]['sid']=$acc['sid'].','.$acclist2[$i]['sid'];
-								}else{
-									$acclist2[$i]['sid']=$acclist2[$i]['sid'].','.$acc['sid'];
+						//dump('acc:');
+						//dump($acc);	
+								$acclist2[$i]['sid']=$acclist2[$i]['sid'].','.$acc['sid'];
+								if($acc['psn']!=$acclist2[$i]['psn']){
+								  $acclist2[$i]['psn']=$acclist2[$i]['psn'].','.$acc['psn'];	
 								}
 								$al_find=true;
 								break;
