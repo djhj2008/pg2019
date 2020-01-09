@@ -2554,6 +2554,7 @@ class DevselectController extends HomeController {
     	//dump($cur_time);
     	$first_time = $cur_time-$delay+$start_time;
 			//dump(date('Y-m-d H:i:s',$first_time));
+			//dump(date('Y-m-d H:i:s',$first_time));
     	if($psnid==12)
     	{
     		$devlist=M('device')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
@@ -2569,14 +2570,16 @@ class DevselectController extends HomeController {
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
 				$psnid = $dev['psnid'];
+
 				foreach($accSelect2 as $acc){
 					if($devid==$acc['devid']){
+
 						$al_find=false;
 						for($i=0;$i< count($acclist2);$i++){
 							if($devid==$acclist2[$i]['devid']){
-						//dump('acc:');
-						//dump($acc);	
-								$acclist2[$i]['sid']=$acclist2[$i]['sid'].','.$acc['sid'];
+								if($acclist2[$i]['sid']!=$acc['sid']){
+									$acclist2[$i]['sid']=$acclist2[$i]['sid'].','.$acc['sid'];
+								}								
 								if($acc['psn']!=$acclist2[$i]['psn']){
 								  $acclist2[$i]['psn']=$acclist2[$i]['psn'].','.$acc['psn'];	
 								}

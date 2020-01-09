@@ -180,16 +180,19 @@ class ProductController extends HomeController {
 				foreach($accSelect1 as $acc){
 					if($acc['devid']==$devid){
 						$acc_list[]=$acc;
+						break;
 					}
 				}
 				foreach($accSelect2 as $acc){
 					if($acc['devid']==$devid){
 						$acc_list[]=$acc;
+						break;
 					}
 				}
 				foreach($accSelect3 as $acc){
 					if($acc['devid']==$devid){
 						$acc_list[]=$acc;
+						break;
 					}
 				}
 				$acc_size=count($acc_list);

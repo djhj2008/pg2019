@@ -346,6 +346,12 @@ class DatapushController extends Controller {
 	    		  			}
 	    		  		}
 	    		  }
+	    		  foreach($rfid_list as $rfid_dev){
+	    		  	if($rfid_dev['devid']==$snint){
+	    		  		$change_dev_find=true;
+	    		  		break;
+	    		  	}
+	    		  }
 	    		  if($change_dev_find==false){
 							$addrfdev=array(
 								'psn'=>$dev_psn,
