@@ -25,10 +25,6 @@
   <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
 	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
 	<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
-	
-	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
-	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
-	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
 </head>
 <style>
 	b {color: #23527C;}
@@ -46,54 +42,56 @@
 		</div>
 		
 		<div class="container" >
-		  <div class="weui-btn-area">
-		    <button class="weui-btn weui-btn_primary" onclick="addstation()">添加基站</button>
-		  </div>
      <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
      <thead>
 			<tr>
-				<th>厂号</th>
-				<th>ID</th>
-				<th>版本</th>
-				<th>上报间隔</th>
-				<th>上报次数</th>
-				<th>状态</th>
-				<th>基带ID</th>
-				<th>号码</th>
-				<th>url</th>
+				<th>DEVID</th>
+				<th>SN</th>
+				<th>舍</th>
 				<th>操作</th>
 			</tr>
 		</thead>
 		  <tbody>
-			<%foreach $devSelect as $value%>
+			<%foreach $devnone as $value%>
 			<tr>
-				<td><%$value['psn']%></td>
-				<td><%$value['id']%></td>
-				<td><%$value['version']%></td>
-				<td><%$value['uptime']%></td>
-				<td><%$value['count']%></td>
-				<%if $value['state'] eq 0%>
-				<td>正常</td>
-				<%else%>
-				<td>异常</td>
-				<%/if%>
-				<td><%$value['rate_id']%></td>
-				<td><%$value['number']%></td>
-				<td><%$value['url']%></td>
+				<td><%$value['devid']%></td>
+				<td><%$value['sn']%></td>
+				<td><%$value['shed']%></td>
 				<td>
-					<a href="<%$smarty.const.__APP__%>/add/editstation?autoid=<%$value['autoid']%>">编辑</a>
-					<a href="<%$smarty.const.__APP__%>/add/delstation?autoid=<%$value['autoid']%>">|删除</a>
+				<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">查看温度</a>
 				</td>
 			</tr>
 			<%/foreach%>
 		</tbody>
 		</table>
 		</div>
-	<!--div class="container" style="margin-top: 50px"->
+	<!--div class="container" style="margin-top: 50px"-->
 </body>
-<!-- Required datatable js -->
-<script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jquery.dataTables.min.js"></script>
-<script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.js"></script>
+    <!-- jQuery  -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/popper.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/bootstrap.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/metisMenu.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/waves.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.slimscroll.js"></script>
+
+    <!-- Required datatable js -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.js"></script>
+    <!-- Buttons examples -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.buttons.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jszip.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/pdfmake.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/vfs_fonts.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.html5.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.print.min.js"></script>
+    <!-- Responsive examples -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/responsive.bootstrap4.min.js"></script>
+    <!-- App js -->
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.core.js"></script>
+    <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.app.js"></script>
 <script type="text/javascript">
       $(document).ready(function() {
           //Buttons examples
@@ -102,14 +100,7 @@
               iDisplayLength: 25,
               info: true,
               buttons: ['excel'],
-              bSort: false,
-							columnDefs: [ 
-									{
-								      "targets": 6,
-								      "searchable": false
-									},
-		
-							],
+              order: [[ 0, "asc" ]],
               language: {
                   "sProcessing": "处理中...",
                   "sLengthMenu": "显示 _MENU_ 项结果",
@@ -139,8 +130,6 @@
           table.buttons().container()
                   .appendTo('#datatable-buttons_wrapper .col-md-6:eq(0)');
       } );
-      function addstation(){
-          window.location.href="<%$smarty.const.__APP__%>/add/addstation?psnid=<%$psnid%>";
-      }
+
 </script>
 </html>

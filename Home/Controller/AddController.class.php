@@ -745,6 +745,7 @@ class AddController extends HomeController {
 			$count=$_POST['count'];
 			$rate_id=$_POST['rate_id'];
 			$slave_stop=$_POST['slave_stop'];
+			$number=$_POST['number'];
 			$have=M('bdevice')->where(array('autoid'=>$autoid))->find();
 			$psnid=$have['psnid'];
 			
@@ -771,12 +772,19 @@ class AddController extends HomeController {
 				}
 				if($uptime!=$have['uptime']){
 					$savedev['uptime']=$uptime;
+					if(strlen($uptime)!=4){
+						$this->redirect('Devselect/station',array('psnid'=>$have['psnid']),0,'');
+						exit;
+					}
 				}
 				if($count!=$have['count']){
 					$savedev['count']=$count;
 				}
 				if($rate_id!=$have['rate_id']){
 					$savedev['rate_id']=$rate_id;
+				}
+				if($number!=$have['number']){
+					$savedev['number']=$number;
 				}
 				//if($slave_stop!=$have['slave_stop']){
 				//	$savedev['slave_stop']=$slave_stop;
