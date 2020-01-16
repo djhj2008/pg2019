@@ -1,9 +1,0 @@
-[ 2018-09-18T10:23:45+08:00 ] 124.207.250.66 /base/index.php/value/temp?devid=11
-ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'psn=1 and time BETWEEN 1537200000 AND 1537203600 ) LIMIT 0,1' at line 1
-
-[ 2018-09-18T11:22:33+08:00 ] 180.163.220.3 /base/index.php/value/temp?devid=11
-ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time BETWEEN 1537200000 AND 1537203600 ) LIMIT 0,1' at line 1
-
-[ 2018-09-18T11:47:41+08:00 ] 124.207.250.67 /base/index.php/datapush/pushnewsubtest?sid=1
-ERR: 非法操作:pushnewsubtest
-

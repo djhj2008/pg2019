@@ -1,9 +1,0 @@
-[ 2016-12-09T10:43:00+08:00 ] 127.0.0.1 /base/index.php/devdatatime/data
-ERR: Syntax Error in template "D:/amp/apache/htdocs/base/Home/View\Devdatatime\data.html"  on line 14 "&lt;%if%&gt;" missing if condition
-
-[ 2016-12-09T11:39:15+08:00 ] 127.0.0.1 /base/index.php/Home/Manager/CheckNamesal/name/root
-ERR: 非法操作:CheckNamesal
-
-[ 2016-12-09T11:39:15+08:00 ] 127.0.0.1 /base/index.php/Home/Manager/paword/name/123
-ERR: 非法操作:paword
-

@@ -1,3 +1,0 @@
-[ 2018-09-17T15:41:04+08:00 ] 124.207.250.66 /base/index.php/acadd/select
-ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 1537113600 and time <= 1537200000 ) ORDER BY id desc' at line 1
-

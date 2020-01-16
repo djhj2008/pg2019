@@ -1,6 +1,0 @@
-[ 2018-07-30T10:33:54+08:00 ] 101.91.62.11 /base/index.php/time/gettime
-ERR: 非法操作:gettime
-
-[ 2018-07-30T10:35:29+08:00 ] 140.207.54.187 /base/index.php/time/gettime
-ERR: 非法操作:gettime
-

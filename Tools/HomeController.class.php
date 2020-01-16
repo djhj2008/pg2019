@@ -53,7 +53,7 @@ class HomeController extends Controller{
         //① 用户不在登录状态
         //② 用户的操作 还没有在$rang_ac出现
            function userset(){
-              if($_SESSION['userid']){
+              if($_SESSION['admin_user']){
                 return false;
                }
              

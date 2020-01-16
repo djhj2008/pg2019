@@ -1,9 +1,0 @@
-[ 2018-12-27T11:39:27+08:00 ] 124.207.250.67 /base/index.php/datapush/pushnewsubTEST?sid=3
-ERR: 非法操作:pushnewsubTEST
-
-[ 2018-12-27T11:41:48+08:00 ] 124.207.250.67 /base/index.php/datapush/pushnewsubTEST
-ERR: 非法操作:pushnewsubTEST
-
-[ 2018-12-27T16:43:52+08:00 ] 127.0.0.1 /pg/index.php/acadd/autoadd
-ERR: 非法操作:autoadd
-

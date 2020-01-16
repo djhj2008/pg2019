@@ -1,6 +1,0 @@
-[ 2017-02-20T10:39:38+08:00 ] 124.207.250.66 /base/index.php/home/devselect/select
-ERR: SQLSTATE[28000] [1045] Access denied for user 'root'@'localhost' (using password: YES)
-
-[ 2017-02-20T11:24:27+08:00 ] 124.207.250.66 /base/index.php/home/devselect/select
-ERR: SQLSTATE[28000] [1045] Access denied for user 'root'@'localhost' (using password: YES)
-

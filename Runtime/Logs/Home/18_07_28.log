@@ -1,3 +1,0 @@
-[ 2018-07-28T12:21:33+08:00 ] 61.148.245.168 http://124.207.250.67:16000/base/index.php/home/datapush/pushnewsub?sid=1
-ERR: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'devid' cannot be null
-

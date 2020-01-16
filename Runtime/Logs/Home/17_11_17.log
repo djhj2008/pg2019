@@ -1,9 +1,0 @@
-[ 2017-11-17T13:14:54+08:00 ] 117.136.0.188 /base/index.php/acadd/select?nsukey=6lWvoUoexAmQuGaLP2ansCV7a4yZac4onovtrGA1ATnD3aGvLvUtTpGVJPVWkfPYidmQv%2BwzDUpYwihNIMkygfvwuFqnGpMq0wXrgDffIuIYFsSFIg5CwG7NoUtzg3XnI6PuuceGvvXp6wCN8I2yqQ16QDJawrnUFTExoLcM3XYOPql6AXJdPyiEWpMuo5UcLMBFOU9Li6ZXMW%2FgAWAeHg%3D%3D
-ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
-
-[ 2017-11-17T14:13:17+08:00 ] 124.207.250.66 /base/index.php/acadd/select
-ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
-
-[ 2017-11-17T17:06:55+08:00 ] 180.89.1.150 /base/index.php/acadd/select?nsukey=ZHJ33UUuPwmpjOLFUeu3rShzure36zHxv4p8xKv%2F7YtxAh%2BB4v7f5fA%2B0qX2eHxN0Te%2FgN9HnnzmU0ETYatypceDC1ZfQ2rFjQOWbQv4sEViH0Rikk%2BHVByZfsX7uJA9co3gXcoXjB9kG9c23xJ3sUUduC89FjqJti7ddwKJ5m%2FoHmktmmQjB8pwdCnpdqng39ZIPTL6mBjK7kGh5iE9og%3D%3D
-ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time <= 86400 ) ORDER BY id desc' at line 1
-

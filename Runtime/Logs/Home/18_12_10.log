@@ -1,3 +1,0 @@
-[ 2018-12-10T12:55:58+08:00 ] 101.91.62.65 /base/index.php/value/temp?devid=13
-ERR: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'and time BETWEEN 1544371200 AND 1544374800 ) LIMIT 0,1' at line 1
-
