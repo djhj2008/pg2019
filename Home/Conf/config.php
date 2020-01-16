@@ -6,6 +6,7 @@ return array(
 	'DEFAULT_MODULE'  => 'Home',//默认模块
     //启用路由功能
     'URL_ROUTER_ON' => true,
+    'URL_MODEL'=>2,
     //配置路由规则
     //'URL_ROUTE_RULES' => array(
          
@@ -34,7 +35,7 @@ return array(
     'DB_HOST'               =>  'localhost', // 服务器地址
     'DB_NAME'               =>  'pg',          // 数据库名
     'DB_USER'               =>  'root',      // 用户名
-    'DB_PWD'                =>  'dj919',          // 密码
+    'DB_PWD'                =>  'mj919',          // 密码
     'DB_PORT'               =>  '3306',        // 端口
     //'DB_PREFIX'             =>  '',    // 数据库表前缀
     'DB_PARAMS'          	=>  array(), // 数据库连接参数    
