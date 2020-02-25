@@ -56,6 +56,7 @@
 				<th>信息</th>
 				<th>统编</th>
 				<th>SN</th>
+				<th>扫描</th>
 				<th>研发管理</th>
 				<%if $admin_userid eq 100 %>
 				<th>牧场管理</th>
@@ -69,14 +70,15 @@
 				<td><%$value['info']%></td>
 				<td><%$value['tsn']%></td>
 				<td><%$value['sn']%></td>
+				<td><a href="<%$smarty.const.__APP__%>/collect/downValue?psnid=<%$value['id']%>">低温</a></td>
 				<td>
-					<a href="<%$smarty.const.__APP__%>/devselect/devlist?psnid=<%encode($value['id'])%>">设备信息</a>
+					<a href="<%$smarty.const.__APP__%>/devselect/devlist?psnid=<%encode($value['id'])%>">设备</a>
 					<a href="<%$smarty.const.__APP__%>/devselect/devtempnow?psnid=<%$value['id']%>">|最后上报</a>
 					<a href="<%$smarty.const.__APP__%>/devselect/devtempnone?psnid=<%$value['id']%>">|当前未报</a>
-					<a href="<%$smarty.const.__APP__%>/devselect/station?psnid=<%$value['id']%>">|基站信息</a>
+					<a href="<%$smarty.const.__APP__%>/devselect/station?psnid=<%$value['id']%>">|基站</a>
 					<a href="<%$smarty.const.__APP__%>/devselect/devmove?psnid=<%$value['id']%>">|修改ID</a>
 					<a href="<%$smarty.const.__APP__%>/devselect/dev1301acc?psnid=<%$value['id']%>">|1301信息</a>
-					<a href="<%$smarty.const.__APP__%>/add/recoverylist?psnid=<%$value['id']%>">|回收设备</a>
+					<a href="<%$smarty.const.__APP__%>/add/recoverylist?psnid=<%$value['id']%>">|回收</a>
 				</td>
 				<%if $admin_userid eq 100 %>
 				<td>

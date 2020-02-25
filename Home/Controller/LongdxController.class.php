@@ -51,11 +51,12 @@ class LongdxController extends HomeController {
     	$token=(int)ldx_decode($_GET['token']);
     	$addr=ldx_decode($_GET['addr']);
     	$now=time();
-
+			//dump($token);
+			//dump($now-$token);
     	if(!$token||$token< $now-60*5||$token>$now){
     		$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
     		echo json_encode($jarr);
-    		exit;
+    		//exit;
     	}
       $sn=$_POST['sn'];
       if(empty($sn)){
@@ -68,8 +69,23 @@ class LongdxController extends HomeController {
 			//dump($devid);
 			//dump($psn);
 			//dump($rid);
-			$dev = M('device')->field('psn,devid,psnid,rid')->where(array('rid'=>$rid))->find();
+			$psnfind = M('psn')->where(array('id'=>$psn))->find();
+			if(empty($psnfind)){
+				echo "PSN NULL.";
+				exit;
+			}
+			$btemp=38.75;//$psnfind['base_temp'];
+			$hlevl1=$psnfind['htemplev1'];
+			$hlevl2=$psnfind['htemplev2'];
+			$llevl1=$psnfind['ltemplev1'];
+			$llevl2=$psnfind['ltemplev2'];
+			$temp_value=$psnfind['check_value'];
+			//($temp_value);
+			
+			$dev = M('device')->field('psn,devid,psnid,rid,avg_temp')->where(array('rid'=>$rid))->find();
 			//dump($dev);
+    	$avg=(float)$dev['avg_temp'];
+    	//dump($avg);
 			if(empty($dev)){
     		$jarr=array('ret'=>array('ret_message'=>'sn error','status_code'=>10000301));
     		echo json_encode($jarr);
@@ -81,14 +97,32 @@ class LongdxController extends HomeController {
 			$start_time = strtotime($time)-86400;
 			$end_time = strtotime($time)+86400;	
 			
-			$acclist=M('access')->field('temp1,temp2,time')->where(array('devid'=>550,'psn'=>7))->where('time >= '.$start_time.' and time <= '.$end_time)
+			$mydb='access_'.$psn;
+			$acclist=M($mydb)->field('temp1,temp2,time')->where(array('devid'=>$devid,'psn'=>$psn))->where('time >= '.$start_time.' and time <= '.$end_time)
 													        ->group('time')
 													        ->limit(0,48)
 													        ->select();
 			//dump($acclist);
+			if($avg>0){
+				for($i=0;$i<count($acclist);$i++){
+	        		$temp1=$acclist[$i]['temp1'];
+	        		$temp2=$acclist[$i]['temp2'];
+	        		$temp3=$acclist[$i]['env_temp'];
+							$a=array($temp1,$temp2);
+							$t=max($a);
+							$vt=(float)$t;
+							if($vt < 32){
+								$ntemp=$vt;
+							}else{
+								$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
+							}
+	        		//$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
+	        		$acclist[$i]['temp1']=$ntemp;
+				}
+			}
   		$jarr=array('ret'=>array('ret_message'=>'success','status_code'=>10000100,'data'=>$acclist));
   		echo json_encode($jarr);
-			exit;		        
+			exit;
     }
     
     public function sendsmscode(){

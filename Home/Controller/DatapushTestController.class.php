@@ -2218,6 +2218,7 @@ class DatapushTestController extends Controller {
 	        $changedev_str=$changedev_str.$olddev_str.$newdev_str;
 	    }
 	    
+	    $blacklist = array();
 	    for($n=0;$n< 512;$n++){
 	    	$blpsn_str=str_pad("4",5,'0',STR_PAD_LEFT).str_pad(30+$n,4,'0',STR_PAD_LEFT);
 	      $blacklist[]=$blpsn_str;
@@ -3070,6 +3071,7 @@ class DatapushTestController extends Controller {
 	        $changedev_str=$changedev_str.$olddev_str.$newdev_str;
 	    }
 	    
+	    $blacklist = array();
 	    for($n=0;$n< 512;$n++){
 	    	$blpsn_str=str_pad("4",5,'0',STR_PAD_LEFT).str_pad(30+$n,4,'0',STR_PAD_LEFT);
 	      $blacklist[]=$blpsn_str;
