@@ -56,7 +56,7 @@ class LongdxController extends HomeController {
     	if(!$token||$token< $now-60*5||$token>$now){
     		$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
     		echo json_encode($jarr);
-    		//exit;
+    		exit;
     	}
       $sn=$_POST['sn'];
       if(empty($sn)){

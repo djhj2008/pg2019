@@ -650,7 +650,7 @@ class AddController extends HomeController {
     
     public function addserver(){
     	$check_value=0.25;
-    	$base_temp=39;
+    	$base_temp=38.75;
     	$htemplev1=39.5;
     	$htemplev2=40;
     	$ltemplev1=37.5;
@@ -801,6 +801,96 @@ class AddController extends HomeController {
     	}
     }
     
+    public function editsn(){
+    	$autoid=$_GET['autoid'];
+    	
+			$change_flag=$_POST['change_flag'];
+			$new_bsn=$_POST['new_bsn'];
+			
+			$have=M('bdevice')->where(array('autoid'=>$autoid))->find();
+			$psnid=$have['psnid'];
+			
+    	$psn=M('psn')->where(array('id'=>$psnid))->find();
+    	if(empty($psn)){
+    		$this->assign('ret',"1001");
+    		$this ->redirect('Devselect/select',NULL,0,'');
+    		exit;
+    	}
+    	$sn=$psn['sn'];
+    	//dump($change_flag);
+    	if(empty($new_bsn)){
+				$this->assign('station',$have);
+    		$this->display();
+    		exit;
+    	}
+			//dump($have);
+    	if($have){
+				if($new_bsn!=$have['new_bsn']){
+					$savedev['new_bsn']=$new_bsn;
+				}
+
+				if($change_flag!=$have['change_flag']){
+					$savedev['change_flag']=$change_flag;
+				}
+				//dump($savedev);
+				if(empty($savedev)){
+					$this->assign('station',$have);
+				  $this->display();
+				  exit;
+				}else{
+					//dump($savedev);
+					$ret=M('bdevice')->where(array('autoid'=>$autoid))->save($savedev);
+					$this->redirect('Devselect/station',array('psnid'=>$have['psnid']),0,'');
+					exit;
+				}
+    	}
+    }
+    
+    public function editurl(){
+    	$autoid=$_GET['autoid'];
+    	
+			$url_flag=$_POST['url_flag'];
+			$url=$_POST['url'];
+			
+			$have=M('bdevice')->where(array('autoid'=>$autoid))->find();
+			$psnid=$have['psnid'];
+			
+    	$psn=M('psn')->where(array('id'=>$psnid))->find();
+    	if(empty($psn)){
+    		$this->assign('ret',"1001");
+    		$this ->redirect('Devselect/select',NULL,0,'');
+    		exit;
+    	}
+    	$sn=$psn['sn'];
+    	//dump($change_flag);
+    	if(empty($url)){
+				$this->assign('station',$have);
+    		$this->display();
+    		exit;
+    	}
+			//dump($have);
+    	if($have){
+				if($url!=$have['url']){
+					$savedev['url']=$url;
+				}
+
+				if($url_flag!=$have['url_flag']){
+					$savedev['url_flag']=$url_flag;
+				}
+				//dump($savedev);
+				if(empty($savedev)){
+					$this->assign('station',$have);
+				  $this->display();
+				  exit;
+				}else{
+					//dump($savedev);
+					$ret=M('bdevice')->where(array('autoid'=>$autoid))->save($savedev);
+					$this->redirect('Devselect/station',array('psnid'=>$have['psnid']),0,'');
+					exit;
+				}
+    	}
+    }
+            
     public function movedev(){
     	$old_psn=$_POST['old_psn'];
     	$old_devid=$_POST['old_devid'];

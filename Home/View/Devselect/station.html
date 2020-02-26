@@ -60,6 +60,9 @@
 				<th>状态</th>
 				<th>基带ID</th>
 				<th>号码</th>
+				<th>改号状态</th>
+				<th>新号码</th>
+				<th>改url状态</th>
 				<th>url</th>
 				<th>操作</th>
 			</tr>
@@ -79,9 +82,14 @@
 				<%/if%>
 				<td><%$value['rate_id']%></td>
 				<td><%$value['number']%></td>
+				<td><%$value['change_flag']%></td>
+				<td><%$value['new_bsn']%></td>
+				<td><%$value['url_flag']%></td>
 				<td><%$value['url']%></td>
 				<td>
 					<a href="<%$smarty.const.__APP__%>/add/editstation?autoid=<%$value['autoid']%>">编辑</a>
+					<a href="<%$smarty.const.__APP__%>/add/editsn?autoid=<%$value['autoid']%>">|改SN</a>
+					<a href="<%$smarty.const.__APP__%>/add/editurl?autoid=<%$value['autoid']%>">|改URL</a>
 					<a href="<%$smarty.const.__APP__%>/add/delstation?autoid=<%$value['autoid']%>">|删除</a>
 				</td>
 			</tr>
