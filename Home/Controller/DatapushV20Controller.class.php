@@ -227,6 +227,14 @@ class DatapushV20Controller extends Controller {
 			}
 			if($change_flag==1){
 				$change_str=$change_flag.$new_bsn;
+				$ch_psnint=(int)substr($new_bsn,0,5);
+				$ch_bsnint=(int)substr($new_bsn,5,4);
+				$ch_bdevinfo=D('bdevice')->where(array('id'=>$ch_bsnint,'psnid'=>$ch_psnint))->find();
+				if($ch_bdevinfo)
+				{
+					$rate = $ch_bdevinfo['rate_id'];
+				}
+				
 			}else{
 				$change_str="0";
 			}
@@ -762,6 +770,7 @@ class DatapushV20Controller extends Controller {
 		}else{
 			$header="OK2".date('YmdHis');
 		}
+		$body=$header.$delay_time.$rate.$change_str.$footer.$devres_str;
   	{
         $logdir =$logreq;
         if(!file_exists($logdir)){
@@ -782,13 +791,11 @@ class DatapushV20Controller extends Controller {
         $filename = date("Ymd_His_").mt_rand(10, 99).".bmp"; //新图片名称
         $newFilePath = $logdir.$filename;//图片存入路径
         $newFile = fopen($newFilePath,"w"); //打开文件准备写入
-        fwrite($newFile,$header.$delay_time.$rate.$footer.$devres_str);
+        fwrite($newFile,$body);
         fclose($newFile); //关闭文件 
   	}
-    //$change_str='1'.'000050002';
-    //$devres_str='03'.'0030'.'0031'.'0032';
-    //$change_bsn=0;
-		echo $header.$delay_time.$rate.$change_str.$footer.$devres_str;
+
+		echo $body;
 		exit;
 	}
 
