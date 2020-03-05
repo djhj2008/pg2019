@@ -676,6 +676,28 @@ class ProductController extends HomeController {
 			$this->display();
 		}
 		
+		public function addfactoryfornew(){
+			dump('add close');
+			exit;
+			$psnid = 30;
+			$productno='2020030501';
+			$now=date('Y-m-d H:i:s',time());
+			for($i=41;$i<665;$i++){
+				$cur_dev=array( 
+  											'psnid'=>$psnid,
+						      			'devid'=>$i,
+						      			'productno'=>$productno,
+												'state'=>1,
+						      			'fsn'=>"ABC",
+						      			'time'=>$now);
+				$dev_add[]=	$cur_dev;	      			
+			}
+  				
+			dump($dev_add);
+			$ret=M('factory')->addAll($dev_add); 
+    	dump('finish!');
+			exit;
+		}
 		public function test(){
 			
 			send163msg('13801394601',NULL);
