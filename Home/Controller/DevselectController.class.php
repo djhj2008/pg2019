@@ -313,7 +313,16 @@ class DevselectController extends HomeController {
 	public function station(){
 		$psnid = $_GET['psnid'];
 		$devSelect=M('bdevice')->where(array('psnid'=>$psnid))->order('id asc')->select();
-		//dump($dev);
+
+		for($i=0;$i<count($devSelect);$i++){
+			$psn=(int)$devSelect[$i]['psn'];
+			$sid=(int)$devSelect[$i]['id'];
+			$num=($psn<<13)|($sid&0x1fff);
+			$devSelect[$i]['num']=$num;
+			$devSelect[$i]['hexnum']=dechex($num);
+		}
+		//dump($devSelect);
+		//exit;
 		$this->assign('devSelect',$devSelect);
 		$this->assign('psnid',$psnid);
 		$this->display();
