@@ -679,10 +679,10 @@ class ProductController extends HomeController {
 		public function addfactoryfornew(){
 			dump('add close');
 			exit;
-			$psnid = 31;
-			$productno='2020030701';
+			$psnid = 34;
+			$productno='2020031201';
 			$now=date('Y-m-d H:i:s',time());
-			for($i=31;$i<542;$i++){
+			for($i=31;$i<625;$i++){
 				$cur_dev=array( 
   											'psnid'=>$psnid,
 						      			'devid'=>$i,

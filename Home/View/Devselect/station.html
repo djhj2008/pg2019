@@ -58,13 +58,9 @@
 				<th>版本</th>
 				<th>上报间隔</th>
 				<th>上报次数</th>
-				<th>状态</th>
 				<th>基带ID</th>
-				<th>号码</th>
 				<th>改号状态</th>
-				<th>新号码</th>
 				<th>改url状态</th>
-				<th>url</th>
 				<th>操作</th>
 			</tr>
 		</thead>
@@ -77,17 +73,9 @@
 				<td><%$value['version']%></td>
 				<td><%$value['uptime']%></td>
 				<td><%$value['count']%></td>
-				<%if $value['state'] eq 0%>
-				<td>正常</td>
-				<%else%>
-				<td>异常</td>
-				<%/if%>
 				<td><%$value['rate_id']%></td>
-				<td><%$value['number']%></td>
 				<td><%$value['change_flag']%></td>
-				<td><%$value['new_bsn']%></td>
 				<td><%$value['url_flag']%></td>
-				<td><%$value['url']%></td>
 				<td>
 					<a href="<%$smarty.const.__APP__%>/add/editstation?autoid=<%$value['autoid']%>">编辑</a>
 					<a href="<%$smarty.const.__APP__%>/add/editsn?autoid=<%$value['autoid']%>">|改SN</a>
