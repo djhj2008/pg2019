@@ -252,6 +252,177 @@ class CollectController extends Controller {
 	      //dump($devSelect);
 	      $this->display();
     }
+
+    public function signdownValue(){
+    		$count_num=15;
+				if(empty($_POST['time'])||empty($_POST['time2'])){
+					  $now = time();
+					  $v = strtotime(date('Y-m-d',$now))-86400*15;
+					  $time =date('Y-m-d',$v);
+		  			$time2 =date('Y-m-d',$now);
+				}else{
+				  	$time =  $_POST['time'];
+				  	$time2 =  $_POST['time2'];
+				}
+		    $down_value=-100;
+		    
+				$psnid=$_GET['psnid'];
+				$productno=$_GET['productno'];
+				$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
+
+				$delay_str= $bdevinfo['uptime'];
+				$count= $bdevinfo['count'];
+				
+				$psninfo= M('psn')->where(array('id'=>$psnid))->find();
+				if($psninfo){
+				  $psn=$psninfo['sn'];
+				}else{
+					echo 'PSN ERR.';
+					exit;
+				}
+	    	
+	    	$start_time = strtotime($time);
+	    	$end_time = strtotime($time2)+86400;
+
+        $ios_order='time asc';
+        
+        $dateArr = array();
+        $temp1Arr = array();
+        $temp2Arr = array();
+        
+        $mydb='access_'.$psnid;
+        
+				$psn=$psnid;
+				//$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psn,'flag'=>1))->order('devid desc')->select();
+				$devSelect=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
+				
+				for($i=0;$i<count($devSelect);$i++)
+				{
+					$devSelect[$i]['down_count']=0;
+				}
+		
+        $selectSql=M($mydb)->where('sign <'.$down_value.' and time >= '.$start_time.' and time <= '.$end_time)
+													        ->order($ios_order)
+													        ->select();
+        if($selectSql)
+        {
+        		foreach($selectSql as $acc){
+        			$devid=$acc['devid'];
+        			$cur_time=$acc['time'];
+        			for($i=0;$i<count($devSelect);$i++)
+        			{
+        				if($devid==$devSelect[$i]['devid']){
+        					$devSelect[$i]['down_count']=$devSelect[$i]['down_count']+1;
+        					$devSelect[$i]['down_time'][]=$cur_time;
+        					break;
+        				}
+        			}
+						}
+        }
+
+        $this->assign('devSelect',$devSelect);
+	      //dump($devSelect);
+	      $this->display();
+    }
+   
+    public function signlastValue(){
+    		$count_num=15;
+				if(empty($_POST['time'])||empty($_POST['time2'])){
+					  $now = time();
+					  $v = strtotime(date('Y-m-d',$now))-86400*15;
+					  $time =date('Y-m-d',$v);
+		  			$time2 =date('Y-m-d',$now);
+				}else{
+				  	$time =  $_POST['time'];
+				  	$time2 =  $_POST['time2'];
+				}
+		    $down_value=-100;
+		    
+				$psnid=$_GET['psnid'];
+				$productno=$_GET['productno'];
+				$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
+
+				$delay_str= $bdevinfo['uptime'];
+				$count= $bdevinfo['count'];
+				
+				$delay = substr($delay_str,0, 2);
+				$delay = (int)$delay;
+
+				$delay = 3600*$delay;
+				$delay_sub = $delay/$count;
+				
+				$psninfo= M('psn')->where(array('id'=>$psnid))->find();
+				if($psninfo){
+				  $psn=$psninfo['sn'];
+				}else{
+					echo 'PSN ERR.';
+					exit;
+				}
+
+	    	$now = time();
+				$start_time = strtotime(date('Y-m-d',$now));
+	    	$cur_time = $now - $start_time;
+	    	$cur_time = (int)($cur_time/$delay)*$delay;
+	    	$first_time = $cur_time-$delay+$start_time;
+    	
+	    	$start_time = strtotime($time);
+	    	$end_time = strtotime($time2)+86400;
+
+        $ios_order='time asc';
+        
+        $dateArr = array();
+        $temp1Arr = array();
+        $temp2Arr = array();
+        
+        $mydb='access_'.$psnid;
+        
+				$psn=$psnid;
+
+				$$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
+				
+				for($i=0;$i<count($devSelect);$i++)
+				{
+					$devSelect[$i]['down_count']=0;
+				}
+		
+        $accSelect2=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->order('devid asc')->select();
+        
+				foreach($devlist as $dev){
+					$devid = $dev['devid'];
+					$dev_find=false;
+					foreach($accSelect2 as $acc){
+						if($devid==$acc['devid']){
+							$dev_find=true;
+							$al_find=false;
+							foreach($acclist2 as $al){
+								if($devid==$al['devid']){
+									$al_find=true;
+									break;
+								}
+							}
+							if($al_find==false){
+								$acclist2[]=$acc;
+							}
+						}
+					}
+					if($dev_find==false){
+						if($acc_lost){
+							$acc_lost=$acc_lost.','.$devid;
+						}else{
+							$acc_lost=$devid;
+						}
+					}
+				}
+				
+				
+				
+				
+
+				$this->assign('acclist',$acclist2);
+				$this->assign('devlost',$acc_lost);
+	      //dump($devSelect);
+	      $this->display();
+    }
     
 		public function avgtoday(){
 			$psnid=$_GET['psnid'];

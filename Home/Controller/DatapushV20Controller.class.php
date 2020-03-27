@@ -81,7 +81,7 @@ class DatapushV20Controller extends Controller {
     }
 
 		if(strlen($str) < $CDATA_START){
-    	echo "OKF".date('YmdHis')."00101";
+    	echo "OKF";
     	exit;
 		}
 
@@ -99,7 +99,7 @@ class DatapushV20Controller extends Controller {
     //$psn = $bdevinfo['psn'];
     //var_dump($bsnint);
     if($bsnint!=$sid){
-    	echo "OKE".date('YmdHis')."00101";
+    	echo "OKE";
     	{
         $logdir =$logerr;
         if(!file_exists($logdir)){
@@ -131,7 +131,7 @@ class DatapushV20Controller extends Controller {
     if($psninfo){
     	$psnid=$psninfo['id'];
     }else{
-    	echo "OKE".date('YmdHis')."00101";
+    	echo "OKE";
     	{
         $logdir =$logerr;
         if(!file_exists($logdir)){
@@ -241,7 +241,7 @@ class DatapushV20Controller extends Controller {
     }else{
     	$dev_freq = 1;
     	$url_flag = 0;
-    	$delay_time = "00101".$dev_freq;
+    	//$delay_time = "00101".$dev_freq;
     	echo "OKE";
     	exit;
     }

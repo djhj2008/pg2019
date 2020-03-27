@@ -164,7 +164,7 @@ class ProductController extends HomeController {
     	foreach($devlist as $dev){
     		$devidlist[]=$dev['devid'];
     	}
-    	
+    	//dump($devlist);
     	$wheredev['devid']=array('in',$devidlist);
 
     	$mydb='access_'.$psn;
@@ -179,24 +179,27 @@ class ProductController extends HomeController {
 				$acc_list = array();
 				foreach($accSelect1 as $acc){
 					if($acc['devid']==$devid){
+
 						$acc_list[]=$acc;
 						break;
 					}
 				}
 				foreach($accSelect2 as $acc){
 					if($acc['devid']==$devid){
+
 						$acc_list[]=$acc;
 						break;
 					}
 				}
 				foreach($accSelect3 as $acc){
 					if($acc['devid']==$devid){
+
 						$acc_list[]=$acc;
 						break;
 					}
 				}
 				$acc_size=count($acc_list);
-				
+			
 				if($acc_size< 3){
 						if($acc_size==0){
       		  		$dev_none[]=$devid;
@@ -208,7 +211,6 @@ class ProductController extends HomeController {
 				$dev_pass[]=$devid;
 			}
 
-			
 			if($dev_lost){
 				$wherelost['devid']=array('in',$dev_lost);
 				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wherelost)->save(array('state'=>3));
@@ -677,12 +679,22 @@ class ProductController extends HomeController {
 		}
 		
 		public function addfactoryfornew(){
-			dump('add close');
-			exit;
-			$psnid = 34;
-			$productno='2020031201';
+			//dump('add close');
+			//exit;
+			$psnid = $_GET['psnid'];
+			$productno=$_GET['productno'];
+			$count=$_GET['count'];
 			$now=date('Y-m-d H:i:s',time());
-			for($i=31;$i<625;$i++){
+			
+			if(empty($psnid)||empty($productno)||empty($count)){
+				dump('add null');
+				exit;
+			}
+			dump($psnid);
+			dump($productno);
+			dump((31+$count));
+
+			for($i=31;$i<(31+$count);$i++){
 				$cur_dev=array( 
   											'psnid'=>$psnid,
 						      			'devid'=>$i,
@@ -698,8 +710,8 @@ class ProductController extends HomeController {
     	dump('finish!');
 			exit;
 		}
+	
 		public function test(){
-			
 			send163msg('13801394601',NULL);
 		}
 }

@@ -150,10 +150,19 @@ class DevmanagerController extends Controller {
 			echo "<script type='text/javascript'>alert('Not Admin.');distory.back();</script>";
 			exit;
 		}  	
-  	
+		
+		$psninfo= M('psn')->where(array('id'=>$psnid))->find();
+		if($psninfo){
+		  $psn=$psninfo['sn'];
+		}else{
+			echo 'PSN ERR.';
+			exit;
+		}
+			
   	$psn=$dev['psn'];
   	
-		$selectSql=M('access')->group('time')->where('devid ='.$devid.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select();
+  	$mydb='access_'.$psn;
+		$selectSql=M($mydb)->group('time')->where('devid ='.$devid.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select();
 		
 		foreach($selectSql as $acc){
 			$id=$acc['id'];
@@ -171,6 +180,8 @@ class DevmanagerController extends Controller {
 			}else if($state==3){
 				$state=51;
 			}
+			//dump($state);
+			//dump($acc);
 			$real_temp=$_POST['real_temp-'.$id];
 			unset($saveacc);
 			if($acc['state']!=$state){
@@ -184,15 +195,19 @@ class DevmanagerController extends Controller {
 				//dump('save:');
 				//dump(date('Y-m-d H:s:i',$acc['time']));
 				//dump($saveacc);
-				$ret=M('access')->where(array('id'=>$id))->save($saveacc);
+				$ret=M($mydb)->where(array('id'=>$id))->save($saveacc);
 			}
 		}
 		
-		$lastacc=M('access')->where(array('devid'=>$devid,'psn'=>$psn))->where('state>0')->order('time desc')->find();
+		$lastacc=M($mydb)->where(array('devid'=>$devid,'psn'=>$psn))->where('state>0')->order('time desc')->find();
+		if($lastacc){
+			$lastsate=$lastacc['state'];
+		}else{
+			$lastsate=0;
+		}
 
-		$lastsate=$lastacc['state'];
 		$ret=M('device')->where(array('devid'=>$devid,'psnid'=>$psnid))->save(array('state'=>$lastsate));
-		
+		//exit;
 		$this ->redirect('/Devmanager/querytemp',array('psnid'=>$psnid,'devid'=>$devid,'time'=>$time),0,'');
 		exit;
 	}
@@ -324,8 +339,17 @@ class DevmanagerController extends Controller {
 	{
 		$psnid = $_GET['psnid'];
 		$devid = $_GET['devid'];
-
-		$slist=M('access')->where(array('psnid'=>$psnid,'devid'=>$devid))->where('state > 0')->order('time desc')->select();
+		
+		$psninfo= M('psn')->where(array('id'=>$psnid))->find();
+		if($psninfo){
+		  $psn=$psninfo['sn'];
+		}else{
+			echo 'PSN ERR.';
+			exit;
+		}
+			
+  	$mydb='access_'.$psn;
+		$slist=M($mydb)->where(array('psnid'=>$psnid,'devid'=>$devid))->where('state > 0')->order('time desc')->select();
 		$sicktype=M('sicktype')->order('type asc')->select();
 		$this->assign('sicktype',$sicktype);
 		

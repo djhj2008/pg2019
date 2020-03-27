@@ -302,7 +302,7 @@ class DevselectController extends HomeController {
 		$psnid = decode($_GET['psnid']);
 		$psninfo = M('psn')->where(array('id'=>$psnid))->find();
 		$psn=$psninfo['sn'];
-		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psn,'flag'=>1))->order('devid desc')->select();
+		$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psn))->order('devid desc')->select();
 		$sicktype=M('sicktype')->order('type asc')->select();
 		$this->assign('sicktype',$sicktype);
 		//dump($dev);
@@ -402,7 +402,7 @@ class DevselectController extends HomeController {
             $date = date("Y-m-d");
             $this->assign('date',$date);
             $this->assign('date2',$date);
-            echo "<script type='text/javascript'>alert('设备不存在.');distory.back();</script>";
+            echo "<script type='text/javascript'>alert('No device.');distory.back();</script>";
             $this->display();
             exit;
         }
