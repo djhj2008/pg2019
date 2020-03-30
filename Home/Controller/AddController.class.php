@@ -928,7 +928,7 @@ class AddController extends HomeController {
 				    	$this->display();
 				    	exit;
 	    	  }
-	    		for($i=30;$i<2000;$i++){
+	    		for($i=31;$i<2000;$i++){
 	    			$finddev=false;
 	    			foreach($devlist as $v){
 	    				if($i==$v['devid']){

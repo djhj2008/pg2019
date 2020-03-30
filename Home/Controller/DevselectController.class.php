@@ -2875,8 +2875,9 @@ class DevselectController extends HomeController {
 																		    $where2,
 																		    '_logic' => 'or'
 																		);
+				$mydb='access_'.$psn;														
         if($devid==NULL){
-            if($selectSql=M('access')->where($whereall)->group('time')->order('time desc')->select()){
+            if($selectSql=M($mydb)->where($whereall)->group('time')->order('time desc')->select()){
                 $this->assign('devid',$id);
                 $this->assign('date',$time);
                 $this->assign('date2',$time2);
@@ -2902,8 +2903,9 @@ class DevselectController extends HomeController {
         	$tmpSql3=M('taccess')->where('devid ='.$devid3.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id asc')->select();
 					//var_dump($tmpSql3);
 				}
-
-        if($selectSql=M('access')->where($whereall)->group('time')->order('time desc')->select()){
+				
+        $mydb='access_'.$psn;
+        if($selectSql=M($mydb)->where($whereall)->group('time')->order('time desc')->select()){
             $this->assign('devid',$id);
             $this->assign('date',$time);
             $this->assign('date2',$time2);

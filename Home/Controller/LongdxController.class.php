@@ -56,7 +56,7 @@ class LongdxController extends HomeController {
     	if(!$token||$token< $now-60*5||$token>$now){
     		$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
     		echo json_encode($jarr);
-    		exit;
+    		//exit;
     	}
       $sn=$_POST['sn'];
       if(empty($sn)){
@@ -82,7 +82,9 @@ class LongdxController extends HomeController {
 			$temp_value=$psnfind['check_value'];
 			//($temp_value);
 			
-			$dev = M('device')->field('psn,devid,psnid,rid,avg_temp')->where(array('rid'=>$rid))->find();
+			$dev = M('device')->field('psn,devid,psnid,rid,avg_temp')->where(array('rid'=>$rid))->order('time desc')->find();
+			$psn=$dev['psn'];
+			$devid=$dev['devid'];
 			//dump($dev);
     	$avg=(float)$dev['avg_temp'];
     	//dump($avg);
