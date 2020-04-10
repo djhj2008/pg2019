@@ -50,6 +50,7 @@
 				<th>温度1</th>
 				<th>温度2</th>
 				<th>温度3</th>
+				<th>上报厂号</th>
 				<th>SID</th>
         <th>延迟</th>
         <th>信号</th>
@@ -67,6 +68,7 @@
 				<td><%$value['temp1']%></td>
 				<td><%$value['temp2']%></td>
 				<td><%$value['env_temp']%></td>
+				<td><%$value['psnid']%></td>
 				<td><%$value['sid']%></td>
 	      <td><%$value['delay']%></td>
 	      <td><%$value['sign']%></td>
@@ -75,7 +77,7 @@
 				<td><%date('Y-m-d H:i:s',$value['time'])%></td>
 				<td><%$value['cur_time']%></td>
 				<td>
-				<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">查看温度</a>
+				<a href="<%$smarty.const.__APP__%>/product/querytemp?devid=<%$value['devid']%>&psn=<%$value['psn']%>">查看温度</a>
 				</td>
 			</tr>
 			<%/foreach%>

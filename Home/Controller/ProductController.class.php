@@ -171,6 +171,20 @@ class ProductController extends HomeController {
     	$accSelect1=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->where($wheredev)->order('devid asc')->select();
 			$accSelect2=M($mydb)->where(array('psn'=>$psn,'time'=>$pre_time))->where($wheredev)->order('devid asc')->select();
 			$accSelect3=M($mydb)->where(array('psn'=>$psn,'time'=>$pre2_time))->where($wheredev)->order('devid asc')->select();
+			
+			for($i=30;$i<40;$i++){
+    		$mydb='access1301_'.$i;
+    		$acc1301list1[$i]=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->order('devid asc')->select();
+    	}
+			for($i=30;$i<40;$i++){
+    		$mydb='access1301_'.$i;
+    		$acc1301list2[$i]=M($mydb)->where(array('psn'=>$psn,'time'=>$pre_time))->order('devid asc')->select();
+    	}
+			for($i=30;$i<40;$i++){
+    		$mydb='access1301_'.$i;
+    		$acc1301list3[$i]=M($mydb)->where(array('psn'=>$psn,'time'=>$pre2_time))->order('devid asc')->select();
+    	}
+
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
 				$psnid = $dev['psnid'];
@@ -198,8 +212,33 @@ class ProductController extends HomeController {
 						break;
 					}
 				}
+				
 				$acc_size=count($acc_list);
-			
+
+				if($acc_size==0){
+						for($i=30;$i<40;$i++){
+							foreach($acc1301list1[$i] as $acc){
+								if($devid==$acc['devid']){
+									$acc_list[]=$acc;
+									break;
+								}
+							}
+							foreach($acc1301list2[$i] as $acc){
+								if($devid==$acc['devid']){
+									$acc_list[]=$acc;
+									break;
+								}
+							}
+							foreach($acc1301list3[$i] as $acc){
+								if($devid==$acc['devid']){
+									$acc_list[]=$acc;
+									break;
+								}
+							}
+						}
+				}
+				$acc_size=count($acc_list);
+				
 				if($acc_size< 3){
 						if($acc_size==0){
       		  		$dev_none[]=$devid;
@@ -388,6 +427,11 @@ class ProductController extends HomeController {
 			$accSelect2=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->order('devid asc')->select();
 			//dump(count($accSelect2));
 			//dump(count($acclist));
+    	for($i=30;$i<40;$i++){
+    		$mydb='access1301_'.$i;
+    		$acc1301list[$i]=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->order('devid asc')->select();
+    	}
+    	
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
 				$dev_find=false;
@@ -407,6 +451,32 @@ class ProductController extends HomeController {
 					}
 				}
 				if($dev_find==false){
+					for($i=30;$i<40;$i++){
+						if(count($acc1301list[$i])>0){
+							foreach($acc1301list[$i] as $acc){
+								if($devid==$acc['devid']){
+									$dev_find=true;
+									$al_find=false;
+									for($j=0;$j<count($acclist2);$j++){
+										$al=$acclist2[$j];
+										if($devid==$al['devid']){
+											$acclist2[$j]['psnid']=$acclist2[$j]['psnid'].','.$acc['psnid'];
+											$al_find=true;
+											break;
+										}
+									}
+									if($al_find==false){
+										$acc['psnid']=$acc['psnid'];
+										$acclist2[]=$acc;
+										break;
+									}
+								}
+							}
+						}
+					}		
+				}
+
+				if($dev_find==false){
 					if($acc_lost){
 						$acc_lost=$acc_lost.','.$devid;
 					}else{
@@ -415,6 +485,97 @@ class ProductController extends HomeController {
 				}
 			}
 
+			$this->assign('acclist',$acclist2);
+			$this->assign('devlost',$acc_lost);
+			$this->display();
+		}
+
+ 		public function devtempnow1301(){
+			$psnid=$_GET['psnid'];
+			$productno=$_GET['productno'];
+			$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
+
+			$delay_str= $bdevinfo['uptime'];
+			$count= $bdevinfo['count'];
+			
+			$psninfo= M('psn')->where(array('id'=>$psnid))->find();
+			if($psninfo){
+			  $psn=$psninfo['sn'];
+			}else{
+				echo 'PSN ERR.';
+				exit;
+			}
+			
+			$delay = substr($delay_str,0, 2);
+			$delay = (int)$delay;
+			$delay = 3600*$delay;
+			$delay_sub = $delay/$count;
+
+			if($productno==NULL){
+				echo 'PRODUCTNO ERR.';
+				exit;
+		
+			}
+    	$now = time();
+			$start_time = strtotime(date('Y-m-d',$now));
+    	$yes_time = $start_time;
+    	$end_time = $start_time+86400;
+    	$cur_time = $now - $start_time;
+    	//dump($cur_time);
+    	//dump($start_time);
+    	$cur_time = (int)($cur_time/$delay)*$delay;
+    	$first_time = $cur_time-$delay+$start_time;
+			//dump(date('Y-m-d H:s:i',$first_time));
+			//dump($psn);
+    	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('id asc')->select();
+    	//dump(count($devlist));
+
+    	for($i=30;$i<40;$i++){
+    		$mydb='access1301_'.$i;
+    		$accSelect[$i]=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->order('devid asc')->select();
+    	}
+
+			foreach($devlist as $dev){
+				$devid = $dev['devid'];
+				$dev_find=false;
+
+				for($i=30;$i<40;$i++){
+					if(count($accSelect[$i])>0){
+						foreach($accSelect[$i] as $acc){
+							if($devid==$acc['devid']){
+								$dev_find=true;
+								$al_find=false;
+								for($j=0;$j<count($acclist2);$j++){
+									$al=$acclist2[$j];
+									if($devid==$al['devid']){
+										$acclist2[$j]['psnid']=$acclist2[$j]['psnid'].','.$acc['psnid'];
+										$al_find=true;
+										break;
+									}
+								}
+								if($al_find==false){
+									$acc['psnid']=$acc['psnid'];
+									$acclist2[]=$acc;
+									break;
+								}
+							}
+						}
+					}
+					if($dev_find==true){
+						//break;
+					}
+				}
+				if($dev_find==false){
+					if($acc_lost){
+						$acc_lost=$acc_lost.','.$devid;
+					}else{
+						$acc_lost=$devid;
+					}
+				}
+			}
+			//dump($acc_lost);
+			//dump($acclist2);
+			//exit;
 			$this->assign('acclist',$acclist2);
 			$this->assign('devlost',$acc_lost);
 			$this->display();
@@ -456,7 +617,16 @@ class ProductController extends HomeController {
 			$accSelect=M($mydb)->where(array('psn'=>$psn,'time'=>$pre_time))->order('devid asc')->select();
 			//dump(count($accSelect));
 			$accSelect2=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->order('devid asc')->select();
-			//dump(count($accSelect2));
+			
+			for($i=30;$i<40;$i++){
+    		$mydb='access1301_'.$i;
+    		$acc1301list1[$i]=M($mydb)->where(array('psn'=>$psn,'time'=>$pre_time))->order('devid asc')->select();
+    	}
+			for($i=30;$i<40;$i++){
+    		$mydb='access1301_'.$i;
+    		$acc1301list2[$i]=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->order('devid asc')->select();
+    	}
+    	
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
 				$psnid = $dev['psnid'];
@@ -475,6 +645,31 @@ class ProductController extends HomeController {
 							$acclist[]=$acc;
 						}
 					}
+				}
+				if($dev_find==false){
+					for($i=30;$i<40;$i++){
+						if(count($acc1301list1[$i])>0){
+							foreach($acc1301list1[$i] as $acc){
+								if($devid==$acc['devid']){
+									$dev_find=true;
+									$al_find=false;
+									for($j=0;$j<count($acclist);$j++){
+										$al=$acclist[$j];
+										if($devid==$al['devid']){
+											$acclist[$j]['psnid']=$acclist[$j]['psnid'].','.$acc['psnid'];
+											$al_find=true;
+											break;
+										}
+									}
+									if($al_find==false){
+										$acc['psnid']=$acc['psnid'];
+										$acclist[]=$acc;
+										break;
+									}
+								}
+							}
+						}
+					}		
 				}
 			}
 			$precount=count($acclist);
@@ -497,6 +692,31 @@ class ProductController extends HomeController {
 							$acclist2[]=$acc;
 						}
 					}
+				}
+				if($dev_find==false){
+					for($i=30;$i<40;$i++){
+						if(count($acc1301list2[$i])>0){
+							foreach($acc1301list2[$i] as $acc){
+								if($devid==$acc['devid']){
+									$dev_find=true;
+									$al_find=false;
+									for($j=0;$j<count($acclist2);$j++){
+										$al=$acclist2[$j];
+										if($devid==$al['devid']){
+											$acclist2[$j]['psnid']=$acclist2[$j]['psnid'].','.$acc['psnid'];
+											$al_find=true;
+											break;
+										}
+									}
+									if($al_find==false){
+										$acc['psnid']=$acc['psnid'];
+										$acclist2[]=$acc;
+										break;
+									}
+								}
+							}
+						}
+					}		
 				}
 			}
 			$nowcount=count($acclist2);
@@ -710,6 +930,173 @@ class ProductController extends HomeController {
     	dump('finish!');
 			exit;
 		}
+	
+	public function querytemp(){
+		if(empty($_POST['time'])||empty($_POST['time2'])){
+			  $now = time();
+			  $v = strtotime(date('Y-m-d',$now))-86400;
+			  $time =date('Y-m-d',$v);
+  			$time2 =date('Y-m-d',$now);
+		}else{
+		  	$time =  $_POST['time'];
+		  	$time2 =  $_POST['time2'];
+		}
+    {
+	  	$psn = $_GET['psn'];
+	  	$id=$_GET['devid'];
+	  	
+    	$start_time = strtotime($time);
+    	$end_time = strtotime($time2)+86400;
+
+        $devSelect=M('device')->field('devid')->where(array('flag'=>1,'dev_type'=>1,'psn'=>$psn))->find();
+        if($devSelect!=NULL){
+            $devid=$devSelect['devid'];
+
+        }
+        
+        $devSelect2=M('device')->field('devid')->where(array('flag'=>1,'dev_type'=>2,'psn'=>$psn))->find();
+        if($devSelect2!=NULL){
+            $devid2=$devSelect2['devid'];
+
+        }
+
+        $devSelect3=M('device')->field('devid')->where(array('flag'=>1,'dev_type'=>3,'psn'=>$psn))->find();
+        if($devSelect3!=NULL){
+            $devid3=$devSelect3['devid'];
+
+        }
+
+        $mydb='access_'.$psn;
+        if($devid==NULL){
+            if($selectSql=M($mydb)->field('temp1,temp2,env_temp,delay,sign,cindex,lcount,time,devid,sid,state,psnid,psn')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select()){
+                $this->assign('devid',$id);
+                $this->assign('date',$time);
+                $this->assign('date2',$time2);
+                $this->assign('id',$id);
+                $this->assign('selectSql',$selectSql);
+            }else{
+								for($i=30;$i<40;$i++){
+					    		$mydb='access1301_'.$i;
+					    		$acc1301list[$i]=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select();
+					    	}
+					    	for($i=30;$i<40;$i++){
+					    		//dump($acc1301list[$i]);
+									if(count($acc1301list[$i])>0){
+		            		foreach($acc1301list[$i] as $acc){
+		            			$selectSql[]=$acc;
+		            		}
+		            	}
+		            }
+                $this->assign('devid',$id);
+                $this->assign('id',$id);
+                $this->assign('selectSql',$selectSql);
+                $date = date("Y-m-d");
+                $this->assign('date',$date);
+                $this->assign('date2',$date);
+                //echo "<script type='text/javascript'>alert('NO DATA.');distory.back();</script>"; 
+            }
+
+            $this->display();
+            exit;
+        }
+
+        $tmpSql=M('taccess')->where('devid ='.$devid.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id asc')->select();
+
+				if($devid2!=NULL){
+        	$tmpSql2=M('taccess')->where('devid ='.$devid2.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id asc')->select();
+					//var_dump($tmpSql2);
+				}
+				
+				if($devid3!=NULL){
+        	$tmpSql3=M('taccess')->where('devid ='.$devid3.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id asc')->select();
+					//var_dump($tmpSql3);
+				}
+
+        if($selectSql=M($mydb)->group('time')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
+            $this->assign('devid',$id);
+            $this->assign('date',$time);
+            $this->assign('date2',$time2);
+            $this->assign('id',$id);
+
+            for($i=0;$i<count($selectSql);$i++){
+                if($tmpSql!=NULL){
+                		$max=count($tmpSql)-1;
+                    for($j=0;$j<count($tmpSql);$j++){
+                        if($selectSql[$i]['time']==$tmpSql[$j]['time']){
+                            $selectSql[$i]['env_temp1']=number_format($tmpSql[$j]['temp1'],2);
+                            $selectSql[$i]['env_temp2']=number_format($tmpSql[$j]['temp2'],2);
+                            break;
+                        }
+                        else if($selectSql[$i]['time'] > $tmpSql[$j]['time']){
+                            $selectSql[$i]['env_temp1']=number_format($tmpSql[$max]['temp1'],2);
+                            $selectSql[$i]['env_temp2']=number_format($tmpSql[$max]['temp2'],2);
+                        }
+                        else{
+                        	  $selectSql[$i]['env_temp1']=255; 
+                    				$selectSql[$i]['env_temp2']=255;
+                        }                          
+                    }
+                }else{
+                    $selectSql[$i]['env_temp1']=255; 
+                    $selectSql[$i]['env_temp2']=255;
+                }
+                if($tmpSql2!=NULL){
+                		$max=count($tmpSql2)-1;
+                    for($j=0;$j<count($tmpSql2);$j++){
+                        if($selectSql[$i]['time']==$tmpSql2[$j]['time']){
+                            $selectSql[$i]['env_temp3']=number_format($tmpSql2[$j]['temp1'],2);
+                            $selectSql[$i]['env_temp4']=number_format($tmpSql2[$j]['temp2'],2);
+                            break;
+                        }
+                        else if($selectSql[$i]['time'] > $tmpSql2[$j]['time']){
+                            $selectSql[$i]['env_temp3']=number_format($tmpSql2[$max]['temp1'],2);
+                            $selectSql[$i]['env_temp4']=number_format($tmpSql2[$max]['temp2'],2);
+                        }
+                        else{
+                        	  $selectSql[$i]['env_temp3']=255; 
+                    				$selectSql[$i]['env_temp4']=255;
+                        }   
+                    }
+                }else{
+                    $selectSql[$i]['env_temp3']=255; 
+                    $selectSql[$i]['env_temp4']=255;
+                } 
+                if($tmpSql3!=NULL){
+                		$max=count($tmpSql3)-1;
+                    for($j=0;$j<count($tmpSql3);$j++){
+                        if($selectSql[$i]['time']==$tmpSql3[$j]['time']){
+                            $selectSql[$i]['env_temp5']=number_format($tmpSql3[$j]['temp1'],2);
+                            $selectSql[$i]['env_temp6']=number_format($tmpSql3[$j]['temp2'],2);
+                            break;
+                        }
+                        else if($selectSql[$i]['time'] > $tmpSql3[$j]['time']){
+                            $selectSql[$i]['env_temp5']=number_format($tmpSql3[$max]['temp1'],2);
+                            $selectSql[$i]['env_temp6']=number_format($tmpSql3[$max]['temp2'],2);
+                        }
+                        else{
+                        	  $selectSql[$i]['env_temp5']=255; 
+                    				$selectSql[$i]['env_temp6']=255;
+                        }   
+                    }
+                }else{
+                    $selectSql[$i]['env_temp5']=255; 
+                    $selectSql[$i]['env_temp6']=255;
+                }                        
+                                   
+            }
+
+            $this->assign('selectSql',$selectSql);
+            //var_dump($selectSql);
+
+        }else{
+        		$date = date("Y-m-d");
+	 	 				$this->assign('date',$date);
+	 	 				$this->assign('date2',$date);
+            echo "<script type='text/javascript'>alert('没有查询到结果.');distory.back();</script>";
+        }
+    }
+		$this->display();
+	}
 	
 		public function test(){
 			send163msg('13801394601',NULL);

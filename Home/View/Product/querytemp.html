@@ -70,8 +70,6 @@
         <th>温度</th>
         <th>温度</th>
         <th>温度</th>
-        <th>环境温度</th>
-        <th>环境湿度</th>
         <th>延迟</th>
         <th>信号</th>
         <th>频点</th>
@@ -94,8 +92,6 @@
       <%else%>
       <td><%$v.env_temp%></td>
       <%/if%>
-			<td><%$v.env_temp3%></td>
-			<td><%$v.env_temp4%></td>
       <td><%$v.delay%></td>
       <td><%$v.sign%></td>
       <td><%$v.cindex%></td>
@@ -146,7 +142,7 @@
                     iDisplayLength: 25,
                     info: true,
                     buttons: ['excel','pdf'],
-			              order: [[ 14, "desc" ]],
+			              order: [[ 12, "desc" ]],
 										columnDefs: [
 												{
 											      "targets": 1,

@@ -397,17 +397,9 @@ class DevselectController extends HomeController {
     	$start_time = strtotime($time);
     	$end_time = strtotime($time2)+86400;
 
-      $dev=M('device')->where(array('devid'=>$id,'psnid'=>$psnid))->find();
-        if($dev==NULL){
-            $date = date("Y-m-d");
-            $this->assign('date',$date);
-            $this->assign('date2',$date);
-            echo "<script type='text/javascript'>alert('No device.');distory.back();</script>";
-            $this->display();
-            exit;
-        }
-        $psn = $dev['psn'];
-        $shed = $dev['shed'];
+			$psninfo = M('psn')->where(array('id'=>$psnid))->find();
+			$psn=$psninfo['sn'];
+      $shed = $dev['shed'];
 
         $devSelect=M('device')->field('devid')->where(array('flag'=>1,'dev_type'=>1,'psn'=>$psn))->find();
         if($devSelect!=NULL){
@@ -436,6 +428,21 @@ class DevselectController extends HomeController {
                 $this->assign('id',$id);
                 $this->assign('selectSql',$selectSql);
             }else{
+								for($i=30;$i<40;$i++){
+					    		$mydb='access1301_'.$i;
+					    		$acc1301list[$i]=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select();
+					    	}
+					    	for($i=30;$i<40;$i++){
+					    		//dump($acc1301list[$i]);
+									if(count($acc1301list[$i])>0){
+		            		foreach($acc1301list[$i] as $acc){
+		            			$selectSql[]=$acc;
+		            		}
+		            	}
+		            }
+                $this->assign('devid',$id);
+                $this->assign('id',$id);
+                $this->assign('selectSql',$selectSql);
                 $date = date("Y-m-d");
                 $this->assign('date',$date);
                 $this->assign('date2',$date);
