@@ -147,7 +147,7 @@ class ProductController extends HomeController {
 			$start_time = strtotime(date('Y-m-d',$now));
     	//var_dump($start_time);
     	$month_time = $start_time-86400*30;
-    	$week_time = $start_time-86400*6;
+    	$week_time = $start_time-86400*1;
     	$end_time = $start_time+86400;
     	$cur_time = $now - $start_time;
     	//var_dump($cur_time);
@@ -258,25 +258,48 @@ class ProductController extends HomeController {
 				$wherenone['devid']=array('in',$dev_none);
 				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wherenone)->save(array('state'=>4));
 				//week
-				/*
+				//dump($dev_none);
 				if(!empty($dev_none)){
-					$accweekSelect=M('access')->where($wherenone)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psnid'=>$psnid))->order('time desc')->select();
+					$mydb='access_'.$psn;
+					$accweekSelect=M($mydb)->where($wherenone)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psn'=>$psn))->order('time desc')->select();
+					for($i=30;$i<40;$i++){
+		    		$mydb='access1301_'.$i;
+		    		$accweek1301list[$i]=M($mydb)->where($wherenone)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psn'=>$psn))->order('time desc')->select();
+		    	}
+		    	
 					foreach($dev_none as $dev_week_id){
-						$acc_week_size=0;
-						unset($acc_week_list);
-						$acc_week_list = array();
+						$acc_week_find=false;
 						foreach($accweekSelect as $acc){
 							if($acc['devid']==$dev_week_id){
-								$acc_week_list[]=$acc;
+								//echo 'access';
+								//dump($dev_week_id);
+								$acc_week_find=true;
+								break;
 							}
 						}
-						$acc_week_size=count($acc_week_list);
-						if($acc_week_size==0){
+						if($acc_week_find==false){
+							for($i=30;$i<40;$i++){
+								foreach($accweek1301list[$i] as $acc){
+									if($dev_week_id==$acc['devid']){
+										//echo 'access1301';
+										//dump($dev_week_id);
+										$acc_week_find=true;
+										break;
+									}
+								}
+							}
+						}
+
+						if($acc_week_find==false){
 							$dev_week_none[]=$dev_week_id;
 						}
 					}
 				}
-
+				if(!empty($dev_week_none)){
+					$whereweeknone['devid']=array('in',$dev_week_none);
+					$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($whereweeknone)->save(array('state'=>5));
+				}
+				/*
 				if(!empty($dev_week_none)){
 					$whereweeknone['devid']=array('in',$dev_week_none);
 					$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($whereweeknone)->save(array('state'=>5));
@@ -298,18 +321,20 @@ class ProductController extends HomeController {
 						}
 					}
 				}
+				
 				if(!empty($dev_week_none)){
 					$wheremonnone['devid']=array('in',$dev_mon_none);
 					$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wheremonnone)->save(array('state'=>6));
 				}
 				*/
+				
 			}
 			if($dev_pass){
 				$wherepass['devid']=array('in',$dev_pass);
 				$ret=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where($wherepass)->save(array('state'=>2));
 			}
 
-			$devSelect=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('devid asc')->select();
+			$devSelect=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno,'state'=>5))->order('devid asc')->select();
 			$this->assign('devSelect',$devSelect);
 			$this->display();
 		}
@@ -1095,6 +1120,114 @@ class ProductController extends HomeController {
             echo "<script type='text/javascript'>alert('没有查询到结果.');distory.back();</script>";
         }
     }
+		$this->display();
+	}
+	
+	public function devnotinsall(){
+		$psnid=$_GET['psnid'];
+		$productno=$_GET['productno'];
+		$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
+
+		$delay_str= $bdevinfo['uptime'];
+		$count= $bdevinfo['count'];
+
+		$psninfo= M('psn')->where(array('id'=>$psnid))->find();
+		if($psninfo){
+		$psn=$psninfo['sn'];
+		}else{
+		echo 'PSN ERR.';
+		exit;
+		}
+
+		$delay = substr($delay_str,0, 2);
+		$delay = (int)$delay;
+		$delay = 3600*$delay;
+		$delay_sub = $delay/$count;
+
+		if($productno==NULL){
+		echo 'PRODUCTNO ERR.';
+		exit;
+
+		}
+		$now = time();
+		$start_time = strtotime(date('Y-m-d',$now));
+		$yes_time = $start_time;
+		$end_time = $start_time+86400;
+		$cur_time = $now - $start_time;
+    	//dump($cur_time);
+    	//dump($start_time);
+    	$cur_time = (int)($cur_time/$delay)*$delay;
+    	$first_time = $cur_time-$delay+$start_time;
+			//dump(date('Y-m-d H:s:i',$first_time));
+			//dump($psn);
+    	$devlist=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('devid asc')->select();
+    	//dump(count($devlist));
+    	$dev_max=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->order('devid desc')->find();
+
+    	$devid_max=(int)$dev_max['devid'];
+    	//dump($devid_max);
+
+    	$cows=M('cows')->order('sn_code asc')->select();
+
+    	//dump($cows);
+		//echo 'dev not install:';
+    	foreach($devlist as $dev){
+    		$psn=$dev['psnid'];
+    		$devid=$dev['devid'];
+    		$dev_find=false;
+			//dump($psn);
+			//dump($devid);
+    		foreach($cows as $cow){
+    			$sn=$cow['sn_code'];
+    			$cow_psn=(int)substr($sn,0,5);
+      			$cow_devid=(int)substr($sn,5,4);
+    			//dump($sn);
+				//dump($cow_psn);
+				//dump($cow_devid);
+    			//exit;
+      			if($psn==$cow_psn){
+      				if($devid==$cow_devid){
+      					$dev_find=true;
+      					break;
+      				}
+      			}
+    		}
+    		if($dev_find==false){
+    			$psn_not=str_pad($psn,5,'0',STR_PAD_LEFT);
+    			$devid_not=str_pad($devid,4,'0',STR_PAD_LEFT);
+    			$dev_not_install['sn']=$psn_not.$devid_not;
+    			$dev_not_install['psn']=$psn;
+    			$dev_not_install['devid']=$devid;
+    			$devlist_not_install[]=$dev_not_install;
+    			//dump($dev_not_install);
+    		}
+
+    	}
+		//echo 'dev not install:';
+    	//dump($dev_not_install);
+    	//echo 'dev error:';
+		foreach($cows as $cow){
+			$sn=$cow['sn_code'];
+			$cow_psn=(int)substr($sn,0,5);
+  			$cow_devid=(int)substr($sn,5,4);
+  			if($psn==$cow_psn){
+  				if($cow_devid>$devid_max){
+	    			$psn_err=str_pad($cow_psn,5,'0',STR_PAD_LEFT);
+	    			$devid_err=str_pad($cow_devid,4,'0',STR_PAD_LEFT);
+	    			$dev_err['sn']=$psn_err.$devid_err;
+	    			$dev_err['psn']=$cow_psn;
+	    			$dev_err['devid']=$cow_devid;
+	    			$devlist_err[]=$dev_err;
+  					//dump($dev_err);
+  				}
+  			}
+		}
+
+		//echo 'dev error:';
+		//dump($dev_err);
+    	//exit;
+    	$this->assign('dev_not_install',$devlist_not_install);
+    	$this->assign('dev_err',$devlist_err);
 		$this->display();
 	}
 	

@@ -157,7 +157,127 @@ class LongdxController extends HomeController {
 			}
   		exit;
     }
-        
+
+    public function sendsmsmsg(){
+    	$token=(int)ldx_decode($_GET['token']);
+    	$addr=ldx_decode($_GET['addr']);
+    	$now=time();
+
+    	if(!$token||$token< $now-60*5||$token>$now){
+    		//$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
+    		//echo json_encode($jarr);
+    		//exit;
+    	}
+			$post=file_get_contents('php://input');
+	    $logbase="sms_backup/";
+	    {
+	        $logdir =$logbase;
+	        if(!file_exists($logdir)){
+	            mkdir($logdir);
+	        }
+	        $logdir = $logdir.date('Y-m-d',time()).'/';
+	        if(!file_exists($logdir)){
+	            mkdir($logdir);
+	        }
+	          			
+	        $filename = date("Ymd_His_").mt_rand(10, 99).".bmp"; //新图片名称
+	        $newFilePath = $logdir.$filename;//图片存入路径
+	        $newFile = fopen($newFilePath,"w"); //打开文件准备写入
+	        fwrite($newFile,$post);
+	        fclose($newFile); //关闭文件
+	           
+	    }
+    	
+    	/*
+    	$sn1[]='000310031';
+    	
+    	$sn2[]='000320031';
+    	$sn2[]='000320032';
+    	    	
+    	$sn3[]='000330031';
+    	$sn3[]='000330032';
+    	$sn3[]='000330033';
+    	$sn3[]='000330134';
+    	$sn3[]='000331134';
+    	$sn3[]='000332134';
+    	$sn3[]='000333134';
+    	$sn3[]='000334134';
+    	$sn3[]='000335134';
+    	
+    	$phone1 = array('phone'=>'13311152676','name'=>iconv("GBK", "UTF-8", '测试1'),'sn'=>$sn1);
+    	$phone2 = array('phone'=>'15010160170','name'=>iconv("GBK", "UTF-8", '测试2'),'sn'=>$sn2);
+    	$phone3 = array('phone'=>'15010150766','name'=>iconv("GBK", "UTF-8", '测试3'),'sn'=>$sn3);
+    
+    	$msg[]=$phone1;
+    	$msg[]=$phone2;
+    	$msg[]=$phone3;
+    	
+    	$jarr = array('type'=>1,'msg'=>$msg);
+    	$jarr=json_encode($jarr);
+    	dump($jarr);
+    	*/
+    	
+      $array = json_decode($post,TRUE);
+
+			$type= $array['type'];
+			$cmd= $array['cmd'];
+			
+			dump($type);
+			dump($cmd);
+			
+			if($type==1){
+				$tmp='14867047';
+			}else if($type==2){
+				$tmp='14854123';
+			}else{
+				$tmp='14867047';
+			}
+			
+			foreach($array['msg'] as $msg){
+				//dump($msg['phone']);
+				unset($phone);
+				unset($smsmsg);
+				$phone[]=$msg['phone'];
+				$other='SN:';
+				for($i=0;$i<count($msg['sn']);$i++){
+					$sn=$msg['sn'][$i];
+					//dump($sn);
+					//$psn=(int)substr($sn,0,5);
+      		$devid=(int)substr($sn,5,4);
+					if($i==0){
+						$other=$other.$devid;
+					}else{
+						if(strlen($other)>=25){
+							$other=$other.'...';
+							break;
+						}else{
+							$other=$other.','.$devid;
+						}
+					}
+				}
+				$ohter=$other;
+				$smsmsg[]=$msg['name'];
+				$smsmsg[]=$ohter;
+				dump($smsmsg);
+				//send163msgtmp($phone,$smsmsg,$tmp);
+				//send163msg($phone,$smsmsg);
+			}
+      $jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100));
+	  	echo json_encode($jarr);
+	  	exit;
+	  	
+			if($ret['code']==200){
+				$data['obj']=$ret['obj'];
+	  		$jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100,'data'=>$data));
+	  		echo json_encode($jarr);
+			}else{
+    		$jarr=array('ret'=>array('ret_message'=>'send error','status_code'=>10000301));
+    		echo json_encode($jarr);
+    		exit;
+			}
+  		exit;
+    }
+       
     public function test_encode(){
     	$data=$_GET['data'];
     	$token=ldx_encode($data);
