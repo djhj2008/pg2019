@@ -222,15 +222,15 @@ class LongdxController extends HomeController {
 			$type= $array['type'];
 			$cmd= $array['cmd'];
 			
-			dump($type);
-			dump($cmd);
-			
+			//dump($type);
+			//dump($cmd);
+
 			if($type==1){
-				$tmp='14867047';
+				$tmp='14860115';
 			}else if($type==2){
 				$tmp='14854123';
 			}else{
-				$tmp='14867047';
+				$tmp='14860115';
 			}
 			
 			foreach($array['msg'] as $msg){
@@ -258,8 +258,8 @@ class LongdxController extends HomeController {
 				$ohter=$other;
 				$smsmsg[]=$msg['name'];
 				$smsmsg[]=$ohter;
-				dump($smsmsg);
-				//send163msgtmp($phone,$smsmsg,$tmp);
+				//dump($smsmsg);
+				send163msgtmp($phone,$smsmsg,$tmp);
 				//send163msg($phone,$smsmsg);
 			}
       $jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100));

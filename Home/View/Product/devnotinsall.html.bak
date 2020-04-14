@@ -48,7 +48,7 @@
 				<th>SN</th>
         <th>psn</th>
         <th>devid</th>
-        <th>state</th>
+        <th>状态</th>
         <th>ACCTION</th>
 			</tr>
 		</thead>
@@ -64,7 +64,7 @@
 				</td>
 			</tr>
 			<%/foreach%>
-			<%foreach $dev_err as $value%>
+			<%foreach $devlist_err as $value%>
 			<tr>
 				<td><%$value['sn']%></td>
         <td><%$value['psn']%></td>
