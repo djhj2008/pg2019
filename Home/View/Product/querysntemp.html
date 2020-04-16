@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:img="http://www.w3.org/1999/html">
+<head>
+	<meta charset="UTF-8">
+	<title>设备展示</title>	
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+	<!-- <link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css"> -->
+	<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
+  <!-- DataTables -->
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+  <!-- Responsive datatable examples -->
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+  <!-- Buttons examples -->
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.buttons.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jszip.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/pdfmake.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/vfs_fonts.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.html5.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.print.min.js"></script>
+  <!-- Responsive examples -->
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+	
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
+
+	<!-- battery -->
+	<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/battery.css">
+</head>
+<style>
+	b {color: #23527C;}
+</style>
+<body>
+	<div class="container" >
+ 	<div class="navbar navbar-default navbar-fixed-left" >
+		<ul class="nav navbar-nav" >
+			<li class="active"><a href="<%$smarty.const.__APP__%>/devselect/select"><b >首页</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/product/querysntemp"><b>温度查询</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/acadd/checkrssi"><b>基站RSSI</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/manager/logout"><b>退出登陆</b></a></li>
+			</ul>
+		</div>
+		</div>
+		</div>
+ 	<div class="container" >
+<h2 style="text-align:center;font-size:25px" >查询温度</h2>
+<form class="form-horizontal"  method="post">
+<div class="weui-cells">
+    <div class="weui-cell">
+        <div class="weui-cell__hd"><label class="weui-label">SN编号</label></div>
+        <div class="weui-cell__bd">
+            <input class="weui-input" placeholder="请输入9位SN编号" type="number" id="sn" name="sn">
+        </div>
+    </div>
+	  <div class="weui-btn-area">
+	    <button class="weui-btn weui-btn_primary" type="submit" id="btn">提交</button>
+	  </div>
+</div>
+</form>
+
+<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4.js"></script>
+<script src="<%$smarty.const.AJS_URL%>fastclick.js"></script>
+<script src="<%$smarty.const.AJS_URL%>jquery-weui.js"></script>
+<script>
+    $(function() {
+        FastClick.attach(document.body);
+    });
+
+    var ret='<%$errcode%>';
+    //$.toptip(ret);
+    if(ret=="1001"){
+	     	$.toptip('设备已存在.');
+    }
+
+    $(function(){
+           $(document).on("click","#btn",function(){
+               var user = $("#tsn").val();
+               if(user==""){
+                   $.toptip("SN不能为空");
+                   return false;
+               }else{
+               		 if(user.length!=9){
+               		 	 	$.toptip("SN超出范围");
+                   		return false;
+               		 }
+               }
+           })
+
+    });
+    
+    
+</script>
+</body>
+</html>

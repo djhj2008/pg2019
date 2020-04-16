@@ -1263,7 +1263,7 @@ class ProductController extends HomeController {
     	$cur_time = (int)($cur_time/$delay)*$delay;
     	$first_time = $cur_time-$delay+$start_time;
     	
-    	$mydb='access1301_'.$psnid;
+    	$mydb='access_'.$psnid;
     	$lasttimeSel=M($mydb)->where(array('psnid'=>$psnid,'sid'=>$sid))->order('time desc')->find();
     	$first_time=$lasttimeSel['time'];
     	$pretime=$lasttimeSel['time']-$delay;
@@ -1321,8 +1321,22 @@ class ProductController extends HomeController {
 			}
 			$this->assign('acclist',$acclist);
 			$this->display();
+	}
+	
+	public function test(){
+		send163msg('13801394601',NULL);
+	}
+	
+	public function querysntemp(){
+		$sn=$_POST['sn'];
+		if($sn){
+			$sn=str_pad($sn,9,'0',STR_PAD_LEFT);
+      $psn=(int)substr($sn,0,5);
+      $devid=(int)substr($sn,5,4);
+      $this ->redirect('/product/querytemp',array('psn'=>$psn,'devid'=>$devid),0,'');
+			exit;
 		}
-		public function test(){
-			send163msg('13801394601',NULL);
-		}
+		$this->display();
+	}
+	
 }

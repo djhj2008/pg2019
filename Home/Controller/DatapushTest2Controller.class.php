@@ -53,7 +53,8 @@ class DatapushTest2Controller extends Controller {
     $logerr="lora_errorV2030/";
     $logreq="lora_reqV2030/";
     
-
+		ob_clean();
+		
 		if(strlen($str) < $CDATA_START){
     	echo "OKF";
     	exit;
@@ -757,7 +758,7 @@ class DatapushTest2Controller extends Controller {
 	    $logbase = "lora_backupV2047/";
 	    $logerror = "lora_errorV2047/";
 	    $logreq = "lora_reqV2047/";
-
+			ob_clean();
 
 	    if (strlen($str) < $CDATA_START) {
 	        echo "OKF";

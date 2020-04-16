@@ -104,6 +104,19 @@ class LongdxController extends HomeController {
 													        ->group('time')
 													        ->limit(0,48)
 													        ->select();
+			if(empty($acclist)){
+	    	for($i=30;$i<40;$i++){
+	    		$mydb='access1301_'.$i;
+	    		$acclist=M($mydb)->where(array('psn'=>$psn,'devid'=>$devid))->where('time >= '.$start_time.' and time <= '.$end_time)
+	    														->group('time')
+													        ->limit(0,48)
+													        ->select();
+					if($acclist){
+						break;
+					}
+	    	}
+			}
+			
 			//dump($acclist);
 			if($avg>0){
 				for($i=0;$i<count($acclist);$i++){
