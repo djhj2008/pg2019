@@ -18,30 +18,45 @@ class LongdxController extends HomeController {
     		exit;
     	}
     	if(!empty($sn)){
-					$data[0]['sn']=$sn;
-	    		$data[0]['health']=3;
-	    		$data[0]['survival']=2;
+    		  $rid=(int)$sn;
+    			$dev=M('device')->where(array('rid'=>$rid,'flag'=>1))->order('time desc')->find();
+    			if($dev){
+						$cow['sn']=$sn;
+						if($dev['cow_state']==4){
+							$cow['survival']=3;
+						}else{
+							$cow['survival']=1;
+						}
+						if($dev['cow_state']==5){
+							$cow['health']=3;
+						}else{
+							$cow['health']=1;
+						}
+		    		$data[]=$cow;
+    			}else{
+		    		$jarr=array('ret'=>array('ret_message'=>'dev not find','status_code'=>10000301));
+		    		echo json_encode($jarr);
+		    		exit;
+    			}
     	}else{
-	    	for($i=0;$i<1;$i++){
-	    		$data[$i]['sn']=200480+$i;
-	    		$data[$i]['health']=3;
-	    		$data[$i]['survival']=2;
-	    	}
-	    	
-	    	for($i=8;$i<14;$i++){
-	    		$data[$i]['sn']=200480+$i;
-	    		$data[$i]['health']=2;
-	    		$data[$i]['survival']=1;
-	    	}
-	    	
-	    	for($i=14;$i<20;$i++){
-	    		$data[$i]['sn']=200480+$i;
-	    		$data[$i]['health']=1;
-	    		$data[$i]['survival']=3;
-	    	}
+					$devnone=M('device')->where('psnid>=30 and psnid<=39')->where(array('cow_state'=>4))->select();
+					$devnlow=M('device')->where('psnid>=30 and psnid<=39')->where(array('cow_state'=>5))->select();
+					
+					foreach($devnone as $dev){
+						$cow['sn']=str_pad($dev['rid'],9,'0',STR_PAD_LEFT);
+						$cow['survival']=3;
+						$cow['health']=1;
+						$data[]=$cow;
+						$sn_none[]=$cow['sn'];
+					}
+					foreach($devnlow as $dev){
+						$cow['sn']=str_pad($dev['rid'],9,'0',STR_PAD_LEFT);
+						$cow['survival']=1;
+						$cow['health']=3;
+						$data[]=$cow;
+						$sn_low[]=$cow['sn'];
+					}
     	}
-    	
-    	
   		$jarr=array('ret'=>array('ret_message'=>'success','status_code'=>10000100,'data'=>$data));
   		echo json_encode($jarr);
   		exit;
@@ -104,6 +119,7 @@ class LongdxController extends HomeController {
 													        ->group('time')
 													        ->limit(0,48)
 													        ->select();
+												        
 			if(empty($acclist)){
 	    	for($i=30;$i<40;$i++){
 	    		$mydb='access1301_'.$i;

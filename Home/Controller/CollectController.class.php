@@ -182,7 +182,7 @@ class CollectController extends Controller {
         $mydb='access_'.$psnid;
         
 				$psn=$psnid;
-				$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psn,'flag'=>1))->order('devid desc')->select();
+				$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psn))->order('devid desc')->select();
 		
 				for($i=0;$i<count($devSelect);$i++)
 				{
@@ -196,10 +196,11 @@ class CollectController extends Controller {
         {
         		foreach($selectSql as $acc){
         			$devid=$acc['devid'];
+        			$psn=$acc['psn'];
         			$cur_time=$acc['time'];
         			for($i=0;$i<count($devSelect);$i++)
         			{
-        				if($devid==$devSelect[$i]['devid']){
+        				if($devid==$devSelect[$i]['devid']&&$psn==$devSelect[$i]['psn']){
         					$devSelect[$i]['down_count']=$devSelect[$i]['down_count']+1;
         					$devSelect[$i]['down_time'][]=$cur_time;
         					break;
