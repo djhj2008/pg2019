@@ -940,9 +940,9 @@ class ProductController extends HomeController {
 			}
 			dump($psnid);
 			dump($productno);
-			dump((31+$count));
-
-			for($i=31;$i<(31+$count);$i++){
+			dump((231+$count));
+			exit;
+			for($i=231;$i<(231+$count);$i++){
 				$cur_dev=array( 
   											'psnid'=>$psnid,
 						      			'devid'=>$i,
@@ -997,6 +997,18 @@ class ProductController extends HomeController {
         $mydb='access_'.$psn;
         if($devid==NULL){
             if($selectSql=M($mydb)->field('temp1,temp2,env_temp,delay,sign,cindex,lcount,time,devid,sid,state,psnid,psn')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('time desc')->select()){
+								for($i=30;$i<40;$i++){
+					    		$mydb='access1301_'.$i;
+					    		$acc1301list[$i]=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('time desc')->select();
+					    	}
+					    	for($i=30;$i<40;$i++){
+					    		//dump($acc1301list[$i]);
+									if(count($acc1301list[$i])>0){
+		            		foreach($acc1301list[$i] as $acc){
+		            			$selectSql[]=$acc;
+		            		}
+		            	}
+		            }
                 $this->assign('devid',$id);
                 $this->assign('date',$time);
                 $this->assign('date2',$time2);
@@ -1396,15 +1408,20 @@ class ProductController extends HomeController {
 		//$this->display();
 		
 	}
-	
-	
+
 	public function villagelist(){
 		$villagelist=M('subareas')->where(array('type'=>'village_id'))->select();
 		//dump($villagelist);
 		//exit;
 		foreach($villagelist as $key=>$v){
 			$nc=M('cows')->where(array('village_id'=>$v['id']))->count();
+			$hc=M('cows')->where(array('village_id'=>$v['id'],'health_state'=>3))->count();
+			$lc=M('cows')->where(array('village_id'=>$v['id'],'survival_state'=>3))->count();
+			$sc=M('cows')->where(array('village_id'=>$v['id'],'survival_state'=>4))->count();
 			$villagelist[$key]['count']=$nc;
+			$villagelist[$key]['hcount']=$hc;
+			$villagelist[$key]['lcount']=$lc;
+			$villagelist[$key]['scount']=$sc;
 		}
 		$this->assign('vlist',$villagelist);
 		$this->display();
@@ -1445,7 +1462,9 @@ class ProductController extends HomeController {
 	public function scancows(){
 		ini_set("memory_limit","1024M");
 		$psnid=$_GET['psnid'];
-		//dump($vid);
+
+		$low_temp=25;
+		$check_count=6;
 		//for($psnid=30;$psnid<40;$psnid++)
 		if($psnid)
 		{
@@ -1453,6 +1472,8 @@ class ProductController extends HomeController {
 			$psn=$bdevinfo['psn'];
 			$delay_str= $bdevinfo['uptime'];
 			$count= $bdevinfo['count'];
+			echo "PSN:";
+			dump($psn);
 			
 			$delay = substr($delay_str,0, 2);
 			$delay = (int)$delay;
@@ -1473,6 +1494,7 @@ class ProductController extends HomeController {
     	$pre_time = $cur_time-$delay+$start_time-$delay;
     	$pre2_time = $cur_time-$delay+$start_time-$delay*2;
     	$pre3_time = $cur_time-$delay+$start_time-$delay*3;
+			$last_time = $cur_time-$delay+$start_time-($check_count-1)*3600;
 			
     	$devlist=M('device')->where(array('psn'=>$psn,'flag'=>1))->order('id asc')->select();
     	foreach($devlist as $dev){
@@ -1482,104 +1504,82 @@ class ProductController extends HomeController {
     	$wheredev['devid']=array('in',$devidlist);
 
     	$mydb='access_'.$psn;
-    	$accSelect1=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->where($wheredev)->order('devid asc')->select();
-			$accSelect2=M($mydb)->where(array('psn'=>$psn,'time'=>$pre_time))->where($wheredev)->order('devid asc')->select();
-			$accSelect3=M($mydb)->where(array('psn'=>$psn,'time'=>$pre2_time))->where($wheredev)->order('devid asc')->select();
+    	$accSelect1=M($mydb)->where(array('psn'=>$psn))->where('time<='.$first_time.' and time>='.$last_time)->where($wheredev)->field('devid,temp1,temp2,time')->order('time desc')->select();
 			
 			for($i=30;$i<40;$i++){
     		$mydb='access1301_'.$i;
-    		$acc1301list1[$i]=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->where($wheredev)->order('devid asc')->select();
+    		$acc1301list1[$i]=M($mydb)->where(array('psn'=>$psn))->where('time<='.$first_time.' and time>='.$last_time)->where($wheredev)->field('devid,temp1,temp2,time')->order('time desc')->select();
     	}
+    	
+			foreach($accSelect1 as $acc){
+				$devid=$acc['devid'];
+				$cdev[$devid][]=$acc;
+			}
 			for($i=30;$i<40;$i++){
-    		$mydb='access1301_'.$i;
-    		$acc1301list2[$i]=M($mydb)->where(array('psn'=>$psn,'time'=>$pre_time))->where($wheredev)->order('devid asc')->select();
-    	}
-			for($i=30;$i<40;$i++){
-    		$mydb='access1301_'.$i;
-    		$acc1301list3[$i]=M($mydb)->where(array('psn'=>$psn,'time'=>$pre2_time))->where($wheredev)->order('devid asc')->select();
+				foreach($acc1301list1[$i] as $acc){
+					$devid=$acc['devid'];
+					$cdev[$devid][]=$acc;
+				}
     	}
 
+			echo "START SCAN...";
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
 				//$psnid = $dev['psnid'];
 				//$rid = $dev['rid'];
+				//dump($devid);
 				$acc_size=0;
 				$acc_low_size=0;
 				unset($acc_list);
 				unset($acc_low_list);
 				$acc_list = array();
 				$acc_low_list = array();
-				foreach($accSelect1 as $acc){
+				foreach($cdev[$devid] as $acc){
 					if($acc['devid']==$devid){
-
-						$acc_list[]=$acc;
-						break;
-					}
-				}
-				foreach($accSelect2 as $acc){
-					if($acc['devid']==$devid){
-
-						$acc_list[]=$acc;
-						break;
-					}
-				}
-				foreach($accSelect3 as $acc){
-					if($acc['devid']==$devid){
-
-						$acc_list[]=$acc;
-						break;
-					}
-				}
-				
-				$acc_size=count($acc_list);
-
-				if($acc_size==0){
-						for($i=30;$i<40;$i++){
-							foreach($acc1301list1[$i] as $acc){
-								if($devid==$acc['devid']){
-									$acc_list[]=$acc;
-									if($acc['temp1']<25&&$acc['temp2']<25){
-										$acc_low_list[]=$acc;
-									}
-									break;
-								}
-							}
-							foreach($acc1301list2[$i] as $acc){
-								if($devid==$acc['devid']){
-									$acc_list[]=$acc;
-									if($acc['temp1']<25&&$acc['temp2']<25){
-										$acc_low_list[]=$acc;
-									}
-									break;
-								}
-							}
-							foreach($acc1301list3[$i] as $acc){
-								if($devid==$acc['devid']){
-									$acc_list[]=$acc;
-									if($acc['temp1']<25&&$acc['temp2']<25){
-										$acc_low_list[]=$acc;
-									}
-									break;
-								}
+						for($ai=0;$ai<$check_count;$ai++){
+							if($acc['time']==$first_time-$ai*3600){
+								$acc_list[$ai]=$acc;
+								break;
 							}
 						}
+						$acc_size=count($acc_list);
+					}
 				}
-				$acc_size=count($acc_list);
-				$acc_low_size=count($acc_low_list);
+				$low_count=0;
+				foreach($acc_list as $key=>$acc){
+					if($acc['temp1']<$low_temp&&$acc['temp2']<$low_temp){
+						$low_count++;
+					}else{
+						break;
+					}
+				}
+				if($low_count>0){
+					dump($acc_list);
+				}
 
-				if($acc_size==3){
-      		$dev_pass[]=$devid;
-      	}				
-				if($acc_size==0){
-      		$dev_none[]=$devid;
-      		//$dev_none_list[]=$dev;
-      	}
-				//$dev_pass[]=$devid;
-				if($acc_low_size==3){
-					$dev_low[]=$devid;
-					//$dev_low_list[]=$dev;
+				if($acc_size>=3){
+					if($low_count>=3)
+					{
+						//dump($acc_list);
+						$dev_low[]=$devid;
+					}
+				}else if($acc_size==2){
+					if($low_count==2)
+					{
+						//dump($acc_list);
+						$dev_low[]=$devid;
+					}					
+				}else if($acc_size==1){
+					if($low_count==1)
+					{
+						//dump($acc_list);
+						$dev_low[]=$devid;
+					}
+				}else if($acc_size==0){
+					$dev_none[]=$devid;
 				}
 			}
+			
 			$ret=M('device')->where(array('psn'=>$psn))->save(array('cow_state'=>0));
 			if($dev_pass){
 				$wherenpass['devid']=array('in',$dev_pass);
@@ -1593,76 +1593,6 @@ class ProductController extends HomeController {
 				$wherenlow['devid']=array('in',$dev_low);
 				$ret=M('device')->where(array('psn'=>$psn))->where($wherenlow)->save(array('cow_state'=>5));
 			}
-      /*
-			if($dev_lost){
-				$wherelost['devid']=array('in',$dev_lost);
-				//$ret=M('device')->where(array('psn'=>$psnid))->where($wherelost)->save(array('state'=>3));
-			}
-			
-			if($dev_none){
-					foreach($dev_none as $sn_id){
-						$sn=str_pad($psn,5,'0',STR_PAD_LEFT).str_pad($sn_id,4,'0',STR_PAD_LEFT);
-						$dev_none_sn[]=$sn;
-					}
-					$wherenone['sn_code']=array('in',$dev_none_sn);
-					//$ret=M('cows')->where($wherenone)->save(array('survival_state'=>4));
-				//$wherenone['devid']=array('in',$dev_none);
-					$ret=M('device')->where(array('psn'=>$psn))->where($wherenone)->save(array('state'=>4));
-				//week
-				
-				if(!empty($dev_none)){
-					//$mydb='access_'.$psn;
-					//$accweekSelect=M($mydb)->where($wherenone)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psn'=>$psn))->order('time desc')->select();
-					//for($i=30;$i<40;$i++){
-		    	//	$mydb='access1301_'.$i;
-		    	//	$accweek1301list[$i]=M($mydb)->where($wherenone)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psn'=>$psn))->order('time desc')->select();
-		    	//}
-		    	
-					foreach($dev_none as $dev_week_id){
-						$acc_week_find=false;
-						foreach($accweekSelect as $acc){
-							if($acc['devid']==$dev_week_id){
-								//echo 'access';
-								//dump($dev_week_id);
-								$acc_week_find=true;
-								break;
-							}
-						}
-						if($acc_week_find==false){
-							for($i=30;$i<40;$i++){
-				    		$mydb='access1301_'.$i;
-				    		$accweek1301list[$i]=M($mydb)->where('time >='.$week_time.' and time <='.$end_time)->where(array('psn'=>$psn,'devid'=>$dev_week_id))->order('time desc')->count();
-				    	}
-							for($i=30;$i<40;$i++){
-								foreach($accweek1301list[$i] as $acc){
-									if($acc>0){
-										//echo 'access1301';
-										//dump($dev_week_id);
-										$acc_week_find=true;
-										break;
-									}
-								}
-							}
-						}
-
-						if($acc_week_find==false){
-							$dev_week_none[]=$dev_week_id;
-						}
-					}
-				}
-				
-				if(!empty($dev_week_none)){
-					foreach($dev_week_none as $sn_id){
-						$sn=str_pad($psn,5,'0',STR_PAD_LEFT).str_pad($sn_id,4,'0',STR_PAD_LEFT);
-						$dev_week_none_sn[]=$sn;
-					}
-					$whereweeknone['sn_code']=array('in',$dev_week_none_sn);
-					//$ret=M('cows')->where($whereweeknone)->save(array('survival_state'=>5));
-					$ret=M('device')->where(array('psn'=>$psn))->where($whereweeknone)->save(array('state'=>5));
-				}
-				
-			}
-			*/
 			//if($dev_pass){
 			//	$wherepass['devid']=array('in',$dev_pass);
 			//	$ret=M('device')->where(array('psn'=>$psn))->where($wherepass)->save(array('state'=>2));
@@ -1676,31 +1606,18 @@ class ProductController extends HomeController {
 			echo 'low:';
 			dump($dev_low);
 		}
-		/*	
-		$cows=M('cows')->select();
-		$flist1=M('device')->where('psnid>=30 and psnid<40')->where(array('state'=>4))->select();
-		$flist1=M('device')->where('psnid>=30 and psnid<40')->where(array('state'=>5))->select();
-		foreach($cows as $key=>$cow){
-			$sn=$cow['sn_code'];
-			$sn=str_pad($sn,9,'0',STR_PAD_LEFT);
-      $psn=(int)substr($sn,0,5);
-      $devid=(int)substr($sn,5,4);
-			foreach($flist as $dev){
-				if($dev['psnid']==$psn&&$dev['devid']==$devid){
-					$lost_cow0[]=$dev['state'];
-					break;
-				}
-			}
-		}
-		*/
-		dump(count($cows));
+		//dump(count($cows));
 		exit;
 	}
-	
+
 	public function scansync(){
 		//$cows=M('cows')->order('sn_code asc')->select();
 		$devnone=M('device')->where('psnid>=30 and psnid<=39')->where(array('cow_state'=>4))->select();
 		$devnlow=M('device')->where('psnid>=30 and psnid<=39')->where(array('cow_state'=>5))->select();
+		//$cowslist=M('cows')->select();
+		$ret=M('cows')->where(array('survival_state'=>3))->save(array('survival_state'=>1));
+		$ret=M('cows')->where('health_state>1')->save(array('health_state'=>1));
+		dump($ret);
 		
 		foreach($devnone as $dev){
 			$cow['sn']=str_pad($dev['rid'],9,'0',STR_PAD_LEFT);
@@ -1727,13 +1644,17 @@ class ProductController extends HomeController {
 			}
 			echo 'cow none:';
 			dump($cow_none);
-			$wherenonecow['sn_code']=array('in',$cow_none);
-			$ret=M('cows')->where($wherenonecow)->save(array('survival_state'=>3));
-			dump($ret);
+			if($cow_none){
+				$wherenonecow['sn_code']=array('in',$cow_none);
+				$ret=M('cows')->where($wherenonecow)->save(array('survival_state'=>3));
+				dump($ret);
+			}
 		}
 		if($sn_low){
 			$wherelow['sn_code']=array('in',$sn_low);
 			$cowslist=M('cows')->where($wherelow)->select();
+			//echo 'cow low:';
+			//dump($cowslist);
 			foreach($cowslist as $cow){
 				if($cow['health_state']==1){
 					$cow_low[]=$cow['sn_code'];
@@ -1741,9 +1662,11 @@ class ProductController extends HomeController {
 			}
 			echo 'cow low:';
 			dump($cow_low);
-			$wherelowcow['sn_code']=array('in',$cow_low);
-			$ret=M('cows')->where($wherelowcow)->save(array('health_state'=>3));
-			dump($ret);
+			if($cow_low){
+				$wherelowcow['sn_code']=array('in',$cow_low);
+				$ret=M('cows')->where($wherelowcow)->save(array('health_state'=>3));
+				dump($ret);
+			}
 		}
 		//dump($data);
 	}

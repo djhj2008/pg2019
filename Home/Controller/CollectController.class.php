@@ -435,7 +435,7 @@ class CollectController extends Controller {
 			$max_count=24;
 			$env_check=0.4;
 			
-			$devs=M('device')->where(array('flag'=>0,'psn'=>$psnid,'dev_type'=>0))->select();
+			$devs=M('device')->where(array('flag'=>1,'psn'=>$psnid,'dev_type'=>0))->select();
 			
 			foreach($devs as $dev){
 				$devid=$dev['devid'];

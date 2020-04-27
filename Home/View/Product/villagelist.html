@@ -48,18 +48,26 @@
 			<tr>
 				<th>ID</th>
 				<th>村名</th>
-				<th>数量</th>
+				<th>总数量</th>
+				<th>低温数量</th>
+				<th>丢失数量</th>
+				<th>出售数量</th>
 				<th>操作</th>
 			</tr>
 		</thead>
 		  <tbody>
 			<%foreach $vlist as $value%>
+			<%if $value['count'] gt 0 %>
 			<tr>
 				<td><%$value['id']%></td>
 				<td><%$value['name']%></td>
 				<td><%$value['count']%></td>
+				<td><%$value['hcount']%></td>
+				<td><%$value['lcount']%></td>
+				<td><%$value['scount']%></td>
 				<td><a href="<%$smarty.const.__APP__%>/product/cowlist?village_id=<%$value['id']%>">设备</a></td>
 			</tr>
+			<%/if%>
 			<%/foreach%>
 		</tbody>
 		</table>

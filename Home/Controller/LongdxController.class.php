@@ -118,6 +118,7 @@ class LongdxController extends HomeController {
 			$acclist=M($mydb)->field('temp1,temp2,time')->where(array('devid'=>$devid,'psn'=>$psn))->where('time >= '.$start_time.' and time <= '.$end_time)
 													        ->group('time')
 													        ->limit(0,48)
+													        ->order('time asc')
 													        ->select();
 												        
 			if(empty($acclist)){
@@ -126,6 +127,7 @@ class LongdxController extends HomeController {
 	    		$acclist=M($mydb)->where(array('psn'=>$psn,'devid'=>$devid))->where('time >= '.$start_time.' and time <= '.$end_time)
 	    														->group('time')
 													        ->limit(0,48)
+													        ->order('time asc')
 													        ->select();
 					if($acclist){
 						break;
@@ -143,7 +145,11 @@ class LongdxController extends HomeController {
 							$t=max($a);
 							$vt=(float)$t;
 							if($vt < 32){
-								$ntemp=$vt;
+								if($ntemp>32){
+									$ntemp=$ntemp;
+								}else{
+									$ntemp=$vt;
+								}
 							}else{
 								$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
 							}
@@ -188,15 +194,6 @@ class LongdxController extends HomeController {
     }
 
     public function sendsmsmsg(){
-    	$token=(int)ldx_decode($_GET['token']);
-    	$addr=ldx_decode($_GET['addr']);
-    	$now=time();
-
-    	if(!$token||$token< $now-60*5||$token>$now){
-    		//$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
-    		//echo json_encode($jarr);
-    		//exit;
-    	}
 			$post=file_get_contents('php://input');
 	    $logbase="sms_backup/";
 	    {
@@ -247,7 +244,19 @@ class LongdxController extends HomeController {
     	*/
     	
       $array = json_decode($post,TRUE);
+    	$token=(int)ldx_decode($array['token']);
+    	$addr=ldx_decode($array['addr']);
+    	$now=time();
 
+			//dump($token);
+			//dump($addr);
+
+    	if(!$token||$token< $now-60*5||$token>$now){
+    		$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
+    		echo json_encode($jarr);
+    		exit;
+    	}
+			//exit;
 			$type= $array['type'];
 			$cmd= $array['cmd'];
 			
@@ -294,7 +303,7 @@ class LongdxController extends HomeController {
       $jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100));
 	  	echo json_encode($jarr);
 	  	exit;
-	  	
+	  	/*
 			if($ret['code']==200){
 				$data['obj']=$ret['obj'];
 	  		$jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100,'data'=>$data));
@@ -304,6 +313,7 @@ class LongdxController extends HomeController {
     		echo json_encode($jarr);
     		exit;
 			}
+			*/
   		exit;
     }
        

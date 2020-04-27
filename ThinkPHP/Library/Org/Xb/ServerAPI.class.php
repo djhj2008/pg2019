@@ -217,7 +217,7 @@ class ServerAPI
             'mobiles' => json_encode($mobiles),
             'params' => json_encode($params)
         );
-        dump($data);
+        //dump($data);
         if ($this->RequestType == 'curl') {
             $result = $this->postDataCurl($url, $data);
         } else {

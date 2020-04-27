@@ -430,6 +430,11 @@ class DatapushV20Controller extends Controller {
 		    $end = $real_time;
 		    
 		    $tempstr=substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
+
+				if($vaild>4){
+					continue;
+				}
+				
 	    	for($j=0;$j < $vaild;$j++){
 
 		    	$up_time = $real_time-$interval*$freq+$interval*($j+1)+$interval*($freq-$vaild);
@@ -1218,6 +1223,11 @@ class DatapushV20Controller extends Controller {
 		        $devsave_list[] = $dev_save;
 
 		        $tempstr = substr($data, $i * $DATA_LEN + ($CSN_LEN + $SIGN_LEN + $CVS_LEN + $STATE_LEN + $DELAY_LEN + $VAILD_LEN) * 2, $VALUE_LEN * $COUNT_VALUE);//temp1十六进制字符
+
+						if($vaild>4){
+							continue;
+						}
+
 		        for ($j = 0; $j < $vaild; $j++) {
 
 		            $up_time = $real_time - $interval * $freq + $interval * ($j + 1) + $interval * ($freq - $vaild);
