@@ -1464,7 +1464,7 @@ class ProductController extends HomeController {
 		$psnid=$_GET['psnid'];
 
 		$low_temp=25;
-		$check_count=6;
+		$check_count=8;
 		//for($psnid=30;$psnid<40;$psnid++)
 		if($psnid)
 		{

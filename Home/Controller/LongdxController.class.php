@@ -89,7 +89,7 @@ class LongdxController extends HomeController {
 				echo "PSN NULL.";
 				exit;
 			}
-			$btemp=38.75;//$psnfind['base_temp'];
+			$btemp=35.5;//$psnfind['base_temp'];
 			$hlevl1=$psnfind['htemplev1'];
 			$hlevl2=$psnfind['htemplev2'];
 			$llevl1=$psnfind['ltemplev1'];
@@ -108,7 +108,11 @@ class LongdxController extends HomeController {
     		echo json_encode($jarr);
     		exit;
 			}
-			
+			if($dev['cow_state']==4){
+    		$jarr=array('ret'=>array('ret_message'=>'sn error','status_code'=>10000301));
+    		echo json_encode($jarr);
+    		exit;
+			}
 			$now = time();
 			$time =date('Y-m-d',$now);
 			$start_time = strtotime($time)-86400;

@@ -421,7 +421,7 @@ class DevselectController extends HomeController {
 
         $mydb='access_'.$psn;
         if($devid==NULL){
-            if($selectSql=M($mydb)->field('temp1,temp2,env_temp,delay,sign,cindex,lcount,time,devid,sid,state,psnid,psn')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select()){
+            if($selectSql=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select()){
                 $this->assign('devid',$id);
                 $this->assign('date',$time);
                 $this->assign('date2',$time2);
