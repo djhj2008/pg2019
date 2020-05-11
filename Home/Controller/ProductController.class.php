@@ -1557,12 +1557,30 @@ class ProductController extends HomeController {
 					dump($acc_list);
 				}
 
-				if($acc_size>=3){
-					if($low_count>=3)
+				if($acc_size>=6){
+					if($low_count>=6)
 					{
 						//dump($acc_list);
 						$dev_low[]=$devid;
 					}
+				}else if($acc_size>=3&$acc_size<6){
+					if($low_count>=3)
+					{
+						//dump($acc_list);
+						$dev_low[]=$devid;
+					}					
+				}else if($acc_size==2){
+					if($low_count==2)
+					{
+						//dump($acc_list);
+						$dev_low[]=$devid;
+					}					
+				}else if($acc_size==2){
+					if($low_count==2)
+					{
+						//dump($acc_list);
+						$dev_low[]=$devid;
+					}					
 				}else if($acc_size==2){
 					if($low_count==2)
 					{

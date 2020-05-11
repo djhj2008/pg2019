@@ -217,36 +217,7 @@ class LongdxController extends HomeController {
 	        fclose($newFile); //¹Ø±ÕÎÄ¼þ
 	           
 	    }
-    	
-    	/*
-    	$sn1[]='000310031';
-    	
-    	$sn2[]='000320031';
-    	$sn2[]='000320032';
-    	    	
-    	$sn3[]='000330031';
-    	$sn3[]='000330032';
-    	$sn3[]='000330033';
-    	$sn3[]='000330134';
-    	$sn3[]='000331134';
-    	$sn3[]='000332134';
-    	$sn3[]='000333134';
-    	$sn3[]='000334134';
-    	$sn3[]='000335134';
-    	
-    	$phone1 = array('phone'=>'13311152676','name'=>iconv("GBK", "UTF-8", '²âÊÔ1'),'sn'=>$sn1);
-    	$phone2 = array('phone'=>'15010160170','name'=>iconv("GBK", "UTF-8", '²âÊÔ2'),'sn'=>$sn2);
-    	$phone3 = array('phone'=>'15010150766','name'=>iconv("GBK", "UTF-8", '²âÊÔ3'),'sn'=>$sn3);
-    
-    	$msg[]=$phone1;
-    	$msg[]=$phone2;
-    	$msg[]=$phone3;
-    	
-    	$jarr = array('type'=>1,'msg'=>$msg);
-    	$jarr=json_encode($jarr);
-    	dump($jarr);
-    	*/
-    	
+
       $array = json_decode($post,TRUE);
     	$token=(int)ldx_decode($array['token']);
     	$addr=ldx_decode($array['addr']);
@@ -301,24 +272,12 @@ class LongdxController extends HomeController {
 				$smsmsg[]=$msg['name'];
 				$smsmsg[]=$ohter;
 				//dump($smsmsg);
-				send163msgtmp($phone,$smsmsg,$tmp);
+				//send163msgtmp($phone,$smsmsg,$tmp);
 				//send163msg($phone,$smsmsg);
 			}
-      $jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100));
+      $jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100,'msg_type'=>$type));
 	  	echo json_encode($jarr);
 	  	exit;
-	  	/*
-			if($ret['code']==200){
-				$data['obj']=$ret['obj'];
-	  		$jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100,'data'=>$data));
-	  		echo json_encode($jarr);
-			}else{
-    		$jarr=array('ret'=>array('ret_message'=>'send error','status_code'=>10000301));
-    		echo json_encode($jarr);
-    		exit;
-			}
-			*/
-  		exit;
     }
        
     public function test_encode(){

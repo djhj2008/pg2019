@@ -56,7 +56,7 @@ class DatapushV30Controller extends Controller {
     $logbase="lora_log/backupV3030/";
     $logerr="lora_log/errorV3030/";
     $logreq="lora_log/reqV3030/";
-    
+    ob_clean();
     {
         $logdir =$logbase;
         if(!file_exists($logdir)){
@@ -871,7 +871,7 @@ class DatapushV30Controller extends Controller {
 	    $logbase = "lora_log/backupV3047/";
 	    $logerror = "lora_log/errorV3047/";
 	    $logreq = "lora_log/reqV3047/";
-
+			ob_clean();
 	    {
 	        $logdir = $logbase;
 	        if (!file_exists($logdir)) {

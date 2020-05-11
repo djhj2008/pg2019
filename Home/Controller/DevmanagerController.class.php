@@ -119,7 +119,7 @@ class DevmanagerController extends Controller {
         		$date = date("Y-m-d");
 	 	 				$this->assign('date',$date);
 	 	 				$this->assign('date2',$date);
-            echo "<script type='text/javascript'>alert('没有查询到结果.');distory.back();</script>";
+            echo "<script type='text/javascript'>alert('TEMP NULL.');distory.back();</script>";
         }
     }
     $kind0 =M('sicktype')->where(array('kind'=>0))->order('type asc')->select();

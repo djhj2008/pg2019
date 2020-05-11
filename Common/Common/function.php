@@ -82,7 +82,7 @@ function voiceVerify($verifyCode,$playTimes,$to,$displayNum,$respUrl,$lang,$user
         $result = $rest->voiceVerify($verifyCode,$playTimes,$to,$displayNum,$respUrl,$lang,$userData,$welcomePrompt,$playVerifyCode);
          if($result == NULL ) {
             echo "result error!";
-            break;
+            exit;
         }
 
         if($result->statusCode!=0) {

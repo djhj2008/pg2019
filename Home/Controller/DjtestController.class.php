@@ -3,7 +3,9 @@ namespace Home\Controller;
 use Think\Controller;
 class DjtestController extends Controller {
   public function index(){
-   
+       ob_clean();
+       echo 'test';
+       exit;
   }
   
 	public function scancows_avg(){
