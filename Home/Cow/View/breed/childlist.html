@@ -45,34 +45,8 @@
 		</div>
 
 <div class="container">
-
-  <form class="form-inline pull-left" name="f1"      action=""   method="post" >
-    <!--fieldset>
-    <div class="form-group" >
-	      <label class="control-label" style="margin-top: 5px">日期开始</label>
-	      <div class="controls"  style="margin-top: 10px">
-	      <input name="time" type="date"  value="<%$date%>">
-				</div>
-		</div>
-		<div class="form-group" >
-				<label class="control-label" style="margin-top: 5px">日期结束</label>
-				<div class="controls"  style="margin-top: 10px">
-				<input name="time2" type="date"  value="<%$date2%>">
-				</div>
-		</div>
-    </fieldset-->
-		<div class="form-group" >
-				<label class="control-label" style="margin-top: 5px">配种提醒天数</label>
-				<div class="controls"  style="margin-top: 10px">
-				<input name="count" type="number"  value="<%$count%>">
-				</div>
-		</div>
-  <div class="form-actions"  style="margin-top: 10px">
-    <button type="submit" class="btn btn-primary">查询</button>
-  </div>
-  </form>
-
- </div>
+	<label class="control-label" style="margin-top: 5px">分娩提醒天数:<%$count%></label>
+</div>
 		<div class="container" >
 		  <!--div class="weui-btn-area">
 		    <button class="weui-btn weui-btn_primary" onclick="addstation()">添加配种</button>
@@ -82,23 +56,25 @@
 			<tr>
 				<th>配种时间</th>
 				<th>SN</th>
+				<th>平均温度</th>
+				<th>当前温度</th>
 				<th>天数</th>
 				<th>农户</th>
-				<th>乡</th>
-				<th>配种员</th>
-				<th>配种员电话</th>
+				<th>村</th>
+				<th>推送状态</th>
 			</tr>
 		</thead>
 		  <tbody>
-			<%foreach $breedlist as $value%>
+			<%foreach $childlist as $value%>
 			<tr>
-				<td><%date('Y-m-d H:i:s',$value['breeding_time'])%></td>
+				<td><%date('Y-m-d',$value['alarm_time'])%></td>
 				<td><%$value['sn_code']%></td>
+				<td><%$value['temp_avg']%></td>
+				<td><%$value['temp_now']%></td>
 				<td><%$value['days']%></td>
-				<td><%$value['farmer']%></td>
-				<td><%$value['village']%></td>
-				<td><%$value['admin_id']%></td>
-				<td><%$value['breeding_tel']%></td>
+				<td><%$value['farmer_name']%></td>
+				<td><%$value['farmer_village']%></td>
+				<td><%$value['sms_state']%></td>
 				<!--td>
 					<a href="<%$smarty.const.__APP__%>/add/delstation?autoid=<%$value['autoid']%>">删除</a>
 				</td-->

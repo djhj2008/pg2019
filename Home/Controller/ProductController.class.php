@@ -1504,11 +1504,11 @@ class ProductController extends HomeController {
     	$wheredev['devid']=array('in',$devidlist);
 
     	$mydb='access_'.$psn;
-    	$accSelect1=M($mydb)->where(array('psn'=>$psn))->where('time<='.$first_time.' and time>='.$last_time)->where($wheredev)->field('devid,temp1,temp2,time')->order('time desc')->select();
+    	$accSelect1=M($mydb)->where(array('psn'=>$psn))->where('time<='.$first_time.' and time>='.$last_time)->where($wheredev)->field('devid,temp1,temp2,time,psnid,sign')->order('time desc')->select();
 			
 			for($i=30;$i<40;$i++){
     		$mydb='access1301_'.$i;
-    		$acc1301list1[$i]=M($mydb)->where(array('psn'=>$psn))->where('time<='.$first_time.' and time>='.$last_time)->where($wheredev)->field('devid,temp1,temp2,time')->order('time desc')->select();
+    		$acc1301list1[$i]=M($mydb)->where(array('psn'=>$psn))->where('time<='.$first_time.' and time>='.$last_time)->where($wheredev)->field('devid,temp1,temp2,time,psnid,sign')->order('time desc')->select();
     	}
     	
 			foreach($accSelect1 as $acc){
@@ -1521,7 +1521,7 @@ class ProductController extends HomeController {
 					$cdev[$devid][]=$acc;
 				}
     	}
-
+			$mode=M('device');
 			echo "START SCAN...";
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
@@ -1545,6 +1545,45 @@ class ProductController extends HomeController {
 						$acc_size=count($acc_list);
 					}
 				}
+				
+				$psn_flag=false;
+				$psn_now=0;
+				$sign=-200;
+				unset($psnid_count);
+				foreach($cdev[$devid] as $acc){
+					if($acc['psnid']==$psnid){
+						$psn_flag=true;
+						break;
+					}else{
+						if($sign < $acc['sign']){
+							$psn_now=$acc['psnid'];
+							$sign=$acc['sign'];
+						}
+						$psnid_count[$acc['psnid']]=$psnid_count[$acc['psnid']]+1;
+					}
+				}
+				
+				if($psn_flag==false){
+					if($psn_now>0){
+						if($sign>-100){
+							//dump($psn_now);
+						}else{
+							//dump($psnid_count);
+							$psn_now = array_search(max($psnid_count), $psnid_count);
+						}
+						if($dev['psn_now']!=$psn_now){
+							$ret = $mode->where(array('id'=>$dev['id']))->save(array('psn_now'=>$psn_now));
+							echo 'PSN NOW:';
+							dump($psn_now);
+						}
+					}
+				}else{
+						if($dev['psn_now']!=0){
+							$ret = $mode->where(array('id'=>$dev['id']))->save(array('psn_now'=>0));
+							echo 'PSN NOW:0';
+						}
+				}
+				
 				$low_count=0;
 				foreach($acc_list as $key=>$acc){
 					if($acc['temp1']<$low_temp&&$acc['temp2']<$low_temp){
@@ -1598,18 +1637,18 @@ class ProductController extends HomeController {
 				}
 			}
 			
-			$ret=M('device')->where(array('psn'=>$psn))->save(array('cow_state'=>0));
+			$ret=$mode->where(array('psn'=>$psn))->save(array('cow_state'=>0));
 			if($dev_pass){
 				$wherenpass['devid']=array('in',$dev_pass);
-				$ret=M('device')->where(array('psn'=>$psn))->where($wherenpass)->save(array('cow_state'=>2));
+				$ret=$mode->where(array('psn'=>$psn))->where($wherenpass)->save(array('cow_state'=>2));
 			}
 			if($dev_none){
 				$wherenone['devid']=array('in',$dev_none);
-				$ret=M('device')->where(array('psn'=>$psn))->where($wherenone)->save(array('cow_state'=>4));
+				$ret=$mode->where(array('psn'=>$psn))->where($wherenone)->save(array('cow_state'=>4));
 			}
 			if($dev_low){
 				$wherenlow['devid']=array('in',$dev_low);
-				$ret=M('device')->where(array('psn'=>$psn))->where($wherenlow)->save(array('cow_state'=>5));
+				$ret=$mode->where(array('psn'=>$psn))->where($wherenlow)->save(array('cow_state'=>5));
 			}
 			//if($dev_pass){
 			//	$wherepass['devid']=array('in',$dev_pass);
