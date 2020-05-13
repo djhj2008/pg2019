@@ -3,7 +3,7 @@ return array(
 	'SHOW_PAGE_TRACE' => false,
 	//设置请求的默认分组
     'MODULE_ALLOW_LIST' => array('Home','Admin'),//设置一个对比的分组列表    
-	'DEFAULT_MODULE'  => 'Home',//默认模块
+		'DEFAULT_MODULE'  => 'Home',//默认模块
     //启用路由功能
     'URL_ROUTER_ON' => true,
     'URL_MODEL'=>2,
@@ -42,5 +42,10 @@ return array(
     'DB_DEBUG'  			=>  TRUE, // 数据库调试模式 开启后可以记录SQL日志
     //'DB_FIELDS_CACHE'       =>  true,        // 启用字段缓存
     'DB_CHARSET'            =>  'utf8',      // 数据库编码默认采用utf8
-
+		'DB_CONFIG' => array('db_type' => 'mysql',
+													'db_user' => 'root',
+													'db_pwd'  => 'mj919',
+													'db_host' => 'localhost',
+													'db_port' => '3306',
+													'db_name' => 'cow'),
 );

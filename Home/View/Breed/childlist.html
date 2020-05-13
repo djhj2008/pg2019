@@ -61,7 +61,8 @@
 				<th>天数</th>
 				<th>农户</th>
 				<th>村</th>
-				<th>推送状态</th>
+				<!--th>推送状态</th-->
+				<th>操作</th>
 			</tr>
 		</thead>
 		  <tbody>
@@ -74,10 +75,18 @@
 				<td><%$value['days']%></td>
 				<td><%$value['farmer_name']%></td>
 				<td><%$value['farmer_village']%></td>
-				<td><%$value['sms_state']%></td>
-				<!--td>
-					<a href="<%$smarty.const.__APP__%>/add/delstation?autoid=<%$value['autoid']%>">删除</a>
-				</td-->
+				<!--td><%$value['sms_state']%></td-->
+				<td>
+					<%if $value['sms_state'] eq 1 %>
+					<a href="<%$smarty.const.__APP__%>/breed/child_alarm_sms_set?id=<%$value['id']%>">加入推送</a>
+					<%else if $value['sms_state'] eq 2 %>
+					等待推送
+					<%else if $value['sms_state'] eq 3 %>
+					已推送
+					<%else%>
+					监视中
+					<%/if%>
+				</td>
 			</tr>
 			<%/foreach%>
 		</tbody>
