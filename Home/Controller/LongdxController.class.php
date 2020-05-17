@@ -242,6 +242,8 @@ class LongdxController extends HomeController {
 				$tmp='14860115';
 			}else if($type==2){
 				$tmp='14854123';
+			}else if($type==11){
+				$tmp='14867046';
 			}else{
 				$tmp='14860115';
 			}
@@ -272,7 +274,9 @@ class LongdxController extends HomeController {
 				$smsmsg[]=$msg['name'];
 				$smsmsg[]=$ohter;
 				//dump($smsmsg);
-				//send163msgtmp($phone,$smsmsg,$tmp);
+				if($type==11){
+					send163msgtmp($phone,$smsmsg,$tmp);
+				}
 				//send163msg($phone,$smsmsg);
 			}
       $jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100,'msg_type'=>$type));

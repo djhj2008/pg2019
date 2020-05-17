@@ -48,15 +48,15 @@
        var temp1 = JSON.parse('<%$temp1Arr%>');
        var temp2 = JSON.parse('<%$temp2Arr%>');
        var min1 = Math.min.apply(null, temp1);
-       //var min2 = Math.min.apply(null, temp2);
+       var min2 = Math.min.apply(null, temp2);
 
        var cur_min;
-       if (min1<36){
-           cur_min = 20;
+       if (min2<36){
+           cur_min = 10;
        }else {
            cur_min = 36;
        }
-
+			  cur_min = Math.floor(min2/10)*10;
       	//console.log(date,temp1,temp2);
         var option = {
             tooltip: {

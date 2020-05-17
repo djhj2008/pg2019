@@ -39,13 +39,15 @@ class DjtestController extends Controller {
     	$cur_time = $now - $start_time;
     	//var_dump($cur_time);
     	$cur_time = (int)($cur_time/$delay)*$delay;
-    	$first_time = $cur_time-$delay+$start_time;
-    	$last_time = $cur_time-$delay+$start_time-($max_count-1)*3600;
+    	//$first_time = $cur_time-$delay+$start_time;
+    	//$last_time = $cur_time-$delay+$start_time-($max_count-1)*3600;
+    	$first_time = $start_time;
+    	$last_time = $start_time-($max_count-1)*3600;
     	
 			dump(date('Y-m-d H:i:s',$first_time));
 			dump(date('Y-m-d H:i:s',$last_time));
 			
-    	$devlist=M('device')->where(array('psn'=>$psn,'flag'=>1))->where('avg_temp=0 or avg_temp>36.5')->order('id asc')->select();
+    	$devlist=M('device')->where(array('psn'=>$psn,'flag'=>1))->where('avg_temp=0 or avg_temp>36.5 or avg_temp<35')->order('id asc')->select();
 
     	foreach($devlist as $dev){
     		$devidlist[]=$dev['devid'];	
@@ -156,13 +158,15 @@ class DjtestController extends Controller {
     	$cur_time = $now - $start_time;
     	//var_dump($cur_time);
     	$cur_time = (int)($cur_time/$delay)*$delay;
-    	$first_time = $cur_time-$delay+$start_time;
-    	$last_time = $cur_time-$delay+$start_time-($max_count-1)*3600;
+    	//$first_time = $cur_time-$delay+$start_time;
+    	//$last_time = $cur_time-$delay+$start_time-($max_count-1)*3600;
+    	$first_time = $start_time;
+    	$last_time = $start_time-($max_count-1)*3600;
     	
 			dump(date('Y-m-d H:i:s',$first_time));
 			dump(date('Y-m-d H:i:s',$last_time));
 			
-    	$devlist=M('device')->where(array('psn'=>$psn,'flag'=>1))->where('avg_temp=0 or avg_temp>36.5')->order('id asc')->select();
+    	$devlist=M('device')->where(array('psn'=>$psn,'flag'=>1))->where('avg_temp=0 or avg_temp>36.5 or avg_temp<35')->order('id asc')->select();
 
     	foreach($devlist as $dev){
     		$devidlist[]=$dev['devid'];

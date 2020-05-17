@@ -54,10 +54,10 @@ class BreedController extends Controller {
     }
     
 	  public function breedlist(){
-	  	$alarm_b=$_POST['count'];
-
+	  	$mode=M('','','DB_CONFIG');
 			if($alarm_b==NULL){
-				$alarm_b=20;
+				$alarm_info=$mode->table('alarm_config')->where(array('type'=>'breeding'))->find();
+				$alarm_b=$alarm_info['days_min'];
 			}
 			
 		  $now = time();
@@ -65,7 +65,6 @@ class BreedController extends Controller {
 			$end_time=$v;
 			$wheretime='bs.breeding_time <='.$end_time;
 
-			$mode=M('','','DB_CONFIG');
 			$breedlist = $mode->table(array('breedings'=>'bs','cows'=>'cs'))
 									->field('cs.sn_code,cs.farmer_id,cs.village_id,bs.breeding_time,bs.admin_id,bs.breeding_tel')
 									->where('bs.cows_id = cs.id and '.$wheretime)
@@ -80,12 +79,13 @@ class BreedController extends Controller {
 			$farmers=array_unique($farmers);
 			$wherefarmers['fs.id']=array('in',$farmers);
 			$farmerlist = $mode->table(array('farmers'=>'fs'))
-									->field('fs.id as id,fs.name as name ,fs.village_id as village_id')
+									->field('fs.id as id,fs.name as name,fs.phone as phone,fs.village_id as village_id')
 									->where($wherefarmers)
 									->select();
 						
 			foreach($farmerlist as $farmer){
 				$farmer_sel[$farmer['id']]=$farmer['name'];
+				$phone_sel[$farmer['id']]=$farmer['phone'];
 				$villages[]=$farmer['village_id'];
 			}
 			
@@ -104,6 +104,7 @@ class BreedController extends Controller {
 			foreach($breedlist as $key=>$breed){
 				$breedlist[$key]['farmer']=$farmer_sel[$breed['farmer_id']];
 				$breedlist[$key]['village']=$village_sel[$breed['village_id']];
+				$breedlist[$key]['phone']=$phone_sel[$breed['farmer_id']];
 				$breedlist[$key]['days']=($today-$breed['breeding_time'])/86400;
 			}
 			//dump($breedlist);
@@ -155,7 +156,7 @@ class BreedController extends Controller {
 		  $start_time=$v-$alarm_b_max*86400;
 			$end_time=$v-$alarm_b_min*86400;
 			
-			$wheretime='UNIX_TIMESTAMP(cbs.time) >='.$start_time.' and UNIX_TIMESTAMP(cbs.time) <='.$end_time;
+			$wheretime='UNIX_TIMESTAMP(cbs.time) <='.$end_time;
 					
 			$childlist = $mode->table(array('childbirths'=>'cbs','cows'=>'cs'))
 									->field('cs.sn_code,cs.farmer_id,cs.village_id,cbs.time,cbs.num,UNIX_TIMESTAMP(time) as addtime')
@@ -164,6 +165,18 @@ class BreedController extends Controller {
 									->order('cbs.time desc')
 									->select();
 
+			foreach($alarm_list as $alarm){
+				if($v-$alarm['alarm_time'] >$alarm_b_max*86400){
+					echo 'expire alarm:'.$alarm['sn_code'];
+					$alarm_expire[]= $alarm['id'];
+				}
+			}
+			
+			if($alarm_expire){
+				$whereexpire['id']=array('in',$alarm_expire);
+				$ret=$mode->table('alarm_dev')->where($whereexpire)->save(array('expire_flag'=>1));
+			}
+			
 			if($childlist){
 					foreach($childlist as $key=>$child){
 						$farmers[]=$child['farmer_id'];
@@ -198,19 +211,16 @@ class BreedController extends Controller {
 						$alarm_find=false;
 						//dump($child);
 						foreach($alarm_list as $alarm){
-							//dump($alarm);
-							if($alarm['alarm_time']-$v >$alarm_b_max*86400){
-								$alarm_del[]=$alarm['id'];
-								echo 'del alarm:';
-								dump($alarm);
-							}
-							if($alarm['sn_code']==$child['sn_code']
-								&&$alarm['alarm_time']==strtotime($child['time'])
-								&&$alarm['type']==$alarm_info['id']
-							){
-								//dump($child);
-								$alarm_find=true;
-								break;
+							if($alarm['sn_code']==$child['sn_code']){
+								if($alarm['alarm_time']==strtotime($child['time'])){
+									//dump($child);
+									$alarm_find=true;
+									break;
+								}else{
+									echo 'del alarm:'.$alarm;
+									$alarm_del[]=$alarm['id'];
+									break;
+								}
 							}
 						}
 						if($alarm_find==false){
@@ -234,7 +244,7 @@ class BreedController extends Controller {
 					}
 					if($alarm_del){
 						$wheredel['id']=array('in',$alarm_del);
-						$ret=$mode->table('alarm_dev')->where($wheredel)->del();
+						$ret=$mode->table('alarm_dev')->where($wheredel)->delete();
 					}
 			}
 
@@ -276,9 +286,9 @@ class BreedController extends Controller {
 			foreach($childlist as $key=>$child){
 					$auto_id=$child['id'];
 					$sn=$child['sn_code'];
-					if($child['temp_time']-$start_time>0){
-						continue;
-					}
+					//if($child['temp_time']>$v){
+					//	continue;
+					//}
 					$breed_find=false;
 					foreach($breedlist as $breed){
 						if($breed['sn_code']==$sn){
@@ -327,6 +337,7 @@ class BreedController extends Controller {
 						$v=0;
 						$temp_time=0;
 						$cur_count=0;
+
 						foreach($acc_list as $acc){
 							$a=array($acc['temp1'],$acc['temp2']);
 							$t=max($a);
@@ -334,7 +345,6 @@ class BreedController extends Controller {
 								$v=$t;
 								$temp_time= $acc['time'];
 							}
-							//dump($t);
 							$sum_temp+=$t;
 							$cur_count++;
 						}
@@ -361,7 +371,7 @@ class BreedController extends Controller {
 			}
 			if($alarm_del){
 				$wheredel['id']=array('in',$alarm_del);
-				$ret=$mode->table('alarm_dev')->where($wheredel)->del();
+				$ret=$mode->table('alarm_dev')->where($wheredel)->delete();
 			}
 
 		}
@@ -388,11 +398,11 @@ class BreedController extends Controller {
 					$smsmsg[]=$other;
 					dump($smsmsg);
 					if($child['alarm_type']==1){
-						$tmp='14854123';
+						$tmp='14860115';
 					}else if($child['alarm_type']==2){
-						$tmp='14854123';
+						$tmp='14860115';
 					}else{
-						$tmp='14854123';
+						$tmp='14860115';
 					}   
 					//send163msgtmp($phone,$smsmsg,$tmp);
 					$ret=true;
@@ -408,9 +418,134 @@ class BreedController extends Controller {
 	  public function child_alarm_sms_set(){
 	  	$mode=M('','','DB_CONFIG');
 	  	$id=$_GET['id'];
-			$childlist = $mode->table('alarm_dev')->where(array('id'=>$id))->save(array('sms_state'=>2));
+	  	$type=$_GET['type'];
+			$childlist = $mode->table('alarm_dev')->where(array('id'=>$id))->save(array('sms_state'=>$type));
 			$this->redirect('/breed/childlist');
 			exit;
 		}
 		
+		public function querysntemp(){
+			$sn=$_GET['sn'];
+			if($sn){
+				$sn=str_pad($sn,9,'0',STR_PAD_LEFT);
+	      $psn=(int)substr($sn,0,5);
+	      $devid=(int)substr($sn,5,4);
+	      $this ->redirect('/product/querytemp',array('psn'=>$psn,'devid'=>$devid),0,'');
+				exit;
+			}
+		}
+		
+		public function querymonthtemp(){
+			$sn=$_GET['sn'];
+			$estrus=$_GET['estrus'];
+			if($sn){
+				$sn=str_pad($sn,9,'0',STR_PAD_LEFT);
+	      $psn=(int)substr($sn,0,5);
+	      $devid=(int)substr($sn,5,4);
+	      $this ->redirect('/collect/monthValue',array('psnid'=>$psn,'devid'=>$devid,'estrus'=>$estrus),0,'');
+				exit;
+			}
+		}
+		
+	  public function getstationstate(){
+	  	
+			$bdevice = M('bdevice')->field('autoid,psn,id,uptime,version')->where(array('switch'=>1))->select();
+			$count = 12;
+			$delay = 3600;
+    	$now = time();
+			$start_time = strtotime(date('Y-m-d',$now));
+
+    	$cur_time = $now - $start_time;
+    	$cur_time = (int)($cur_time/$delay)*$delay;
+    	
+    	$first_time = $cur_time+$start_time;
+    	$end_time = $cur_time+$start_time-$count*$delay;	
+    	$timeall[]=$end_time;
+    	$timeall[]=$first_time;
+    	
+    	dump(date('Y-m-d H:i:s',$first_time));
+    	dump(date('Y-m-d H:i:s',$end_time));
+    	
+    	$brssi = M('brssi')->where(array('station'=>1278))->where('time>='.$end_time.' and time<='.$first_time)->select();
+    	
+    	foreach($bdevice as $s){
+    		$psn=$s['psn'];
+    		$sid=$s['id'];
+    		$uptime=(int)substr($s['uptime'],0,2);
+    		$times=$count/$uptime;
+    		$v=0;
+				foreach($brssi as $r){
+					if($r['psnid']==$psn&&$r['bsn']==$sid){
+						$v++;
+					}
+				}
+				$s['times']=$v;
+    		if($v>$times){
+    			$bdev_assert[]=$s['autoid'];
+    			unset($phone);
+    			unset($smsmsg);
+					$phone[]='18995411166';
+					$phone[]='13311152676';
+					$phone[]='15801248751';
+					$sn=str_pad($s['psn'],5,'0',STR_PAD_LEFT).str_pad($s['id'],4,'0',STR_PAD_LEFT);
+					$smsmsg[]=$sn;
+		     	$other_head1='基站异常,重启';
+		     	$other_foot1='次.';
+		     	$other_head1=iconv("GBK", "UTF-8", $other_head1); 
+		     	$other_foot1=iconv("GBK", "UTF-8", $other_foot1);
+		     	$smsmsg[]=$other_head1;
+					$smsmsg[]=''.($v-$times);
+					$smsmsg[]=$other_foot1;
+					$tmp='14807416';
+					if($v-$times>3){
+						$ret=send163msgtmp($phone,$smsmsg,$tmp);
+					}
+					dump($smsmsg);
+    		}else if($v< $times){
+    			if($v==0){
+    				$bdev_lost[]=$s['autoid'];
+	    			unset($phone);
+	    			unset($smsmsg);
+						$phone[]='18995411166';
+						$phone[]='13311152676';
+						$phone[]='15801248751';
+						$sn=str_pad($s['psn'],5,'0',STR_PAD_LEFT).str_pad($s['id'],4,'0',STR_PAD_LEFT);
+						$smsmsg[]=$sn;
+			     	$other_head1='基站异常,连续';
+			     	$other_foot1='小时未上报.';
+			     	$other_head1=iconv("GBK", "UTF-8", $other_head1); 
+			     	$other_foot1=iconv("GBK", "UTF-8", $other_foot1);
+			     	$smsmsg[]=$other_head1;
+						$smsmsg[]=''.$count*$uptime;
+						$smsmsg[]=$other_foot1;
+						$tmp='14807416';
+						$ret=send163msgtmp($phone,$smsmsg,$tmp);
+						dump($smsmsg);
+	    		}else{
+	    			$bdev_err[]=$s['autoid'];
+	    		}
+    		}else{
+    			$bdev_normal[]=$s['autoid'];
+    		}
+    	}
+    	echo 'LOST:';
+    	dump($bdev_lost);
+    	if($bdev_lost){
+	    	$wherelost['autoid']=array('in',$bdev_lost);
+	    	$ret=M('bdevice')->where($wherelost)->save(array('state'=>2));
+    	}
+    	echo 'ASSERT:';
+    	dump($bdev_assert);
+    	if($bdev_assert){
+	    	$whereassert['autoid']=array('in',$bdev_assert);
+	    	$ret=M('bdevice')->where($whereassert)->save(array('state'=>3));
+    	}
+    	echo 'Normal:';
+    	dump($bdev_normal);
+    	if($bdev_normal){
+	    	$bdev_normal['autoid']=array('in',$bdev_normal);
+	    	$ret=M('bdevice')->where($bdev_normal)->save(array('state'=>1));
+    	}
+			exit;
+		}
 }
