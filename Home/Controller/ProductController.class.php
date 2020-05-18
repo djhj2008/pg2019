@@ -1345,11 +1345,23 @@ class ProductController extends HomeController {
 	public function querysntemp(){
 		$sn=$_POST['sn'];
 		if($sn){
-			$sn=str_pad($sn,9,'0',STR_PAD_LEFT);
-      $psn=(int)substr($sn,0,5);
-      $devid=(int)substr($sn,5,4);
-      $this ->redirect('/product/querytemp',array('psn'=>$psn,'devid'=>$devid),0,'');
-			exit;
+			$rid=(int)$sn;
+			$dev=M('device')->where(array('flag'=>1,'rid'=>$rid))->order('time desc')->find();
+			if($dev){
+	      $psn=$dev['psn'];
+	      $devid=$dev['devid'];
+	      $this ->redirect('/product/querytemp',array('psn'=>$psn,'devid'=>$devid),0,'');
+				exit;
+			}
+		}else{
+			$rid=(int)$_GET['sn'];
+			$dev=M('device')->where(array('flag'=>1,'rid'=>$rid))->order('time desc')->find();
+			if($dev){
+	      $psn=$dev['psn'];
+	      $devid=$dev['devid'];
+	      $this ->redirect('/product/querytemp',array('psn'=>$psn,'devid'=>$devid),0,'');
+				exit;
+			}
 		}
 		$this->display();
 	}
@@ -1358,7 +1370,8 @@ class ProductController extends HomeController {
 		//$vid=$_GET['village_id'];
 		//dump($cows);
 		//flag 1:active, 2:change sn,3:die or lose or sale.
-		$cows=M('cows')->order('sn_code asc')->select();
+		$mode=M('','','DB_CONFIG');
+		$cows=$mode->table('cows')->order('sn_code asc')->select();
 		foreach($cows as $key=>$cow){
 			$sn=$cow['sn_code'];
 			//$sn=str_pad($sn,9,'0',STR_PAD_LEFT);
@@ -1410,14 +1423,15 @@ class ProductController extends HomeController {
 	}
 
 	public function villagelist(){
-		$villagelist=M('subareas')->where(array('type'=>'village_id'))->select();
+		$mode=M('','','DB_CONFIG');
+		$villagelist=$mode->table('subareas')->where(array('type'=>'village_id'))->select();
 		//dump($villagelist);
 		//exit;
 		foreach($villagelist as $key=>$v){
-			$nc=M('cows')->where(array('village_id'=>$v['id']))->count();
-			$hc=M('cows')->where(array('village_id'=>$v['id'],'health_state'=>3))->count();
-			$lc=M('cows')->where(array('village_id'=>$v['id'],'survival_state'=>3))->count();
-			$sc=M('cows')->where(array('village_id'=>$v['id'],'survival_state'=>4))->count();
+			$nc=$mode->table('cows')->where(array('village_id'=>$v['id']))->count();
+			$hc=$mode->table('cows')->where(array('village_id'=>$v['id'],'health_state'=>3))->count();
+			$lc=$mode->table('cows')->where(array('village_id'=>$v['id'],'survival_state'=>3))->count();
+			$sc=$mode->table('cows')->where(array('village_id'=>$v['id'],'survival_state'=>4))->count();
 			$villagelist[$key]['count']=$nc;
 			$villagelist[$key]['hcount']=$hc;
 			$villagelist[$key]['lcount']=$lc;
@@ -1431,18 +1445,13 @@ class ProductController extends HomeController {
 	public function cowlist(){
 		$vid=$_GET['village_id'];
 		//dump($cows);
-		$cows=M('cows')->where(array('village_id'=>$vid))->select();
+		$mode=M('','','DB_CONFIG');
+		$cows=$mode->table('cows')->where(array('village_id'=>$vid))->select();
 		//dump($cows);
 		//exit;
-		$farmers=M('farmers')->where(array('village_id'=>$vid))->select();
+		$farmers=$mode->table('farmers')->where(array('village_id'=>$vid))->select();
 		foreach($cows as $key=>$cow){
-			$sn=$cow['sn_code'];
-			$sn=str_pad($sn,9,'0',STR_PAD_LEFT);
-      $psn=(int)substr($sn,0,5);
-      $devid=(int)substr($sn,5,4);
-      $cows[$key]['psn']=$psn;
-      $cows[$key]['devid']=$devid;
-      
+
 			foreach($farmers as $farmer){
 				if($farmer['id']==$cow['farmer_id']){
 					$cows[$key]['farmer']=$farmer['name'];
@@ -1668,13 +1677,14 @@ class ProductController extends HomeController {
 	}
 
 	public function scansync(){
+		
+		exit;
 		//$cows=M('cows')->order('sn_code asc')->select();
 		$devnone=M('device')->where('psnid>=30 and psnid<=39')->where(array('cow_state'=>4))->select();
 		$devnlow=M('device')->where('psnid>=30 and psnid<=39')->where(array('cow_state'=>5))->select();
 		//$cowslist=M('cows')->select();
 		$ret=M('cows')->where(array('survival_state'=>3))->save(array('survival_state'=>1));
 		$ret=M('cows')->where('health_state>1')->save(array('health_state'=>1));
-		dump($ret);
 		
 		foreach($devnone as $dev){
 			$cow['sn']=str_pad($dev['rid'],9,'0',STR_PAD_LEFT);
@@ -1703,13 +1713,13 @@ class ProductController extends HomeController {
 			dump($cow_none);
 			if($cow_none){
 				$wherenonecow['sn_code']=array('in',$cow_none);
-				$ret=M('cows')->where($wherenonecow)->save(array('survival_state'=>3));
+				//$ret=M('cows')->where($wherenonecow)->save(array('survival_state'=>3));
 				dump($ret);
 			}
 		}
 		if($sn_low){
 			$wherelow['sn_code']=array('in',$sn_low);
-			$cowslist=M('cows')->where($wherelow)->select();
+			//$cowslist=M('cows')->where($wherelow)->select();
 			//echo 'cow low:';
 			//dump($cowslist);
 			foreach($cowslist as $cow){
@@ -1721,7 +1731,7 @@ class ProductController extends HomeController {
 			dump($cow_low);
 			if($cow_low){
 				$wherelowcow['sn_code']=array('in',$cow_low);
-				$ret=M('cows')->where($wherelowcow)->save(array('health_state'=>3));
+				//$ret=M('cows')->where($wherelowcow)->save(array('health_state'=>3));
 				dump($ret);
 			}
 		}
