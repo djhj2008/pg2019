@@ -71,7 +71,7 @@ class LongdxController extends HomeController {
     	if(!$token||$token< $now-60*5||$token>$now){
     		$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
     		echo json_encode($jarr);
-    		//exit;
+    		exit;
     	}
       $sn=$_POST['sn'];
       if(empty($sn)){
@@ -79,11 +79,10 @@ class LongdxController extends HomeController {
       }
       $rid=(int)$sn;
       $sn=str_pad($sn,9,'0',STR_PAD_LEFT);
-      $psn=(int)substr($sn,0,5);
-      $devid=(int)substr($sn,5,4);
-			//dump($devid);
-			//dump($psn);
-			//dump($rid);
+			$dev = M('device')->field('psn,devid,psnid,rid,avg_temp')->where(array('rid'=>$rid,'flag'=>1))->order('time desc')->find();
+			$psn=$dev['psn'];
+			$devid=$dev['devid'];
+			
 			$psnfind = M('psn')->where(array('id'=>$psn))->find();
 			if(empty($psnfind)){
 				echo "PSN NULL.";
@@ -97,9 +96,6 @@ class LongdxController extends HomeController {
 			$temp_value=$psnfind['check_value'];
 			//($temp_value);
 			
-			$dev = M('device')->field('psn,devid,psnid,rid,avg_temp')->where(array('rid'=>$rid))->order('time desc')->find();
-			$psn=$dev['psn'];
-			$devid=$dev['devid'];
 			//dump($dev);
     	$avg=(float)$dev['avg_temp'];
     	//dump($avg);
