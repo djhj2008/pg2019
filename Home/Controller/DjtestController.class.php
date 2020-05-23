@@ -490,5 +490,58 @@ class DjtestController extends Controller {
 		exit;
 	}
 	
+	public function testjson()
+	{
+			$ret['cmd']="master";
+			$ret['time']="2014-07-02 22:05:00";
+			
+			$interval[]=4;
+			$interval[]=0;
+			$interval[]=1;
+			$ret['interval']=$interval;
+			
+			$ret['freq']=1;
+			$ret['log']=1;
+			$ret['rate_flag']=1;//ÌøÆµ¿ª¹Ø
+			$ret['sens']=100;
+			
+			$station['flag']=1;
+			$station['new']="000300001";
+			$station['freq']=1;
+			$ret['station']=$station;
+			
+			$url['flag']=1;
+			$url['url']="iot.xunrun.com.cn";
+			$ret['url']=$url;
+			
+			$step['count']=5;
+			for($i=0;$i<5;$i++){
+				$dev['sn']=300000+$i;
+				$dev['flag']=0;
+				$row[]=$dev;
+			}
+			$step['data']=$row;
+			$ret['step']=$step;
+			
+			$recover['count']=40;
+			for($i=0;$i<40;$i++){
+				$stop_list[]=300000+$i;
+			}
+			$recover['dev']=$stop_list;
+			$ret['recover']=$recover;
+			
+			
+			$label = json_encode($ret);
+	    echo $label;
+	    exit;
+	}
 	
+	public function testjsondecode(){
+		$json=http("http://iot.xunrun.com.cn/pg/djtest/testjson");
+		$ret= json_decode($json,true);
+		dump($ret['step']['data']);
+		dump($ret['recover']['dev']);
+		
+		exit;
+	}
 }

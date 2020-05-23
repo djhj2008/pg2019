@@ -156,25 +156,30 @@ class BreedController extends Controller {
 		  $start_time=$v-$alarm_b_max*86400;
 			$end_time=$v-$alarm_b_min*86400;
 			
-			$wheretime='UNIX_TIMESTAMP(cbs.time) <='.$end_time;
+			//$wheretime='UNIX_TIMESTAMP(cbs.time) <='.$end_time;
 					
 			$childlist = $mode->table(array('childbirths'=>'cbs','cows'=>'cs'))
 									->field('cs.sn_code,cs.farmer_id,cs.village_id,cbs.time,cbs.num,UNIX_TIMESTAMP(time) as addtime')
-									->where('cbs.cow_id=cs.id and '.$wheretime)
+									->where('cbs.cow_id=cs.id')
 									->group('cs.sn_code')
 									->order('cbs.time desc')
 									->select();
 
 			foreach($alarm_list as $alarm){
 				if($v-$alarm['alarm_time'] >$alarm_b_max*86400){
-					echo 'expire alarm:'.$alarm['sn_code'];
-					$alarm_expire[]= $alarm['id'];
+					$flag=2;					
+				}else if($v-$alarm['alarm_time'] < $alarm_b_min*86400){
+					$flag=0;
+				}else{
+					$flag=1;
 				}
-			}
-			
-			if($alarm_expire){
-				$whereexpire['id']=array('in',$alarm_expire);
-				$ret=$mode->table('alarm_dev')->where($whereexpire)->save(array('expire_flag'=>1));
+				if($alarm['expire_flag']!=$flag){
+					echo 'expire alarm:';
+					dump($alarm['sn_code']);
+					dump($flag);
+					dump($alarm['expire_flag']);
+					$ret=$mode->table('alarm_dev')->where(array('id'=>$alarm['id']))->save(array('expire_flag'=>$flag));
+				}
 			}
 			
 			if($childlist){
@@ -206,7 +211,7 @@ class BreedController extends Controller {
 						$village_sel[$village['id']]=$village['name'];
 					}
 
-
+					
 					foreach($childlist as $key=>$child){
 						$alarm_find=false;
 						//dump($child);
@@ -215,15 +220,26 @@ class BreedController extends Controller {
 								if($alarm['alarm_time']==strtotime($child['time'])){
 									//dump($child);
 									$alarm_find=true;
-									break;
 								}else{
-									echo 'del alarm:'.$alarm;
-									$alarm_del[]=$alarm['id'];
-									break;
+									if($alarm['alarm_time']< strtotime($child['time'])){
+										echo 'del alarm:'.$alarm;
+										$alarm_del[]=$alarm['id'];
+									}else{
+										$alarm_find=true;
+									}
 								}
+								break;
 							}
 						}
+
 						if($alarm_find==false){
+							if($v-$child['alarm_time'] >$alarm_b_max*86400){
+								$flag=2;					
+							}else if($v-$child['alarm_time'] < $alarm_b_min*86400){
+								$flag=0;
+							}else{
+								$flag=1;
+							}					
 							$alarm_dev=array(
 								'sn_code'=>$child['sn_code'],
 								'type'=>$alarm_info['id'],
@@ -232,7 +248,8 @@ class BreedController extends Controller {
 								'farmer_id'=>$child['farmer_id'],
 								'farmer_name'=>$farmer_sel[$child['farmer_id']],
 								'farmer_phone'=>$phone_sel[$child['farmer_id']],
-								'farmer_village'=>$village_sel[$child['village_id']]
+								'farmer_village'=>$village_sel[$child['village_id']],
+								'expire_flag'=>$flag,
 							);
 							$alarm_dev_list[]=$alarm_dev;
 						}
@@ -263,7 +280,7 @@ class BreedController extends Controller {
 			$alarm_b_min=$alarm_info['days_min'];
 			$alarm_b_max=$alarm_info['days_max'];
 			
-			$childlist = $mode->table('alarm_dev')->where(array('sms_state'=>0))->select();
+			$childlist = $mode->table('alarm_dev')->where(array('sms_state'=>0,'expire_flag'=>1))->select();
 			
 		  $now = time();
 		  $v = strtotime(date('Y-m-d',$now));
@@ -410,9 +427,6 @@ class BreedController extends Controller {
 						$ret=$mode->table('alarm_dev')->where(array('id'=>$auto_id))->save(array('sms_state'=>3));
 					}
 			}
-
-
-
 		}
 		
 	  public function child_alarm_sms_set(){
