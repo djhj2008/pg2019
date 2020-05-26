@@ -957,12 +957,12 @@ class DatapushController extends Controller {
 	        $brssisnstr = substr($brssistr, $i * ($BRSSI_SN_LEN + $BRSSI_SIGN_LEN) * 2, $BRSSI_SN_LEN * 2);
 
 	        $brssisn[$i] = hexdec($brssisnstr);
-	        if ($brssisn > 0) {
+	        if ($brssisn[$i] > 0) {
 	            $brssisignstr = substr($brssistr, $i * ($BRSSI_SN_LEN + $BRSSI_SIGN_LEN) * 2 + $BRSSI_SN_LEN * 2, $BRSSI_SIGN_LEN * 2);
 	            $brssisign = hexdec($brssisignstr);
 
-	            if (($brssisign & 0x08) == 0x08) {
-	                $bsign[$i] = 0 - ($brssisign & 0x07);
+	            if (($brssisign & 0x80) == 0x80) {
+	                $bsign[$i] = 0 - ($brssisign & 0x7f);
 	            } else {
 	                $bsign[$i] = $brssisign;
 	            }
@@ -1789,12 +1789,12 @@ class DatapushController extends Controller {
 	        $brssisnstr = substr($brssistr, $i * ($BRSSI_SN_LEN + $BRSSI_SIGN_LEN) * 2, $BRSSI_SN_LEN * 2);
 
 	        $brssisn[$i] = hexdec($brssisnstr);
-	        if ($brssisn > 0) {
+	        if ($brssisn[$i] > 0) {
 	            $brssisignstr = substr($brssistr, $i * ($BRSSI_SN_LEN + $BRSSI_SIGN_LEN) * 2 + $BRSSI_SN_LEN * 2, $BRSSI_SIGN_LEN * 2);
 	            $brssisign = hexdec($brssisignstr);
 
-	            if (($brssisign & 0x08) == 0x08) {
-	                $bsign[$i] = 0 - ($brssisign & 0x07);
+	            if (($brssisign & 0x80) == 0x80) {
+	                $bsign[$i] = 0 - ($brssisign & 0x7f);
 	            } else {
 	                $bsign[$i] = $brssisign;
 	            }

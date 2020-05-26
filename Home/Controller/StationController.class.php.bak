@@ -12,7 +12,7 @@ class StationController extends Controller {
 		ini_set("memory_limit","1024M");
 		$psnid=$_GET['psnid'];
 
-		$check_count=24;
+		$check_count=24*7;
 		//for($psnid=30;$psnid<40;$psnid++)
 		if($psnid)
 		{
