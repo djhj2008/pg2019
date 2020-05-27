@@ -12,7 +12,7 @@ class StationController extends Controller {
 		ini_set("memory_limit","1024M");
 		$psnid=$_GET['psnid'];
 
-		$check_count=24;
+		$check_count=24*7;
 		//for($psnid=30;$psnid<40;$psnid++)
 		if($psnid)
 		{
@@ -171,21 +171,30 @@ class StationController extends Controller {
 			$psn=(int)($key/10000);
 			$right_psnid=$psn;
 			//dump($devs);
+			unset($tmp);
+			unset($tmp2);
+			$find_local=false;
 			foreach($devs as $dev){
 				$sid=$dev['sid'];
 				$count=$dev['count'];
 				$psnid=(int)($sid/10000);
-				if($count>=12&&$psn==$psnid){
-					$right_psnid=$psn;
-					break;
+				if($count>=80&&$psn==$psnid){
+					//$right_psnid=$sid;
+					$find_local=true;
+					$tmp2=$dev;
+					//dump('local rid:'.$key.' psn_now:'.$sid.' sign:'.$dev['sign'].' count:'.$dev['count']);
+					//dump($dev);
+					//break;
 				}
 				if($count>$max_count){
 					$max_count=$count;
 					$right_psnid=$psnid;
+					$tmp=$dev;
 				}else if($count==$max_count){
 					if($psn==$psnid){
 						$max_count=$count;
 						$right_psnid=$psnid;
+						$tmp=$dev;
 					}
 				}
 			}
@@ -194,7 +203,10 @@ class StationController extends Controller {
 				$rid=$key;
 				$psn_now_list[$rid]=$psn_now;
 				$rid_list[]=$rid;
-				//dump('rid:'.$key.' psn_now:'.$right_psnid);
+				if($find_local==true&&$tmp['count']-$tmp1['count']>20){
+					dump('local rid:'.$key.' psn_now:'.$tmp2['sid'].' sign:'.$tmp2['sign'].' count:'.$tmp2['count']);
+					dump('well rid:'.$key.' psn_now:'.$tmp['sid'].' sign:'.$tmp['sign'].' count:'.$tmp['count']);
+				}
 			}
 		}
 		
@@ -207,10 +219,10 @@ class StationController extends Controller {
 			}
 			$rid=$dev['rid'];
 			if($dev['psn_now']==0){
-				dump('psn null:'.$rid.' new:'.$psn_now_list[$rid]);
+				//dump('psn null:'.$rid.' new:'.$psn_now_list[$rid]);
 				//$ret=M('device')->where(array('id'=>$dev['id']))->save(array('psn_now'=>$psn_now_list[$rid]));
 			}else if($psn_now_list[$rid]!=$dev['psn_now']){
-				dump('psn pre:'.$dev['psn_now'].' new:'.$psn_now_list[$rid]);
+				//dump('psn pre:'.$dev['psn_now'].' new:'.$psn_now_list[$rid]);
 				//$ret=M('device')->where(array('id'=>$dev['id']))->save(array('psn_now'=>$psn_now_list[$rid]));
 			}			
 		}
@@ -443,7 +455,7 @@ class StationController extends Controller {
 				for($i=30;$i<40;$i++){
 					if($i!=$psn){
 		    		$mydb='access1301_'.$i;
-		    		$acc1301list[$i]=M($mydb)->where(array('psn'=>$psn))->where('time<='.$start_time.' and time>='.$end_time)->field('psn,devid,sid,psnid,time,sign,temp1')->select();
+		    		$acc1301list[$i]=M($mydb)->where(array('psn'=>$psn,'devid'=>$devid))->where('time<='.$start_time.' and time>='.$end_time)->field('psn,devid,sid,psnid,time,sign,temp1')->select();
 					}
 	    	}				
 				
@@ -512,5 +524,252 @@ class StationController extends Controller {
 			dump($travel);
 		}
 		echo 'finish.';
+	}
+	
+	
+	public function scandsalesandead(){
+		set_time_limit(1200);
+		$mode=M('','','DB_CONFIG');
+		//$survival_state=3;
+		$health_state=3;
+		
+		$delay=3600*2;
+  	$now = time();
+		$start_time = strtotime(date('Y-m-d',$now));
+  	$cur_time = $now - $start_time;
+  	$cur_time = (int)($cur_time/$delay)*$delay;
+  	$first_time = $cur_time-$delay+$start_time;
+  	$time_str=date('Y-m-d H:i:s',$first_time);
+    	
+		$cow_list=$mode->table('cows')->where(array('health_state'=>$health_state))->select();
+		$birth_list=$mode->table('births')->where(array('cow_type'=>'health_state','cow_code'=>$health_state,'time'=>$time_str))->select();
+		foreach($birth_list as $b){
+			$cow_id=$b['cow_id'];
+			$b_list[$cow_id]=$b[time];
+		}
+		dump($b_list);
+		foreach($cow_list as $cow){
+			$cow_sn=(int)$cow['sn_code'];
+			$cow_id=$cow['id'];
+			dump($cow_id);
+			dump($cow_sn);
+			if(!isset($b_list[$cow_id])){
+				continue;
+			}
+			echo 'enter:';
+			$tmp=NULL;
+			$dev=M('device')->where(array('rid'=>$cow_sn))->find();
+			unset($acclist);
+			unset($acc1301list);
+			unset($cdev);
+			unset($birth);
+			if($dev){
+				//dump($dev);
+				$psn=$dev['psn'];
+				$devid=$dev['devid'];
+				$mydb='access_'.$psn;
+				
+				$user=M($mydb);
+				$acclist=$user->where(array('psn'=>$psn,'devid'=>$devid))->where('temp1>32')->order('time desc')->limit(0,1)->select();
+				
+				dump($user->getlastSql());
+				for($i=30;$i<40;$i++){
+					if($i!=$psn){
+		    		$mydb='access1301_'.$i;
+		    		$acc1301list[$i]=M($mydb)->where(array('psn'=>$psn,'devid'=>$devid))->where('temp1>32')->order('time desc')->limit(0,1)->select();
+					}
+	    	}				
+				
+				foreach($acclist as $acc){
+					$devid=$acc['devid'];
+					if($acc['psn']==$psn){
+						$cdev[]=$acc;
+					}
+				}
+				
+				for($i=30;$i<40;$i++){
+					foreach($acc1301list[$i] as $acc){
+						$devid=$acc['devid'];
+						if($acc['psn']==$psn){
+							$cdev[]=$acc;
+						}
+					}
+		  	}
+		  	//dump($cdev);
+		  	$last_time=0;
+		  	unset($tmp);
+				foreach($cdev as $acc){
+					//dump(date('Y-m-d H:i:s',$acc['time']));
+					if($last_time<$acc['time']){
+						$last_time=$acc['time'];
+						$tmp=$acc;
+					}
+				}
+				echo 'last:';
+				dump($tmp);
+			}
+			$other_head1='系统更新';
+			$other_head1=iconv("GBK", "UTF-8", $other_head1); 
+			$birth['cow_id']=$cow['id'];
+			$birth['cow_type']='health_state';
+			$birth['cow_code']=$health_state;
+			$birth['time']=date('Y-m-d H:i:s',$tmp['time']);
+			$birth['created_at']=date('Y-m-d H:i:s',time());
+			$birth['updated_at']=date('Y-m-d H:i:s',time());
+			$birth['comment']=$other_head1;
+			$birth['deliver_type']=3;
+			$has=$mode->table('births')->where(array('cow_id'=>$cow['id'],'cow_type'=>'health_state','cow_code'=>$health_state))->order('time desc')->find();
+			if($has){
+				//dump('has');
+				dump($has);
+				$mode->table('births')->where(array('id'=>$has['id']))->save(array('time'=>$birth['time']));
+			}else{
+				//$mode->table('births')->add($birth);
+				dump($birth);
+			}
+		}
+		
+	}
+	
+	public function syncdevlost(){
+			set_time_limit(600);
+			$delay=3600*2;
+			$mode=M('','','DB_CONFIG');
+    	$now = time();
+			$start_time = strtotime(date('Y-m-d',$now));
+    	$cur_time = $now - $start_time;
+    	$cur_time = (int)($cur_time/$delay)*$delay;
+    	$first_time = $cur_time-$delay+$start_time-8*3600;
+    	$second_time = $cur_time-$delay+$start_time-3*3600;
+    	
+    	$devchangelist=M('device')->field('id,rid,psn,devid')->where(array('flag'=>2))->select();
+			$changeid=M('changeidlog')->where(array('flag'=>3))->select();
+    	
+			foreach($changeid as $dev){
+				$psn=$dev['old_psn'];
+				$devid=$dev['old_devid'];
+				$rid=$dev['rfid'];
+				$find_dev=false;
+				foreach($devchangelist as $ch){
+					if($ch['rid']==$rid&&$ch['psn']==$psn&&$ch['devid']==$devid){
+						$find_dev=true;
+						break;
+					}
+				}
+				if($find_dev==false){
+					echo 'change id:';
+					dump($rid);
+					$ret=M('device')->where(array('rid'=>$rid,'psn'=>$psn,'devid'=>$devid))->save(array('flag'=>2));
+				}
+			}
+
+		
+			$cowlist=$mode->table('cows')->field('id,sn_code,health_state,survival_state')->select();
+			$devlist=M('device')->where(array('flag'=>1))->select();
+	
+			foreach($devlist as $dev){
+				$rid=$dev['rid'];
+				$devcowstate[$rid]=$dev['cow_state'];		
+				$devflag[$rid]=$dev['id'];
+			}
+			//dump($devflag);
+			foreach($cowlist as $cow){
+				$rid=(int)$cow['sn_code'];				
+				if($cow['survival_state']==2||$cow['survival_state']==4)
+				{
+					$cowstop[]=$rid;
+				}else if($cow['survival_state']==3){
+					if($devcowstate[$rid]!=4){
+						$backcow[]=$cow['id'];
+					}
+				}else if($cow['survival_state']==1){
+					if($devcowstate[$rid]==4){
+						$loseadd[]=$cow['id'];
+						//$losetime=$first_time;
+					}
+				}
+				if($cow['health_state']==3){
+					if($devcowstate[$rid]!=5){
+						$wellcow[]=$cow['id'];
+					}
+				}else if($cow['health_state']==1){
+					if($devcowstate[$rid]==5){
+						$lowadd[]=$cow['id'];
+						//$lowtime=$first_time;
+					}
+				}
+			}
+
+			
+			foreach($cowstop as $id){
+				if(isset($devflag[$id])){
+					$devstop[]=$devflag[$id];
+				}	
+			}
+			echo 'stop id:';
+			dump($devstop);
+			if($devstop){
+				$wherestop['id']=array('in',$devstop);
+				$ret=M('device')->where($wherestop)->save(array('flag'=>3));
+			}
+			
+			echo 'backcow id:';
+			dump($backcow);
+			echo 'wellcow id:';
+			dump($wellcow);
+			echo 'loseadd id:';
+			dump($loseadd);
+			echo 'lowadd id:';
+			dump($lowadd);
+			
+			if($loseadd){
+				$wherelose['id']=array('in',$loseadd);
+				$ret=$mode->table('cows')->where($wherelose)->save(array('survival_state'=>3));
+			}			
+			
+			if($lowadd){
+				$wherelow['id']=array('in',$lowadd);
+				$ret=$mode->table('cows')->where($wherelow)->save(array('health_state'=>3));
+			}		
+				
+			if($backcow){
+				$whereback['id']=array('in',$backcow);
+				$ret=$mode->table('cows')->where($whereback)->save(array('survival_state'=>1));
+			}		
+				
+			if($wellcow){
+				$wherewell['id']=array('in',$wellcow);
+				$ret=$mode->table('cows')->where($wherewell)->save(array('health_state'=>1));
+			}	
+									
+			foreach($loseadd as $cow_id){
+				$other_head1='系统更新';
+				$other_head1=iconv("GBK", "UTF-8", $other_head1); 
+				$birth['cow_id']=$cow_id;
+				$birth['cow_type']='survival_state';
+				$birth['cow_code']=3;
+				$birth['time']=date('Y-m-d H:i:s',$first_time);
+				$birth['created_at']=date('Y-m-d H:i:s',time());
+				$birth['updated_at']=date('Y-m-d H:i:s',time());
+				$birth['comment']=$other_head1;
+				$birth['deliver_type']=3;
+				$ret=$mode->table('births')->add($birth);
+			}
+			
+			foreach($lowadd as $cow_id){
+				$other_head1='系统更新';
+				$other_head1=iconv("GBK", "UTF-8", $other_head1); 
+				$birth['cow_id']=$cow_id;
+				$birth['cow_type']='health_state';
+				$birth['cow_code']=3;
+				$birth['time']=date('Y-m-d H:i:s',$second_time);
+				$birth['created_at']=date('Y-m-d H:i:s',time());
+				$birth['updated_at']=date('Y-m-d H:i:s',time());
+				$birth['comment']=$other_head1;
+				$birth['deliver_type']=3;
+				$ret=$mode->table('births')->add($birth);
+			}
+			
+			exit;
 	}
 }
