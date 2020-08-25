@@ -47,9 +47,7 @@
 			<tr>
 				<th>RFID</th>
 				<th>DEVID</th>
-				<th>最新三次上报状态</th>
-				<th>工厂SN</th>
-				<th>time</th>
+				<th>次数</th>
 				<th>操作</th>
 			</tr>
 		</thead>
@@ -58,19 +56,7 @@
 			<tr>
 				<td><%$value['rid']%></td>
 				<td><%$value['devid']%></td>
-				<%if $value['state'] eq 3 %>
-				<td>数据丢失</td>
-				<%else if $value['state'] eq 2 %>
-				<td>成功</td>
-				<%else if $value['state'] eq 4 %>
-				<td>未上报</td>
-				<%else if $value['state'] eq 5 %>
-				<td>一周未上报</td>
-				<%else if $value['state'] eq 6 %>
-				<td>一月未上报</td>
-				<%/if%>
-				<td><%$value['fsn']%></td>
-				<td><%$value['time']%></td>
+				<td><%$value['lost']%></td>
 				<td><a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">查看温度</a></td>
 			</tr>
 			<%/foreach%>
@@ -116,7 +102,7 @@
               bSort: true,
 							columnDefs: [ 
 									{
-								      "targets": 4,
+								      "targets": 3,
 								      "searchable": false
 									},
 		

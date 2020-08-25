@@ -47,21 +47,23 @@ class HomeController extends Controller{
         
         //用户没有登录系统，就使其退出并进入到登录页面
         //有一些操作，允许在"退出的状态"也让访问
-        $rang_ac = "Manager-loginbase,Manager-register";
+        $rang_ac = "Manager-loginbase,Manager-register,Manager-devlist,Manager-querytemp,Devselect-startnew,Longdx-getstatesync,Longdx-gettempnow,Longdx-sendsmscode,Longdx-test";
         //进行访问设备判断,也就是对操作系统的判断
         if ($this->getOS()=='windows' || $this->getOS()=='mac' || $this->getOS()=='unix' || $this->getOS()=='linux') { 
         //① 用户不在登录状态
         //② 用户的操作 还没有在$rang_ac出现
            function userset(){
-              if($_SESSION['admin_user']){
+              	//dump($_SESSION['userid']);
+              	//dump($_SESSION['admin_userid']);
+              	//dump($nowac);
+              if($_SESSION['userid']||$_SESSION['admin_userid']){
                 return false;
                }
              
-               return ture;
+               return true;
            }
            
            if(userset() && strpos($rang_ac,$nowac)===false){
-
                    $js = <<<eof
                 <script type="text/javascript">
                 window.top.location.href="/pg/index.php/Home/Manager/loginbase";

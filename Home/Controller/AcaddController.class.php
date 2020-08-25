@@ -322,6 +322,19 @@ class AcaddController extends HomeController {
 	          $this->display();
 	          exit;
 	        }else{
+	        	foreach($dev as $key=>$v){
+	        		$bsign='';
+	        		for($i=1;$i<=10;$i++){
+	        			$bsisn=$v['sn'.$i];
+	        			if($bsisn>0){
+	        				$bsign=$bsign.'sn'.$i.':'.$v['rssi'.$i].';';
+	        			}
+	        		}
+	        		if($bsign==''){
+	        			$bsign='NULL';
+	        		}
+	        		$dev[$key]['rssi_list']=$bsign;
+	        	}
 						$this->assign('brssi',$dev);
             $this->assign('date',$time);
             $this->assign('date2',$time2);

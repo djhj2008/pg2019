@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+	<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script>
+	
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+	<!-- <link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css"> -->
+	<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
+  <!-- DataTables -->
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+  <!-- Responsive datatable examples -->
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+  <!-- Buttons examples -->
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.buttons.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jszip.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/pdfmake.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/vfs_fonts.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.html5.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.print.min.js"></script>
+  <!-- Responsive examples -->
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+	
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css?v=01.01.04">
+</head>
+<body>
+ 	<div class="container" >
+ 	<div class="navbar navbar-default navbar-fixed-left" >
+		<ul class="nav navbar-nav" >
+
+			</ul>
+		</div>
+	</div>
+<div class="container">
+  <div class="weui-cells weui-cells_form" >
+    <div class="weui-cell">
+      <div class="weui-cell__hd"><label class="weui-label">防疫码</label></div>
+      <div class="weui-cell__bd">
+        <%$sn%>
+      </div>
+    </div>
+    <div class="weui-cell">
+      <div class="weui-cell__hd"><label class="weui-label">类型</label></div>
+      <div class="weui-cell__bd">
+        母牛
+      </div>
+    </div>
+    <div class="weui-cell">
+      <div class="weui-cell__hd"><label class="weui-label">月龄</label></div>
+      <div class="weui-cell__bd">
+        28月
+      </div>
+    </div>
+    <div class="weui-cell">
+      <div class="weui-cell__hd"><label class="weui-label">农户</label></div>
+      <div class="weui-cell__bd">
+           <div class="weui-cell__bd">
+              <a class="weui_panel_ft" href="/pg/djtest/farmer?sn=<%$sn%>">马红军(详情)</a>
+      </div>
+      </div>
+    </div>
+    <div class="weui-cell">
+      <a class="weui_panel_ft" href="/pg/djtest/dailyworklist?sn=<%$sn%>">防疫记录(6条)</a>
+    </div>
+
+</div>
+<div class="container" >
+<div class="weui_panel_hd">健康记录:</div>
+
+    <div id="main1" style="height:400px;"></div>
+
+
+    <div id="main2" style="height:400px;"></div>
+</div>
+<script src="<%$smarty.const.AJS_URL%>echarts.min.js?v=01.01.01"></script>
+<script src="<%$smarty.const.AJS_URL%>macarons.js?"></script>
+<script src="<%$smarty.const.AJS_URL%>jquery-3.2.1.min.js"></script>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart1 = echarts.init(document.getElementById('main1'),'macarons');
+    var myChart2 = echarts.init(document.getElementById('main2'),'macarons');
+    $(document).ready(function() {
+
+       var date = JSON.parse('<%$dateArr%>');
+       var temp1 = JSON.parse('<%$temp1Arr%>');
+       var temp2 = JSON.parse('<%$temp2Arr%>');
+       var temp3 = JSON.parse('<%$temp3Arr%>');    
+       var option1 = {
+            tooltip: {
+                trigger: 'axis',
+				        axisPointer: {
+				            type: 'cross',
+				            label: {
+				                backgroundColor: '#283b56'
+				            }
+				        }
+            },
+            legend: {
+                data:['体温','外部温度'],
+            },
+				    toolbox: {
+				        show: true,
+				        feature: {
+				            dataView: {readOnly: false},
+				            magicType: {type: ['line', 'bar']},
+				            restore: {},
+				        }
+				    },
+            xAxis:  {
+                type: 'category',
+                boundaryGap: false,
+                data:date,
+                inverse:true,
+            },
+            dataZoom: [{
+                type: 'inside',
+                start: 0,
+                end: 100
+            }, {
+                start:0,
+                end: 100,
+                handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                handleSize: '80%',
+                handleStyle: {
+                    color: '#fff',
+                    shadowBlur: 3,
+                    shadowColor: 'rgba(0, 0, 0, 0.6)',
+                    shadowOffsetX: 2,
+                    shadowOffsetY: 2
+                }
+            }],
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    formatter: '{value}°C'
+                },
+                min:20,
+                max:40,
+            },
+            series: [
+                {
+                    name:'体温',
+                    type:'line',
+                    data:temp2,
+                    markPoint: {
+										data: [
+											{type: 'max', name: '最大值'},
+											{type: 'min', name: '最小值'}
+											]
+										},
+										markLine: {
+										data: [
+											{type: 'average', name: '平均值'}
+											]
+										}
+                }, 
+                {
+                    name:'环境温度',
+                    type:'line',
+                    data:temp3,
+
+                },                 
+            ]
+        };
+       var option2 = {
+            tooltip: {
+                trigger: 'axis',
+				        axisPointer: {
+				            type: 'cross',
+				            label: {
+				                backgroundColor: '#283b56'
+				            }
+				        }
+            },
+            legend: {
+                data:['运动量'],
+            },
+				    toolbox: {
+				        show: true,
+				        feature: {
+				            dataView: {readOnly: false},
+				            magicType: {type: ['line', 'bar']},
+				            restore: {},
+				        }
+				    },
+            xAxis:  {
+                type: 'category',
+                boundaryGap: false,
+                data:date,
+                inverse:true,
+            },
+            dataZoom: [{
+                type: 'inside',
+                start: 0,
+                end: 100
+            }, {
+                start:0,
+                end: 100,
+                handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                handleSize: '80%',
+                handleStyle: {
+                    color: '#fff',
+                    shadowBlur: 3,
+                    shadowColor: 'rgba(0, 0, 0, 0.6)',
+                    shadowOffsetX: 2,
+                    shadowOffsetY: 2
+                }
+            }],
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    formatter: '{value}'
+                },
+                min:0,
+                max:1000,
+            },
+            series: [
+                {
+                    name:'运动量',
+                    type:'line',
+                    data:temp1,
+                    markPoint: {
+										data: [
+											{type: 'max', name: '最大值'},
+											{type: 'min', name: '最小值'}
+											]
+										},
+										markLine: {
+										data: [
+											{type: 'average', name: '平均值'}
+											]
+										}
+                },               
+            ]
+        };
+        myChart1.setOption(option1);
+        myChart2.setOption(option2);
+    });
+    // 使用刚指定的配置项和数据显示图表。
+
+</script>
+</body>
+</html>
+

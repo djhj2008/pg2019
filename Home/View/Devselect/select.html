@@ -77,7 +77,9 @@
 				<td><%$value['info']%></td>
 				<td><%$value['tsn']%></td>
 				<td><%$value['sn']%></td>
-				<td><a href="<%$smarty.const.__APP__%>/collect/downValue?psnid=<%$value['id']%>">低温</a></td>
+				<td><a href="<%$smarty.const.__APP__%>/collect/downValue?psnid=<%$value['id']%>">低温</a>
+					<a href="<%$smarty.const.__APP__%>/devselect/devsignlost?psnid=<%$value['id']%>">|Delay次数</a>
+					</td>
 				<td>
 					<a href="<%$smarty.const.__APP__%>/devselect/devlist?psnid=<%encode($value['id'])%>">设备</a>
 					<a href="<%$smarty.const.__APP__%>/devselect/devtempnow?psnid=<%$value['id']%>">|最后上报</a>
@@ -89,7 +91,7 @@
 				</td>
 				<%if $admin_userid eq 100 %>
 				<td>
-					<a href="<%$smarty.const.__APP__%>/devmanager/devlist?psnid=<%$value['id']%>">设备编辑</a>
+					<a href="<%$smarty.const.__APP__%>/add/editserver?psnid=<%$value['id']%>">基站参数编辑</a>
 					<!--a href="<%$smarty.const.__APP__%>/product/scanfactoryall?psnid=<%$value['id']%>">扫描设备</a-->
 					<!--a href="<%$smarty.const.__APP__%>/product/factorytempeorall?psnid=<%$value['id']%>">|错误设备</a-->
 					<!--a href="<%$smarty.const.__APP__%>/product/scandevlow?psnid=<%$value['id']%>">|低温设备</a-->

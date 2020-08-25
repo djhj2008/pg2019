@@ -69,15 +69,11 @@
      <tr>
      		<th>PSNID</th>
 				<th>SN</th>
+				<th>Chanel</th>
+				<th>Time Diff</th>
+				<th>温度</th>
 				<th>RSSIMAX</th>
-				<th>SN1</th>
-				<th>RSSI1</th>
-				<th>SN2</th>
-				<th>RSSI2</th>   
-				<th>SN3</th>
-				<th>RSSI3</th>   
-				<th>SN4</th>
-				<th>RSSI4</th>   
+				<th>RSSI</th>
         <th>时间</th>
      </tr>
      </thead>
@@ -86,15 +82,11 @@
     <tr>
     	<td><%$v.psnid%></td>
       <td><%$v.bsn%></td>
+      <td><%$v.station%></td>
+      <td><%$v.delay%></td>
+      <td><%$v.temp%></td>
       <td><%$v.rssi%></td>
-      <td><%$v.sn1%></td>
-      <td><%$v.rssi1%></td>
-      <td><%$v.sn2%></td>
-      <td><%$v.rssi2%></td>
-      <td><%$v.sn3%></td>
-      <td><%$v.rssi3%></td>
-      <td><%$v.sn4%></td>
-      <td><%$v.rssi4%></td>    
+      <td><%$v.rssi_list%></td>
       <td><%date("Y-m-d H:i:s",$v.time)%></td>
     </tr>
     <%/foreach%>
@@ -153,30 +145,6 @@
 									},
 									{
 								      "targets": 5,
-								      "searchable": false
-									},
-									{
-								      "targets": 6,
-								      "searchable": false
-									},
-									{
-								      "targets": 7,
-								      "searchable": false
-									},
-									{
-								      "targets": 8,
-								      "searchable": false
-									},
-									{
-								      "targets": 9,
-								      "searchable": false
-									},
-									{
-								      "targets": 10,
-								      "searchable": false
-									},
-									{
-								      "targets": 11,
 								      "searchable": false
 									},
 							],

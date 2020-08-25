@@ -686,6 +686,44 @@ class AddController extends HomeController {
     	}
     	$this->display();
     }
+
+    public function editserver(){
+    	$delay_up=$_POST['delay_up'];
+    	$retry_up=$_POST['retry_up'];
+	    $id=$_GET['psnid'];
+	    $psninfo = M('psn')->where(array('id'=>$id))->find();
+    	if(empty($delay_up)||empty($retry_up)){
+	     	$this->assign('psninfo',$psninfo);
+	     	$this->display();
+	     	exit;
+    	}
+    	if($delay_up<5||$delay_up>10){
+    		$this->assign('errcode','1001');
+				$this->assign('psninfo',$psninfo);
+	    	$this->display();
+    		exit;
+    	}
+    	if($retry_up<1||$retry_up>3){
+    		$this->assign('errcode','1002');
+				$this->assign('psninfo',$psninfo);
+	    	$this->display();
+    		exit;
+    	}
+			if($psninfo['delay_up']!=$delay_up){
+				$psnsave['delay_up']=$delay_up;
+			}
+			if($psninfo['retry_up']!=$retry_up){
+				$psnsave['retry_up']=$retry_up;
+			}
+			//dump($psnsave);
+			if(!empty($psnsave)){
+				$ret = M('psn')->where(array('id'=>$id))->save($psnsave);
+				$this->assign('errcode','1000');
+			}
+			$psninfo = M('psn')->where(array('id'=>$id))->find();
+			$this->assign('psninfo',$psninfo);
+    	$this->display();
+    }
     
     public function addstation(){
     	$psnid=$_GET['psnid'];

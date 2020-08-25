@@ -7,12 +7,14 @@ class DatapushV40Controller extends Controller {
 		// $checksum=crc32("Thequickbrownfoxjumpedoverthelazydog.");
 		// printf("%u\n",$checksum);
 		
-		$TIME_LEN = 15;//时间字符长度
+		$TIME_LEN = 18;//时间字符长度
 		$DELAY_START = 10;
 		$HOUR_DELAY_LEN = 2;
 		$MIN_DELAY_LEN = 2;
 		$FREQ_LEN = 1;
-		
+
+		$TIME_DIFF_LEN=3;
+				
 		$BTSN_LEN  = 10;//统编10位1类型,2-4国家编码,5-10区域编码
 		$BDSN_LEN  = 4;//BS字符长度
 		$BSN_LEN  = $BTSN_LEN+$BDSN_LEN;//BS字符长度
@@ -35,12 +37,11 @@ class DatapushV40Controller extends Controller {
 		$VAILD_LEN  =1;//有效值个数
 		
 		$SENS_LEN  =1;//有效值个数
-		$STEP_LEN  =2;//有效值个数
 		
-		$VALUE_LEN = 9;//data中每个长度
+		$VALUE_LEN = 10;//data中每个长度
 		$COUNT_VALUE = 4;
 
-		$DATA_LEN = ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN+$STEP_LEN)*2+$VALUE_LEN*$COUNT_VALUE; //一条data长度
+		$DATA_LEN = ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN)*2+$VALUE_LEN*$COUNT_VALUE; //一条data长度
 		
 		//var_dump($DATA_LEN);
 		
@@ -49,7 +50,7 @@ class DatapushV40Controller extends Controller {
     $strarr    =unpack("H*", $post);//unpack() 函数从二进制字符串对数据进行解包。
     $str       =implode("", $strarr);
 
-		//$str = "32303139303130343135303031303132303836373536333030000040010140014102420343044400060000200256217400014662244602ffffffffffffffffffffffffff0000200356217400014862244602ffffffffffffffffffffffffff0000200644217400014763345103ffffffffffffffffffffffffff0000200551217400014772244602ffffffffffffffffffffffffff0000200857217400014662244602ffffffffffffffffffffffffff0000200745217400015193344903ffffffffffffffffffffffffff00006002";
+		//$str = "323032303031303130313031303031313634303432333030300002c001055000000000000000000000000005e5";
     $sndir = substr($str, ($TIME_LEN+$BTSN_LEN)*2,$BDSN_LEN*2);
     $sn_footer = hexdec($sndir)&0x1fff;
     $sn_header = hexdec($sndir)>>13;
@@ -88,6 +89,16 @@ class DatapushV40Controller extends Controller {
     	exit;
 		}
 
+
+    $hour_delay =substr($str,$DELAY_START*2,$HOUR_DELAY_LEN*2);
+    $hour_delay =(int)pack("H*",$hour_delay);
+    $min_delay =substr($str,($DELAY_START+$HOUR_DELAY_LEN)*2,$HOUR_DELAY_LEN*2);
+    $min_delay =(int)pack("H*",$min_delay);
+    $freq = substr($str,($DELAY_START+$HOUR_DELAY_LEN+$MIN_DELAY_LEN)*2,$FREQ_LEN*2);
+    $freq = (int)pack("H*",$freq);
+    $time_diff = substr($str,($DELAY_START+$HOUR_DELAY_LEN+$MIN_DELAY_LEN+$FREQ_LEN)*2,$TIME_DIFF_LEN*2);
+    $time_diff = (int)pack("H*",$time_diff);
+    
     $sid =  (int)$_GET['sid']&0x1fff;
     //var_dump($sid);
     $bsnstr   =substr($str, $TIME_LEN*2,$BSN_LEN*2);
@@ -131,6 +142,7 @@ class DatapushV40Controller extends Controller {
     	exit;
     }
     $psninfo = D('psn')->where(array('tsn'=>$btsn,'sn'=>$psn))->find();
+    //$psninfo = D('psn')->where(array('sn'=>$psn))->find();
     if($psninfo){
     	$psnid=$psninfo['id'];
     }else{
@@ -190,6 +202,7 @@ class DatapushV40Controller extends Controller {
 		$rssi = array(
 						'psnid'=>$psnid,
 						'bsn'=>$bsnint,
+						'delay'=>$time_diff,
 						'rssi'=>$brssimax,
 						'sn1'=>$brssisn[0],
 						'rssi1'=>$bsign[0],
@@ -202,10 +215,7 @@ class DatapushV40Controller extends Controller {
 						'time'=>time(),
 						);
 	 	$saveRssi=D('brssi')->add($rssi);
-	 	//var_dump($rssi);
-	 	//var_dump($bsign);
-	 	//exit;
-		//var_dump($bvs);
+
     $bdevinfo    =D('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->find();
 
     if($bdevinfo){
@@ -214,6 +224,14 @@ class DatapushV40Controller extends Controller {
     	$rate = $bdevinfo['rate_id'];
     	$dev_freq = $bdevinfo['count'];
     	$delay_time  = str_pad($uptime,4,'0',STR_PAD_LEFT).$dev_freq;
+    	
+			$log_flag= $bdevinfo['log_flag'];//0 self log 1 sys log
+			$dump_rate=$bdevinfo['dump_rate'];
+			$step_rate=$bdevinfo['step_rate'];
+			$step_rate=str_pad($step_rate,3,'0',STR_PAD_LEFT);
+			$step_setup=$bdevinfo['step_setup'];
+			$step_setup=str_pad($step_setup,3,'0',STR_PAD_LEFT);
+			
     	if($bdevinfo['version']!=$bvs){
     		//var_dump($bdevinfo['version']);
     		$saveSql=M('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->save(array('version'=>$bvs));	
@@ -258,22 +276,9 @@ class DatapushV40Controller extends Controller {
     $env_temp = 0;
     $snint = 0;
     $battery = 0;
-    //var_dump($count);
-    
-    $hour_delay =substr($str,$DELAY_START*2,$HOUR_DELAY_LEN*2);
-    $hour_delay =(int)pack("H*",$hour_delay);
-    $min_delay =substr($str,($DELAY_START+$HOUR_DELAY_LEN)*2,$HOUR_DELAY_LEN*2);
-    $min_delay =(int)pack("H*",$min_delay);
-    $freq = substr($str,($DELAY_START+$HOUR_DELAY_LEN+$MIN_DELAY_LEN)*2,$FREQ_LEN*2);
-    $freq = (int)pack("H*",$freq);
-    
-    //var_dump($hour_delay);
-    //var_dump($min_delay);
-    //echo "freq:";
-    //var_dump($freq);
+    //dump($count);
     
     $day_begin = strtotime(date('Y-m-d',time()));
-    //var_dump(date('Y-m-d',time()));
     $hour_time = 60*60;
     $pre_time =5*60;
     $hour_pre_time=15*60;
@@ -289,6 +294,10 @@ class DatapushV40Controller extends Controller {
    	
    	$change_devs = D('changeidlog')->where(array('psnid' => $psnid))->select();
    	//var_dump($re_devs);
+   	
+		foreach($cur_devs as $cur_dev){
+			$step_list[$cur_dev['devid']]['switch']=(int)$cur_dev['step_switch'];
+		}
    	
     //未解包比对
     $len=strlen($str);
@@ -306,6 +315,8 @@ class DatapushV40Controller extends Controller {
 			$sum+=$value;
 		}
 		$sum=$sum&0xffffffff;
+		
+
 		if($crc==$sum){
 	    for($i=0 ; $i < $count ; $i++){
 	    	$snstr   =substr($data, $i*$DATA_LEN,$CSN_LEN*2);
@@ -315,34 +326,30 @@ class DatapushV40Controller extends Controller {
 	    	
 	    	$rfid = $dev_psn*10000+$snint;
 	    	//echo "sn:";
-	    	//var_dump($snint);
+	    	//dump($snint);
 	    	if($dev_psn!=$psn)
 	    	{
 	    		continue;
 	    	}
 	    	$signstr = substr($data, $i*$DATA_LEN+($CSN_LEN)*2,$SIGN_LEN*2);
-	    	$cvsstr = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN)*2,$CVS_LEN*2);
-	    	$stastr = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN)*2,$STATE_LEN*2);
-	    	$destr  = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN)*2,$DELAY_LEN*2);
-
-	    	$sensstr  = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
-	    	$stepstr  = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$STEP_LEN*2);
+	    	$cvsstr =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN)*2,$CVS_LEN*2);
+	    	$stastr =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN)*2,$STATE_LEN*2);
+	    	$destr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN)*2,$DELAY_LEN*2);
+	    	
 	    	$sign= 0-hexdec($signstr);
-	    	$cvs = hexdec($cvsstr);
-	    	$cvs = $cvs&0x0f;
+	    	$cvst = hexdec($cvsstr);
+	    	$cvs = (int)($cvst&0x07);
+				$step_update =(int)($cvst&0x08);
 	    	$cindex = hexdec($cvsstr);
 	    	$cindex = ($cindex&0xf0)>>4;
 	    	$state =  hexdec($stastr);
 	    	$delay =  hexdec($destr);
 	    	$vaild = hexdec($vaildstr);
-	    	//echo "devid:";
-	    	//var_dump($snint);
 	    	$devbuf[]=$snint;
 
-	    	//var_dump($cvs);
-	    	//var_dump($state);
-	    	//echo "vaild:";
-	    	//var_dump($vaild);
+				//echo "cvs:";
+				//dump($cvs);
+
 	    	$stmp = 0x07;
 	    	$stmp2 = 0x80;
 	    	$stmp3 = 0x08;
@@ -356,33 +363,30 @@ class DatapushV40Controller extends Controller {
 	    	$lcount = ($lcount)>>4;
 	    	$type = $state&$stmp3;
 	    	$state=$state&$stmp;
-	    	
+				$step_update = $step_update|$state;
+				
 	    	if($cvs>3){
-	    		$sens=0-hexdec($sensstr);
-	    		$pre_step=hexdec($stepstr);
-	    		$tempstr=substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN+$STEP_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
-					$vaildstr  = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$STEP_LEN)*2,$VAILD_LEN*2);
+					$sensstr 	 =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
+					$vaildstr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
+	    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
+					$sens=0-hexdec($sensstr);
+					$step_list[$snint]['state']=$state;
 	    	}else{
 					$sens=0;
-	    		$step=0;
-	    		$tempstr=substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
 					$vaildstr  = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$VAILD_LEN*2);
+	    		$tempstr   = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
 	    	}
 	    	$vaild = hexdec($vaildstr);
-	    	//var_dump($ast);
-	    	//var_dump($state);
-	    	//var_dump($type);
-	    	
 	    	if($type>0){
 	    		$type=1;
 	    	}
 	    	//echo "type:";
-	    	//var_dump($type);
+	    	//dump($type);
 	    	if($snint>0)
 	    	{
 	    		$rfid_find=false;
 		    	foreach($cur_devs as $cur_dev){
-		    		if($cur_dev['rid']==$rfid){
+		    		if(($cur_dev['devid']==$snint)&&($cur_dev['psn']==$dev_psn)){
 		    			$rfid_find=true;
 		    			break;
 		    		}
@@ -429,6 +433,8 @@ class DatapushV40Controller extends Controller {
 		    		  	//NEVER HAPPEN.
 		    		  }
 		    	}
+	    	}else{
+	    		continue;
 	    	}
 	    	
 		    if($min_delay == 0){
@@ -451,288 +457,356 @@ class DatapushV40Controller extends Controller {
 				}
 				
 	    	for($j=0;$j < $vaild;$j++){
-
 		    	$up_time = $real_time-$interval*$freq+$interval*($j+1)+$interval*($freq-$vaild);
 			    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
 		    	if($cvs>3){
-		    		if($j==$vaild-1){
-		    			$step=$pre_step;
-		    		}else{
-		    			$step=0;
-		    		}
-		    	}
-		    	if($type==0){
-							if($j==0){
-						    $temp1str1 = substr($tempstr,3,1);
-					  		$temp1str2 = substr($tempstr,0,1);
-					    	$temp1str3 = substr($tempstr,1,1);
+		    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);
+				    	//echo "tempstr_tmp:";
+				    	//dump($tempstr_tmp);
+			    		if($type==0){
+						    $temp1str1 = substr($tempstr_tmp,3,1);
+					  		$temp1str2 = substr($tempstr_tmp,0,1);
+					    	$temp1str3 = substr($tempstr_tmp,1,1);
 					    	$temp1int =base_convert($temp1str1,16,10);
 
-					    	$temp2str1 = substr($tempstr,4,1);
-					  		$temp2str2 = substr($tempstr,5,1);
-					    	$temp2str3 = substr($tempstr,2,1);
+					    	$temp2str1 = substr($tempstr_tmp,4,1);
+					  		$temp2str2 = substr($tempstr_tmp,5,1);
+					    	$temp2str3 = substr($tempstr_tmp,2,1);
 					    	$temp2int =base_convert($temp2str1,16,10);
-					    	
-					    	$temp3str1 = substr($tempstr,9,1);
-					  		$temp3str2 = substr($tempstr,6,1);
-					    	$temp3str3 = substr($tempstr,7,1);
-					    	$temp3int =base_convert($temp3str1,16,10);
-				    	}else if($j==1){
-				    		$temp1str1 = substr($tempstr,10,1);
-					  		$temp1str2 = substr($tempstr,11,1);
-					    	$temp1str3 = substr($tempstr,8,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
-					    	
-					    	$temp2str1 = substr($tempstr,15,1);
-					  		$temp2str2 = substr($tempstr,12,1);
-					    	$temp2str3 = substr($tempstr,13,1);
-					    	$temp2int =base_convert($temp2str1,16,10);
-					    	
-					    	$temp3str1 = substr($tempstr,16,1);
-					  		$temp3str2 = substr($tempstr,17,1);
-					    	$temp3str3 = substr($tempstr,14,1);
-					    	$temp3int =base_convert($temp3str1,16,10);
-				    	}else if($j==2){
-						    $temp1str1 = substr($tempstr,21,1);
-					  		$temp1str2 = substr($tempstr,18,1);
-					    	$temp1str3 = substr($tempstr,19,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
-					    	
-					    	$temp2str1 = substr($tempstr,22,1);
-					  		$temp2str2 = substr($tempstr,23,1);
-					    	$temp2str3 = substr($tempstr,20,1);
-					    	$temp2int =base_convert($temp2str1,16,10);
-					    	
-					    	$temp3str1 = substr($tempstr,27,1);
-					  		$temp3str2 = substr($tempstr,24,1);
-					    	$temp3str3 = substr($tempstr,25,1);
-					    	$temp3int =base_convert($temp3str1,16,10);			    	
-				    	}else if($j==3){
-				    		$temp1str1 = substr($tempstr,28,1);
-					  		$temp1str2 = substr($tempstr,29,1);
-					    	$temp1str3 = substr($tempstr,26,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
+			    		
+			    			$stepstr = substr($tempstr_tmp,-4);
+			    			$stepint = (int)base_convert($stepstr,16,10);
+			    			
+						    if(($temp1int&0x08)==0x08){
+					    		$temp1str1=$temp1int&0x07;
+					    		if($temp1str1==0){
+					    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+					    		}else{
+					    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+					    		}
+					    	}else{
+						    		if($temp1str1==0){
+						    			$temp1 = $temp1str2.".".$temp1str3;
+						    		}else{
+						    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
+						    		}
+					    	}
 
-					    	$temp2str1 = substr($tempstr,33,1);
-					  		$temp2str2 = substr($tempstr,30,1);
-					    	$temp2str3 = substr($tempstr,31,1);
-					    	$temp2int =base_convert($temp2str1,16,10);
+							  //var_dump('temp1:'.$temp1);
+							  if(($temp2int&0x08)==0x08){
+							  	$temp2str1=$temp2int&0x07;
+									if($temp2str1 == 0){
+								    $temp2 = '-'.$temp2str2.".".$temp2str3;
+							 	 	}else{
+							 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
+							 	 	}
+						 		}else{
+						 			if($temp2str1 == 0){
+								    $temp2 = $temp2str2.".".$temp2str3;
+							 	 	}else{
+							 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+							 	 	}
+						 			
+						 		}
+						 	
+								$acc_add=array(
+						  				'psn'=>$dev_psn,
+						  				'psnid'=>$psnid,
+								  		'devid'=>$snint,
+								  		'temp1'=>$temp1,
+								  		'temp2'=>$temp1,
+								  		'env_temp'=>$temp2,
+								  		'sign'=>$sign,
+								  		'rssi1'=>$sens,
+								  		'rssi2'=>$stepint,
+								  		'rssi3'=>$step_update,
+								  		'cindex'=>$cindex,
+								  		'lcount'=>$lcount,
+								  		'delay'=>$delay,
+								  		'time' =>$up_time,
+								  		'sid' =>$sid,
+								  	);
 
-					    	$temp3str1 = substr($tempstr,34,1);
-					  		$temp3str2 = substr($tempstr,35,1);
-					    	$temp3str3 = substr($tempstr,32,1);
-					    	$temp3int =base_convert($temp3str1,16,10);					    	
-				    	}
-		    		
-			    if(($temp1int&0x08)==0x08){
-		    		$temp1str1=$temp1int&0x07;
-		    		if($temp1str1==0){
-		    			$temp1 = '-'.$temp1str2.".".$temp1str3;
-		    		}else{
-		    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
-		    		}
+								$dev_save=array(
+											'devid'=>$snint,
+											'psn'=>$dev_psn,
+											'psnid'=>$psnid,
+											'battery'=>$battery,
+								  	 	'dev_state'=>$state,
+								  	 	'version'=>$cvs);
+								  	 	
+								$accadd_list[]=$acc_add;
+								$devsave_list[]=$dev_save;
+							}else{
+								//nothing
+							}
 		    	}else{
-			    		if($temp1str1==0){
-			    			$temp1 = $temp1str2.".".$temp1str3;
-			    		}else{
-			    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
-			    		}
-		    	}
+			    		if($type==0){
+								if($j==0){
+							    $temp1str1 = substr($tempstr,3,1);
+						  		$temp1str2 = substr($tempstr,0,1);
+						    	$temp1str3 = substr($tempstr,1,1);
+						    	$temp1int =base_convert($temp1str1,16,10);
 
-				  //var_dump('temp1:'.$temp1);
-				  if(($temp2int&0x08)==0x08){
-				  	$temp2str1=$temp2int&0x07;
-						if($temp2str1 == 0){
-					    $temp2 = '-'.$temp2str2.".".$temp2str3;
-				 	 	}else{
-				 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
-				 	 	}
-			 		}else{
-			 			if($temp2str1 == 0){
-					    $temp2 = $temp2str2.".".$temp2str3;
-				 	 	}else{
-				 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
-				 	 	}
-			 			
-			 		}
-			 	
-			    //var_dump('temp2:'.$temp2);
-			    if(($temp3int&0x08)==0x08){
-			    	$temp3str1=$temp3int&0x07;
-				    if($temp3str1 == 0){
-					    $temp3 = '-'.$temp3str2.".".$temp3str3;
-				 	 	}else{
-				 	 	 	$temp3 = '-'.$temp3str1.$temp3str2.".".$temp3str3;
-				 	 	}
-			 		}else{
-			 			if($temp3str1 == 0){
-					    $temp3 = $temp3str2.".".$temp3str3;
-				 	 	}else{
-				 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
-				 	 	}
-			 		}
-			    	//var_dump('temp3:'.$temp3);
-						$acc_add=array(
-				  				'psn'=>$dev_psn,
-				  				'psnid'=>$psnid,
+						    	$temp2str1 = substr($tempstr,4,1);
+						  		$temp2str2 = substr($tempstr,5,1);
+						    	$temp2str3 = substr($tempstr,2,1);
+						    	$temp2int =base_convert($temp2str1,16,10);
+						    	
+						    	$temp3str1 = substr($tempstr,9,1);
+						  		$temp3str2 = substr($tempstr,6,1);
+						    	$temp3str3 = substr($tempstr,7,1);
+						    	$temp3int =base_convert($temp3str1,16,10);
+					    	}else if($j==1){
+					    		$temp1str1 = substr($tempstr,10,1);
+						  		$temp1str2 = substr($tempstr,11,1);
+						    	$temp1str3 = substr($tempstr,8,1);
+						    	$temp1int =base_convert($temp1str1,16,10);
+						    	
+						    	$temp2str1 = substr($tempstr,15,1);
+						  		$temp2str2 = substr($tempstr,12,1);
+						    	$temp2str3 = substr($tempstr,13,1);
+						    	$temp2int =base_convert($temp2str1,16,10);
+						    	
+						    	$temp3str1 = substr($tempstr,16,1);
+						  		$temp3str2 = substr($tempstr,17,1);
+						    	$temp3str3 = substr($tempstr,14,1);
+						    	$temp3int =base_convert($temp3str1,16,10);
+					    	}else if($j==2){
+							    $temp1str1 = substr($tempstr,21,1);
+						  		$temp1str2 = substr($tempstr,18,1);
+						    	$temp1str3 = substr($tempstr,19,1);
+						    	$temp1int =base_convert($temp1str1,16,10);
+						    	
+						    	$temp2str1 = substr($tempstr,22,1);
+						  		$temp2str2 = substr($tempstr,23,1);
+						    	$temp2str3 = substr($tempstr,20,1);
+						    	$temp2int =base_convert($temp2str1,16,10);
+						    	
+						    	$temp3str1 = substr($tempstr,27,1);
+						  		$temp3str2 = substr($tempstr,24,1);
+						    	$temp3str3 = substr($tempstr,25,1);
+						    	$temp3int =base_convert($temp3str1,16,10);			    	
+					    	}else if($j==3){
+					    		$temp1str1 = substr($tempstr,28,1);
+						  		$temp1str2 = substr($tempstr,29,1);
+						    	$temp1str3 = substr($tempstr,26,1);
+						    	$temp1int =base_convert($temp1str1,16,10);
+
+						    	$temp2str1 = substr($tempstr,33,1);
+						  		$temp2str2 = substr($tempstr,30,1);
+						    	$temp2str3 = substr($tempstr,31,1);
+						    	$temp2int =base_convert($temp2str1,16,10);
+
+						    	$temp3str1 = substr($tempstr,34,1);
+						  		$temp3str2 = substr($tempstr,35,1);
+						    	$temp3str3 = substr($tempstr,32,1);
+						    	$temp3int =base_convert($temp3str1,16,10);					    	
+					    	}
+			    		
+						    if(($temp1int&0x08)==0x08){
+					    		$temp1str1=$temp1int&0x07;
+					    		if($temp1str1==0){
+					    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+					    		}else{
+					    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+					    		}
+					    	}else{
+						    		if($temp1str1==0){
+						    			$temp1 = $temp1str2.".".$temp1str3;
+						    		}else{
+						    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
+						    		}
+					    	}
+
+							  //var_dump('temp1:'.$temp1);
+							  if(($temp2int&0x08)==0x08){
+							  	$temp2str1=$temp2int&0x07;
+									if($temp2str1 == 0){
+								    $temp2 = '-'.$temp2str2.".".$temp2str3;
+							 	 	}else{
+							 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
+							 	 	}
+						 		}else{
+						 			if($temp2str1 == 0){
+								    $temp2 = $temp2str2.".".$temp2str3;
+							 	 	}else{
+							 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+							 	 	}
+						 			
+						 		}
+						 	
+						    //var_dump('temp2:'.$temp2);
+						    if(($temp3int&0x08)==0x08){
+						    	$temp3str1=$temp3int&0x07;
+							    if($temp3str1 == 0){
+								    $temp3 = '-'.$temp3str2.".".$temp3str3;
+							 	 	}else{
+							 	 	 	$temp3 = '-'.$temp3str1.$temp3str2.".".$temp3str3;
+							 	 	}
+						 		}else{
+						 			if($temp3str1 == 0){
+								    $temp3 = $temp3str2.".".$temp3str3;
+							 	 	}else{
+							 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
+							 	 	}
+								}
+
+								$acc_add=array(
+						  				'psn'=>$dev_psn,
+						  				'psnid'=>$psnid,
+								  		'devid'=>$snint,
+								  		'temp1'=>$temp1,
+								  		'temp2'=>$temp2,
+								  		'env_temp'=>$temp3,
+								  		'sign'=>$sign,
+								  		'rssi1'=>0,
+								  		'rssi2'=>0,
+								  		'rssi3'=>0,
+								  		'cindex'=>$cindex,
+								  		'lcount'=>$lcount,
+								  		'delay'=>$delay,
+								  		'time' =>$up_time,
+								  		'sid' =>$sid,
+								  	);
+								$dev_save=array(
+											'devid'=>$snint,
+											'psn'=>$dev_psn,
+											'psnid'=>$psnid,
+											'battery'=>$battery,
+								  	 	'dev_state'=>$state,
+								  	 	'version'=>$cvs);
+								  	 	
+								$accadd_list[]=$acc_add;
+								$devsave_list[]=$dev_save;
+							}else{
+								if($j==0){
+							    $temp1str1 = substr($tempstr,3,1);
+						  		$temp1str2 = substr($tempstr,0,1);
+						    	$temp1str3 = substr($tempstr,1,1);
+						    	$temp1int =base_convert($temp1str1,16,10);
+
+						    	$temp2str1 = substr($tempstr,4,1);
+						  		$temp2str2 = substr($tempstr,5,1);
+						    	$temp2str3 = substr($tempstr,2,1);
+						    	
+						    	$temp3str1 = substr($tempstr,9,1);
+						  		$temp3str2 = substr($tempstr,6,1);
+						    	$temp3str3 = substr($tempstr,7,1);
+					    	}else if($j==1){
+					    		$temp1str1 = substr($tempstr,10,1);
+						  		$temp1str2 = substr($tempstr,11,1);
+						    	$temp1str3 = substr($tempstr,8,1);
+						    	$temp1int =base_convert($temp1str1,16,10);
+						    	
+						    	$temp2str1 = substr($tempstr,15,1);
+						  		$temp2str2 = substr($tempstr,12,1);
+						    	$temp2str3 = substr($tempstr,13,1);	
+						    	
+						    	$temp3str1 = substr($tempstr,16,1);
+						  		$temp3str2 = substr($tempstr,17,1);
+						    	$temp3str3 = substr($tempstr,14,1);	
+					    	}else if($j==2){
+							    $temp1str1 = substr($tempstr,21,1);
+						  		$temp1str2 = substr($tempstr,18,1);
+						    	$temp1str3 = substr($tempstr,19,1);
+						    	$temp1int =base_convert($temp1str1,16,10);
+						    	
+						    	$temp2str1 = substr($tempstr,22,1);
+						  		$temp2str2 = substr($tempstr,23,1);
+						    	$temp2str3 = substr($tempstr,20,1);
+						    	
+						    	$temp3str1 = substr($tempstr,27,1);
+						  		$temp3str2 = substr($tempstr,24,1);
+						    	$temp3str3 = substr($tempstr,25,1);					    	
+					    	}else if($j==3){
+					    		$temp1str1 = substr($tempstr,28,1);
+						  		$temp1str2 = substr($tempstr,29,1);
+						    	$temp1str3 = substr($tempstr,26,1);
+						    	$temp1int =base_convert($temp1str1,16,10);
+
+						    	$temp2str1 = substr($tempstr,33,1);
+						  		$temp2str2 = substr($tempstr,30,1);
+						    	$temp2str3 = substr($tempstr,31,1);	
+
+						    	$temp3str1 = substr($tempstr,34,1);
+						  		$temp3str2 = substr($tempstr,35,1);
+						    	$temp3str3 = substr($tempstr,32,1);						    	
+					    	}
+
+						    if(($temp1int&0x08)==0x08){
+					    		$temp1str1=$temp1int&0x07;
+					    		if($temp1str1==0){
+					    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+					    		}else{
+					    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+					    		}
+					    	}else{
+						    		if($temp1str1==0){
+						    			$temp1 = $temp1str2.".".$temp1str3;
+						    		}else{
+						    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
+						    		}
+					    	}
+
+							  //var_dump('temp1:'.$temp1);
+								if($temp2str1 == 0){
+							    $temp2 = $temp2str2.".".$temp2str3;
+						 	 	}else{
+						 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+						 	 	}
+						    //var_dump('temp2:'.$temp2);
+						    if($temp3str1 == 0){
+							    $temp3 = $temp3str2.".".$temp3str3;
+						 	 	}else{
+						 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
+						 	 	}
+			    
+						  	$acc_add2=array(
+						   	  'psn'=>$dev_psn,
+						   	  'psnid'=>$psnid,
 						  		'devid'=>$snint,
 						  		'temp1'=>$temp1,
 						  		'temp2'=>$temp2,
-						  		'env_temp'=>$temp3,
-						  		'sign'=>$sign,
-						  		'rssi1'=>$sens,
-						  		'rssi2'=>$step,
-						  		'rssi3'=>$battery,
+					  			'env_temp'=>$temp3,
+					  			'sign'=>$sign,
 						  		'cindex'=>$cindex,
 						  		'lcount'=>$lcount,
 						  		'delay'=>$delay,
 						  		'time' =>$up_time,
 						  		'sid' =>$sid,
 						  	);
-						$dev_save=array(
-									'devid'=>$snint,
-									'psn'=>$dev_psn,
-									'psnid'=>$psnid,
-									'battery'=>$battery,
-						  	 	'dev_state'=>$state,
-						  	 	'version'=>$cvs);
-						  	 	
-						$accadd_list[]=$acc_add;
-						$devsave_list[]=$dev_save;
-		
-					}else{
-							if($j==0){
-						    $temp1str1 = substr($tempstr,3,1);
-					  		$temp1str2 = substr($tempstr,0,1);
-					    	$temp1str3 = substr($tempstr,1,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
 
-					    	$temp2str1 = substr($tempstr,4,1);
-					  		$temp2str2 = substr($tempstr,5,1);
-					    	$temp2str3 = substr($tempstr,2,1);
-					    	
-					    	$temp3str1 = substr($tempstr,9,1);
-					  		$temp3str2 = substr($tempstr,6,1);
-					    	$temp3str3 = substr($tempstr,7,1);
-				    	}else if($j==1){
-				    		$temp1str1 = substr($tempstr,10,1);
-					  		$temp1str2 = substr($tempstr,11,1);
-					    	$temp1str3 = substr($tempstr,8,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
-					    	
-					    	$temp2str1 = substr($tempstr,15,1);
-					  		$temp2str2 = substr($tempstr,12,1);
-					    	$temp2str3 = substr($tempstr,13,1);	
-					    	
-					    	$temp3str1 = substr($tempstr,16,1);
-					  		$temp3str2 = substr($tempstr,17,1);
-					    	$temp3str3 = substr($tempstr,14,1);	
-				    	}else if($j==2){
-						    $temp1str1 = substr($tempstr,21,1);
-					  		$temp1str2 = substr($tempstr,18,1);
-					    	$temp1str3 = substr($tempstr,19,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
-					    	
-					    	$temp2str1 = substr($tempstr,22,1);
-					  		$temp2str2 = substr($tempstr,23,1);
-					    	$temp2str3 = substr($tempstr,20,1);
-					    	
-					    	$temp3str1 = substr($tempstr,27,1);
-					  		$temp3str2 = substr($tempstr,24,1);
-					    	$temp3str3 = substr($tempstr,25,1);					    	
-				    	}else if($j==3){
-				    		$temp1str1 = substr($tempstr,28,1);
-					  		$temp1str2 = substr($tempstr,29,1);
-					    	$temp1str3 = substr($tempstr,26,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
+								$dev_save2=array(
+																'devid'=>$snint,
+																'psn'=>$dev_psn,
+																'psnid'=>$psnid,
+																'battery'=>$battery,
+													  	 	'dev_state'=>$state,
+													  	 	'version'=>$cvs);
 
-					    	$temp2str1 = substr($tempstr,33,1);
-					  		$temp2str2 = substr($tempstr,30,1);
-					    	$temp2str3 = substr($tempstr,31,1);	
-
-					    	$temp3str1 = substr($tempstr,34,1);
-					  		$temp3str2 = substr($tempstr,35,1);
-					    	$temp3str3 = substr($tempstr,32,1);						    	
-				    	}
-
-			    if(($temp1int&0x08)==0x08){
-		    		$temp1str1=$temp1int&0x07;
-		    		if($temp1str1==0){
-		    			$temp1 = '-'.$temp1str2.".".$temp1str3;
-		    		}else{
-		    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
-		    		}
-		    	}else{
-			    		if($temp1str1==0){
-			    			$temp1 = $temp1str2.".".$temp1str3;
-			    		}else{
-			    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
-			    		}
+								$accadd_list2[]=$acc_add2;
+								$devsave_list[]=$dev_save2;
+							}
 		    	}
-
-				  //var_dump('temp1:'.$temp1);
-					if($temp2str1 == 0){
-				    $temp2 = $temp2str2.".".$temp2str3;
-			 	 	}else{
-			 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
-			 	 	}
-			    //var_dump('temp2:'.$temp2);
-			    if($temp3str1 == 0){
-				    $temp3 = $temp3str2.".".$temp3str3;
-			 	 	}else{
-			 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
-			 	 	}
-			    //var_dump('temp3:'.$temp3);
-			    
-				  	$acc_add2=array(
-				   	  'psn'=>$dev_psn,
-				   	  'psnid'=>$psnid,
-				  		'devid'=>$snint,
-				  		'temp1'=>$temp1,
-				  		'temp2'=>$temp2,
-			  			'env_temp'=>$temp3,
-			  			'sign'=>$sign,
-							'rssi1'=>$sens,
-							'rssi2'=>$step,
-							'rssi3'=>$battery,
-				  		'cindex'=>$cindex,
-				  		'lcount'=>$lcount,
-				  		'delay'=>$delay,
-				  		'time' =>$up_time,
-				  		'sid' =>$sid,
-				  	);
-
-						$dev_save2=array(
-														'devid'=>$snint,
-														'psn'=>$dev_psn,
-														'psnid'=>$psnid,
-														'battery'=>$battery,
-											  	 	'dev_state'=>$state,
-											  	 	'version'=>$cvs);
-
-						$accadd_list2[]=$acc_add2;
-						$devsave_list[]=$dev_save2;
-					}
 				}
-				//var_dump($temp1);
-	    	//var_dump($temp2);
 	    }
   	}
 
+		//dump($accadd_list);
+		//dump($accadd_list2);
+		//dump($rfid_list);
+		
   	$mydb='access_'.$psn;
     $user=D($mydb);
 		$access1=$user->addAll($accadd_list);
     		
     $user2=D('taccess');
 		$access2=$user2->addAll($accadd_list2);
-		//dump($user->getlastsql());
-		//dump("acc add 1:");
-		//dump($access1);
 
 		$user3=D('device');
 		$ret=$user3->addAll($rfid_list);
-		//dump($rfid_list);
-		
+
 		foreach($cur_devs as $dev){
 			$devid = $dev['devid'];
 			$dev_psn =$dev['psn'];
@@ -740,6 +814,7 @@ class DatapushV40Controller extends Controller {
 			$dev_state= $dev['dev_state'];
 			$version= $dev['version'];
 			foreach($devsave_list as $devsave){
+				unset($mysave);
 				if($devid==$devsave['devid']){
 					if($battery!=$devsave['battery']){
 						$mysave['battery']=$devsave['battery'];
@@ -751,15 +826,13 @@ class DatapushV40Controller extends Controller {
 						$mysave['version']=$devsave['version'];
 					}
 					if(!empty($mysave)){
-						$dev1=D('device')->where(array('devid'=>$devid,'psn'=>$dev_psn))->save($mysave);
+						$dev1=M('device')->where(array('devid'=>$devid,'psn'=>$dev_psn))->save($mysave);
 						//$dev1=D('device')->save($mysave);
 						//dump($mysave);
 					}
 				}
 			}
 		}
-
-
 
   	foreach($re_devs as $redev){
   			$devid_tmp=$redev['devid'];
@@ -780,29 +853,13 @@ class DatapushV40Controller extends Controller {
   				}
   			}
   	}
-/*
+
 		$devres_count=count($devres);
 		$devres_count=str_pad($devres_count,2,'0',STR_PAD_LEFT);
 		$devres_str=$devres_count.'';
 		foreach($devres as $devre_id){
 				//$string=base_convert($devre_id, 10, 16);
 				$devre_id=str_pad($devre_id,4,'0',STR_PAD_LEFT);
-				$devres_str=$devres_str.$devre_id;
-		}
-*/
-		$devres_count=count($devres);
-		$devres_count=str_pad($devres_count,2,'0',STR_PAD_LEFT);
-		$devres_str=$devres_count.'';
-		foreach($devres as $devre_id){
-				//$string=base_convert($devre_id, 10, 16);
-				$devre_id=str_pad($devre_id,4,'0',STR_PAD_LEFT);
-				$devres_str=$devres_str.$devre_id;
-		}
-		$devres_count=99;
-		$devres_count=str_pad($devres_count,2,'0',STR_PAD_LEFT);
-		$devres_str=$devres_count.'';
-		for($i=0;$i<99;$i++){
-				$devre_id=str_pad($i+30,4,'0',STR_PAD_LEFT);
 				$devres_str=$devres_str.$devre_id;
 		}
 
@@ -816,29 +873,34 @@ class DatapushV40Controller extends Controller {
 			$dev1=D('device')->where($whereredev2)->where(array('psn'=>$psn))->save(array(re_flag=>3));
 		}
 		
+		$stepres_count=0;
+		foreach($step_list as $key=>$step_dev){
+			if(($step_dev['state']&0x03)==0x03){
+				if($step_dev['switch']==0){
+					$step_dev_str=str_pad($key,4,'0',STR_PAD_LEFT);
+					$step_flag='0';
+					$stepres_str=$stepres_str.$step_dev_str.$step_flag;
+					$stepres_count++;
+				}
+			}else if(($step_dev['state']&0x03)==0x01){
+				if($step_list[$key]['switch']==1){
+					$step_dev_str=str_pad($key,4,'0',STR_PAD_LEFT);
+					$step_flag='1';
+					$stepres_str=$stepres_str.$step_dev_str.$step_flag;
+					$stepres_count++;
+				}
+			}
+		}
+		$stepres_count=str_pad($stepres_count,4,'0',STR_PAD_LEFT);
+		$stepres_str=$stepres_count.$stepres_str;
+		
 		if($crc==$sum){
 			$header="OK1".date('YmdHis');
 		}else{
 			$header="OK2".date('YmdHis'); 
 		}
-		$log_flag=1;//0 self log 1 sys log
-		$dump_rate=1;
-		$step_rate=115;
-		
-		$stepres_count=512;
-		$stepres_count=str_pad($stepres_count,4,'0',STR_PAD_LEFT);
-		$stepres_str=$stepres_count.'';
-		for($i=0;$i<100;$i++){
-			$step_dev=str_pad(1+$i,4,'0',STR_PAD_LEFT);
-			$step_flag=1;
-			$stepres_str=$stepres_str.$step_psn.$step_dev.$step_flag;
-		}
-		for($i=100;$i<512;$i++){
-			$step_dev=str_pad(1+$i,4,'0',STR_PAD_LEFT);
-			$step_flag=0;
-			$stepres_str=$stepres_str.$step_psn.$step_dev.$step_flag;
-		}
-		$body=$header.$delay_time.$rate.$log_flag.$dump_rate.$step_rate.$change_str.$footer.$stepres_str.$devres_str;
+			
+		$body=$header.$delay_time.$rate.$log_flag.$dump_rate.$step_rate.$step_setup.$change_str.$footer.$stepres_str.$devres_str;
   	{
         $logdir =$logreq;
         if(!file_exists($logdir)){
@@ -875,18 +937,19 @@ class DatapushV40Controller extends Controller {
 	    $HOUR_DELAY_LEN = 2;
 	    $MIN_DELAY_LEN = 2;
 	    $FREQ_LEN = 1;
-
+	    
 	    $BTSN_LEN = 10;//统编10位1类型,2-4国家编码,5-10区域编码
 	    $BDSN_LEN = 4;//BS字符长度
 	    $BSN_LEN = $BTSN_LEN + $BDSN_LEN;//BS字符长度
 	    $BVS_LEN = 1; //B device version
 
-	    $BRSSI_LEN = 9;
+	    
 	    $BRSSI_MAX_LEN = 1;
-	    $BRSSI_COUNT = 4;
+	    $BRSSI_COUNT = 10;
 	    $BRSSI_SN_LEN = 1;
 	    $BRSSI_SIGN_LEN = 1;
-
+			$BRSSI_LEN = $BRSSI_MAX_LEN+$BRSSI_COUNT*($BRSSI_SN_LEN+$BRSSI_SIGN_LEN);
+			
 	    $CDATA_START = $TIME_LEN + $BSN_LEN + $BVS_LEN + $BRSSI_LEN;
 
 	    $COUNT_LEN = 2; //data的条数
@@ -898,12 +961,12 @@ class DatapushV40Controller extends Controller {
 	    $VAILD_LEN = 1;//有效值个数
 
 			$SENS_LEN  =1;//有效值个数
-			$STEP_LEN  =2;//有效值个数
 			
-			$VALUE_LEN = 9;//data中每个长度
+			$VALUE_LEN = 10;//data中每个长度
+			$VALUE_LEN_NEW = 11;//data中每个长度
 			$COUNT_VALUE = 4;
 
-			$DATA_LEN = ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN+$STEP_LEN)*2+$VALUE_LEN*$COUNT_VALUE; //一条data长度
+			$DATA_LEN = ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN)*2+$VALUE_LEN*$COUNT_VALUE; //一条data长度
 			
 	    $CRC_LEN = 4;//校验码
 	    $post = file_get_contents('php://input');//抓取内容
@@ -911,7 +974,7 @@ class DatapushV40Controller extends Controller {
 	    $str = implode("", $strarr);
 
 
-	    //$str = "32303139313230323135303430303431303836373536333030000280010350000000000000000000220000a00e22430401043121132861144941146461166171178121170000a01019032401043291122891144761146851166431188061170000a011184304a0017751178201ffffffffffffffffffffffffff0000a0121b730400043381123231154911157071166871187961180000a0132a13040004300113308114478114632116626118855118000280972f03140c04099110079110098110110111093111132111000280b73183140204032110046110057110108110102111113111000280d62933140004186111167111165111176111168111177111000280e15123140104200112200112200112210112202112211112000280ef3b83140004078110060111110111145111147111187111000280f12e53140004011110013110023110066110069110099110000280f63123140104088110078110098110111111103111143111000281062e731401040781100981100891100991101121111231110002810f29831402040761100591100771101201111051111331110002811224731400041671111561111751111781111681111981110002811c35231402040231100371100781101111111241111451110002811e5373140104042110029110078110131111126111155111000281232a53340204021110015110045110109110093111123111000281222b231400049990090131100361100881101021111241110002812f2b53140204077110079110099110122111125111145111000281372a33140404033110046110057110109110113111124111000281392d031401040971100811110911111421111461111461110002815057831400043651133471133661133871133791133881130002815031831400043651133471133661133871133791133881130000e00405030400019903380004ffffffffffffffffffffffffff0000e0044d030400010623281002ffffffffffffffffffffffffff0000e0040c030400010623281002ffffffffffffffffffffffffff0002816533831404043771133561133651133661133571133761130000e00411030400010623281002ffffffffffffffffffffffffff0002816f30331402043331133231133321133441133341133441130002817c2a83140204266112266112267112288112289112299112000281ae2d63140204233112224112243112267112268112288112000281ef5d73140204132111119111188111222112215112244112000281ef30731402041321111191111881112221122151122441120000d876";
+	    //$str = "323032303037323431353030313034313038363735363330300000a00a0550000000000000000000000000000000000000000000270225000047622400004312240000418223000000008007425405002b045522260000562226000056322600005522260000000080055d5405002d04363223000035122300003512230000348222000000008005595405002d04363223000035122300003512230000348222000000008005285405002d04363223000035122300003512230000348222000000008006415405413b04449223000045022400004492230000450224000000008007345405002e04552226000052222600005222260000490226000000010adb00ffffffffffff000080064554058000013562230000ffffffffffffffffffffffffffffff000080064354058000013562230000ffffffffffffffffffffffffffffff000080055a5445002b043622230000350223000033822200003492220000000080055a5445002b04362223000035022300003382220000349222000000008005285445002b04362223000035022300003382220000349222000000008005625445002b043622230000350223000033822200003492220000000080064654058000014682240000ffffffffffffffffffffffffffffff000080064754057f3b014682240000ffffffffffffffffffffffffffffff000080072f1455002c045112260000501226000050122600005002260000000080055954050026043262220000340223000033722200003382220000000080052554050026043262220000340223000033722200003382220000000080055b5405002604326222000034022300003372220000338222000000008005615405002604326222000034022300003372220000338222000000008006435405413b014762240000ffffffffffffffffffffffffffffff000080075e54050078044902260000500226000049022600005002260000000080073654050078044902260000500226000049022600005002260000000080055a5405002e043622230000362223000036322300003522230000000080055a5405002e04362223000036222300003632230000352223000000008005235405002e04362223000036222300003632230000352223000000008006415405003b04487224000050922400005102250000498224000000008007395405412b045412260000542226000054222600005322260000000080055b5405412804363223000037622300003632230000362223000000008005585405412804363223000037622300003632230000362223000000008005255405412804363223000037622300003632230000362223000000008005615405412804363223000037622300003632230000362223000000008006415405413a04500225000047622400004312240000418223000000008007425405002b045522260000562226000056322600005522260000000080055d5405002d04363223000035122300003512230000348222000000008005595405002d04363223000035122300003512230000348222000000008005285405002d04363223000035122300003512230000348222000000008006415405413b04449223000045022400004492230000450224000000008007345405002e0455222600005222260000522226000049022600000000e4f8";
 	    $sndir = substr($str, ($TIME_LEN + $BTSN_LEN) * 2, $BDSN_LEN * 2);
 	    $sn_footer = hexdec($sndir) & 0x1fff;
 	    $sn_header = hexdec($sndir) >> 13;
@@ -950,6 +1013,14 @@ class DatapushV40Controller extends Controller {
 	    }
 
 	    $sid = (int)$_GET['sid'] & 0x1fff;
+	    
+	    $hour_delay = substr($str, $DELAY_START * 2, $HOUR_DELAY_LEN * 2);
+	    $hour_delay = (int)pack("H*", $hour_delay);
+	    $min_delay = substr($str, ($DELAY_START + $HOUR_DELAY_LEN) * 2, $HOUR_DELAY_LEN * 2);
+	    $min_delay = (int)pack("H*", $min_delay);
+	    $freq = substr($str, ($DELAY_START + $HOUR_DELAY_LEN + $MIN_DELAY_LEN) * 2, $FREQ_LEN * 2);
+	    $freq = (int)pack("H*", $freq);
+    
 	    $bsnstr = substr($str, $TIME_LEN * 2, $BSN_LEN * 2);
 	    $btsnstr = substr($str, $TIME_LEN * 2, $BTSN_LEN * 2);
 	    $bdsnstr = substr($str, ($TIME_LEN + $BTSN_LEN) * 2, $BDSN_LEN * 2);
@@ -1046,12 +1117,12 @@ class DatapushV40Controller extends Controller {
 	        $brssisnstr = substr($brssistr, $i * ($BRSSI_SN_LEN + $BRSSI_SIGN_LEN) * 2, $BRSSI_SN_LEN * 2);
 
 	        $brssisn[$i] = hexdec($brssisnstr);
-	        if ($brssisn[$i] > 0) {
+	        if ($brssisn > 0) {
 	            $brssisignstr = substr($brssistr, $i * ($BRSSI_SN_LEN + $BRSSI_SIGN_LEN) * 2 + $BRSSI_SN_LEN * 2, $BRSSI_SIGN_LEN * 2);
 	            $brssisign = hexdec($brssisignstr);
 
-	            if (($brssisign & 0x80) == 0x80) {
-	                $bsign[$i] = 0 - ($brssisign & 0x7f);
+	            if (($brssisign & 0x08) == 0x08) {
+	                $bsign[$i] = 0 - ($brssisign & 0x07);
 	            } else {
 	                $bsign[$i] = $brssisign;
 	            }
@@ -1059,21 +1130,32 @@ class DatapushV40Controller extends Controller {
 	            $bsign[$i] = 0;
 	        }
 	    }
-	    $rssi = array(
-	        'psnid' => $psnid,
-	        'station' => 1301,
-	        'bsn' => $bsnint,
-	        'rssi' => $brssimax,
-	        'sn1' => $brssisn[0],
-	        'rssi1' => $bsign[0],
-	        'sn2' => $brssisn[1],
-	        'rssi2' => $bsign[1],
-	        'sn3' => $brssisn[2],
-	        'rssi3' => $bsign[2],
-	        'sn4' => $brssisn[3],
-	        'rssi4' => $bsign[3],
-	        'time' => time(),
-	    );
+			$rssi = array(
+							'psnid'=>$psnid,
+							'bsn'=>$bsnint,
+							'rssi'=>$brssimax,
+							'sn1'=>$brssisn[0],
+							'rssi1'=>$bsign[0],
+							'sn2'=>$brssisn[1],
+							'rssi2'=>$bsign[1],
+							'sn3'=>$brssisn[2],
+							'rssi3'=>$bsign[2],
+							'sn4'=>$brssisn[3],
+							'rssi4'=>$bsign[3],
+							'sn5'=>$brssisn[4],
+							'rssi5'=>$bsign[4],
+							'sn6'=>$brssisn[5],
+							'rssi6'=>$bsign[5],
+							'sn7'=>$brssisn[6],
+							'rssi7'=>$bsign[6],
+							'sn8'=>$brssisn[7],
+							'rssi8'=>$bsign[7],
+							'sn9'=>$brssisn[8],
+							'rssi9'=>$bsign[8],
+							'sn10'=>$brssisn[9],
+							'rssi10'=>$bsign[9],	
+							'time'=>time(),
+							);
 	    $saveRssi=D('brssi')->add($rssi);
 
 	    $count = substr($str, $CDATA_START * 2, $COUNT_LEN * 2);//2为解包后的倍数
@@ -1082,13 +1164,6 @@ class DatapushV40Controller extends Controller {
 	    $env_temp = 0;
 	    $snint = 0;
 	    $battery = 0;
-
-	    $hour_delay = substr($str, $DELAY_START * 2, $HOUR_DELAY_LEN * 2);
-	    $hour_delay = (int)pack("H*", $hour_delay);
-	    $min_delay = substr($str, ($DELAY_START + $HOUR_DELAY_LEN) * 2, $HOUR_DELAY_LEN * 2);
-	    $min_delay = (int)pack("H*", $min_delay);
-	    $freq = substr($str, ($DELAY_START + $HOUR_DELAY_LEN + $MIN_DELAY_LEN) * 2, $FREQ_LEN * 2);
-	    $freq = (int)pack("H*", $freq);
 
 	    $day_begin = strtotime(date('Y-m-d', time()));
 	    $hour_time = 60 * 60;
@@ -1193,10 +1268,11 @@ class DatapushV40Controller extends Controller {
 		        $stastr = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN)*2, $STATE_LEN * 2);
 		        $destr = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN + $STATE_LEN) * 2, $DELAY_LEN * 2);
 			    	$sensstr  = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
-			    	$stepstr  = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$STEP_LEN*2);
+
 		        $sign = 0 - hexdec($signstr);
-		        $cvs = hexdec($cvsstr);
-		        $cvs = $cvs & 0x0f;
+		        $cvst = hexdec($cvsstr);
+		        $cvs = (int)($cvst&0x07);
+		        $step_update =(int)($cvst&0x08);
 		        $cindex = hexdec($cvsstr);
 		        $cindex = ($cindex & 0xf0) >> 4;
 		        $state = hexdec($stastr);
@@ -1210,25 +1286,6 @@ class DatapushV40Controller extends Controller {
 		                $changeid_find = true;
 		                if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
 		                    $change_buf_find=false;
-		                    /*
-								        foreach($change_buf as $ch_tmp)
-								        {
-					        			 	if($ch_tmp['id']==$ch_dev['id']){
-					        			 		$change_buf_find=true;
-					        			 		break;
-					        			 	}
-								        }
-								        if($change_buf_find==false)
-								        {
-			                    $tmp_dev = array(
-			                    		'id'=>$ch_dev['id'],
-			                        'old_psn' => $dev_psn,
-			                        'old_devid' => $snint,
-			                        'new_devid' => $ch_dev['new_devid']
-			                    );
-			                    $change_buf[] = $tmp_dev;
-								        }
-								        */
 		                }else if($ch_dev['flag'] == 3){
 		                	$changeid_find = false;
 		                }
@@ -1275,16 +1332,17 @@ class DatapushV40Controller extends Controller {
 		        $state = $state & $stmp;
 
 			    	if($cvs>3){
-			    		$sens=0-hexdec($sensstr);
-			    		$pre_step=hexdec($stepstr);
-			    		$tempstr=substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN+$STEP_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
-							$vaildstr  = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$STEP_LEN)*2,$VAILD_LEN*2);
+							$sensstr 	 =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
+							$vaildstr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
+			    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
+							$sens=0-hexdec($sensstr);
+							$step_list[$snint]['state']=$state;
 			    	}else{
 							$sens=0;
-			    		$step=0;
-			    		$tempstr=substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
 							$vaildstr  = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$VAILD_LEN*2);
+			    		$tempstr   = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
 			    	}
+
 			    	$vaild = hexdec($vaildstr);
 			    	
 		        if ($type > 0) {
@@ -1305,302 +1363,407 @@ class DatapushV40Controller extends Controller {
 							continue;
 						}
 
-		        for ($j = 0; $j < $vaild; $j++) {
+			    	for($j=0;$j < $vaild;$j++){
+				    	$up_time = $real_time-$interval*$freq+$interval*($j+1)+$interval*($freq-$vaild);
+					    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
+				    	if($cvs>3){
+				    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);
+						    	//echo "tempstr_tmp:";
+						    	//dump($tempstr_tmp);
+					    		if($type==0){
+								    $temp1str1 = substr($tempstr_tmp,3,1);
+							  		$temp1str2 = substr($tempstr_tmp,0,1);
+							    	$temp1str3 = substr($tempstr_tmp,1,1);
+							    	$temp1int =base_convert($temp1str1,16,10);
 
-		            $up_time = $real_time - $interval * $freq + $interval * ($j + 1) + $interval * ($freq - $vaild);
-		            $up_time = strtotime(date('Y-m-d H:i', $up_time) . ':00');
-					    	if($cvs>3){
-					    		if($j==$vaild-1){
-					    			$step=$pre_step;
-					    		}else{
-					    			$step=0;
-					    		}
-					    	}
+							    	$temp2str1 = substr($tempstr_tmp,4,1);
+							  		$temp2str2 = substr($tempstr_tmp,5,1);
+							    	$temp2str3 = substr($tempstr_tmp,2,1);
+							    	$temp2int =base_convert($temp2str1,16,10);
+					    		
+					    			$stepstr = substr($tempstr_tmp,-4);
+					    			$stepint = (int)base_convert($stepstr,16,10);
+					    			
+								    if(($temp1int&0x08)==0x08){
+							    		$temp1str1=$temp1int&0x07;
+							    		if($temp1str1==0){
+							    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+							    		}else{
+							    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+							    		}
+							    	}else{
+								    		if($temp1str1==0){
+								    			$temp1 = $temp1str2.".".$temp1str3;
+								    		}else{
+								    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
+								    		}
+							    	}
 
-		            if ($type == 0) {
-		                if ($j == 0) {
-		                    $temp1str1 = substr($tempstr, 3, 1);
-		                    $temp1str2 = substr($tempstr, 0, 1);
-		                    $temp1str3 = substr($tempstr, 1, 1);
-		                    $temp1int = base_convert($temp1str1, 16, 10);
+									  //var_dump('temp1:'.$temp1);
+									  if(($temp2int&0x08)==0x08){
+									  	$temp2str1=$temp2int&0x07;
+											if($temp2str1 == 0){
+										    $temp2 = '-'.$temp2str2.".".$temp2str3;
+									 	 	}else{
+									 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
+									 	 	}
+								 		}else{
+								 			if($temp2str1 == 0){
+										    $temp2 = $temp2str2.".".$temp2str3;
+									 	 	}else{
+									 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+									 	 	}
+								 			
+								 		}
+								 	
+										$acc_add=array(
+								  				'psn'=>$dev_psn,
+								  				'psnid'=>$psnid,
+										  		'devid'=>$snint,
+										  		'temp1'=>$temp1,
+										  		'temp2'=>$temp1,
+										  		'env_temp'=>$temp2,
+										  		'sign'=>$sign,
+										  		'rssi1'=>$sens,
+										  		'rssi2'=>$stepint,
+										  		'rssi3'=>$step_update,
+										  		'cindex'=>$cindex,
+										  		'lcount'=>$lcount,
+										  		'delay'=>$delay,
+										  		'time' =>$up_time,
+										  		'sid' =>$sid,
+										  	);
 
-		                    $temp2str1 = substr($tempstr, 4, 1);
-		                    $temp2str2 = substr($tempstr, 5, 1);
-		                    $temp2str3 = substr($tempstr, 2, 1);
-		                    $temp2int = base_convert($temp2str1, 16, 10);
+										$dev_save=array(
+													'devid'=>$snint,
+													'psn'=>$dev_psn,
+													'psnid'=>$psnid,
+													'battery'=>$battery,
+										  	 	'dev_state'=>$state,
+										  	 	'version'=>$cvs);
+										  	 	
+										$accadd_list[]=$acc_add;
+										$devsave_list[]=$dev_save;
+									}else{
+										//nothing
+									}
+									$acc1301_list_find = false;
+			            /*
+			            foreach ($acc1301add_list as $acc1301add) {
+			                if ($acc1301add['time'] == $up_time &&
+			                    $acc1301add['psnid'] == $psnid &&
+			                    $acc1301add['psn'] == $dev_psn &&
+			                    $acc1301add['devid'] == $snint) {
+			                    $acc1301_list_find = true;
+			                    break;
+			                }
+			            }
+			            */
+			            if ($acc1301_list_find == false) {
+			                $acc1301_add = array(
+			                    'psn' => $dev_psn,
+			                    'psnid' => $psnid,
+			                    'devid' => $snint,
+			                    'temp1' => $temp1,
+			                    'temp2' => $temp1,
+			                    'env_temp' => $temp2,
+			                    'sign' => $sign,
+										  		'rssi1'=>$sens,
+										  		'rssi2'=>$stepint,
+										  		'rssi3'=>$step_update,
+			                    'cindex' => $cindex,
+			                    'lcount' => $lcount,
+			                    'delay' => $delay,
+			                    'sid' => $sid,
+			                    'time' => $up_time,
+			                );
+			                $acc1301add_list[] = $acc1301_add;
+			            }
+				    	}else{
+					    		if($type==0){
+										if($j==0){
+									    $temp1str1 = substr($tempstr,3,1);
+								  		$temp1str2 = substr($tempstr,0,1);
+								    	$temp1str3 = substr($tempstr,1,1);
+								    	$temp1int =base_convert($temp1str1,16,10);
 
-		                    $temp3str1 = substr($tempstr, 9, 1);
-		                    $temp3str2 = substr($tempstr, 6, 1);
-		                    $temp3str3 = substr($tempstr, 7, 1);
-		                    $temp3int = base_convert($temp3str1, 16, 10);
-		                } else if ($j == 1) {
-		                    $temp1str1 = substr($tempstr, 10, 1);
-		                    $temp1str2 = substr($tempstr, 11, 1);
-		                    $temp1str3 = substr($tempstr, 8, 1);
-		                    $temp1int = base_convert($temp1str1, 16, 10);
+								    	$temp2str1 = substr($tempstr,4,1);
+								  		$temp2str2 = substr($tempstr,5,1);
+								    	$temp2str3 = substr($tempstr,2,1);
+								    	$temp2int =base_convert($temp2str1,16,10);
+								    	
+								    	$temp3str1 = substr($tempstr,9,1);
+								  		$temp3str2 = substr($tempstr,6,1);
+								    	$temp3str3 = substr($tempstr,7,1);
+								    	$temp3int =base_convert($temp3str1,16,10);
+							    	}else if($j==1){
+							    		$temp1str1 = substr($tempstr,10,1);
+								  		$temp1str2 = substr($tempstr,11,1);
+								    	$temp1str3 = substr($tempstr,8,1);
+								    	$temp1int =base_convert($temp1str1,16,10);
+								    	
+								    	$temp2str1 = substr($tempstr,15,1);
+								  		$temp2str2 = substr($tempstr,12,1);
+								    	$temp2str3 = substr($tempstr,13,1);
+								    	$temp2int =base_convert($temp2str1,16,10);
+								    	
+								    	$temp3str1 = substr($tempstr,16,1);
+								  		$temp3str2 = substr($tempstr,17,1);
+								    	$temp3str3 = substr($tempstr,14,1);
+								    	$temp3int =base_convert($temp3str1,16,10);
+							    	}else if($j==2){
+									    $temp1str1 = substr($tempstr,21,1);
+								  		$temp1str2 = substr($tempstr,18,1);
+								    	$temp1str3 = substr($tempstr,19,1);
+								    	$temp1int =base_convert($temp1str1,16,10);
+								    	
+								    	$temp2str1 = substr($tempstr,22,1);
+								  		$temp2str2 = substr($tempstr,23,1);
+								    	$temp2str3 = substr($tempstr,20,1);
+								    	$temp2int =base_convert($temp2str1,16,10);
+								    	
+								    	$temp3str1 = substr($tempstr,27,1);
+								  		$temp3str2 = substr($tempstr,24,1);
+								    	$temp3str3 = substr($tempstr,25,1);
+								    	$temp3int =base_convert($temp3str1,16,10);			    	
+							    	}else if($j==3){
+							    		$temp1str1 = substr($tempstr,28,1);
+								  		$temp1str2 = substr($tempstr,29,1);
+								    	$temp1str3 = substr($tempstr,26,1);
+								    	$temp1int =base_convert($temp1str1,16,10);
 
-		                    $temp2str1 = substr($tempstr, 15, 1);
-		                    $temp2str2 = substr($tempstr, 12, 1);
-		                    $temp2str3 = substr($tempstr, 13, 1);
-		                    $temp2int = base_convert($temp2str1, 16, 10);
+								    	$temp2str1 = substr($tempstr,33,1);
+								  		$temp2str2 = substr($tempstr,30,1);
+								    	$temp2str3 = substr($tempstr,31,1);
+								    	$temp2int =base_convert($temp2str1,16,10);
 
-		                    $temp3str1 = substr($tempstr, 16, 1);
-		                    $temp3str2 = substr($tempstr, 17, 1);
-		                    $temp3str3 = substr($tempstr, 14, 1);
-		                    $temp3int = base_convert($temp3str1, 16, 10);
-		                } else if ($j == 2) {
-		                    $temp1str1 = substr($tempstr, 21, 1);
-		                    $temp1str2 = substr($tempstr, 18, 1);
-		                    $temp1str3 = substr($tempstr, 19, 1);
-		                    $temp1int = base_convert($temp1str1, 16, 10);
+								    	$temp3str1 = substr($tempstr,34,1);
+								  		$temp3str2 = substr($tempstr,35,1);
+								    	$temp3str3 = substr($tempstr,32,1);
+								    	$temp3int =base_convert($temp3str1,16,10);					    	
+							    	}
+					    		
+								    if(($temp1int&0x08)==0x08){
+							    		$temp1str1=$temp1int&0x07;
+							    		if($temp1str1==0){
+							    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+							    		}else{
+							    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+							    		}
+							    	}else{
+								    		if($temp1str1==0){
+								    			$temp1 = $temp1str2.".".$temp1str3;
+								    		}else{
+								    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
+								    		}
+							    	}
 
-		                    $temp2str1 = substr($tempstr, 22, 1);
-		                    $temp2str2 = substr($tempstr, 23, 1);
-		                    $temp2str3 = substr($tempstr, 20, 1);
-		                    $temp2int = base_convert($temp2str1, 16, 10);
+									  //var_dump('temp1:'.$temp1);
+									  if(($temp2int&0x08)==0x08){
+									  	$temp2str1=$temp2int&0x07;
+											if($temp2str1 == 0){
+										    $temp2 = '-'.$temp2str2.".".$temp2str3;
+									 	 	}else{
+									 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
+									 	 	}
+								 		}else{
+								 			if($temp2str1 == 0){
+										    $temp2 = $temp2str2.".".$temp2str3;
+									 	 	}else{
+									 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+									 	 	}
+								 			
+								 		}
+								 	
+								    //var_dump('temp2:'.$temp2);
+								    if(($temp3int&0x08)==0x08){
+								    	$temp3str1=$temp3int&0x07;
+									    if($temp3str1 == 0){
+										    $temp3 = '-'.$temp3str2.".".$temp3str3;
+									 	 	}else{
+									 	 	 	$temp3 = '-'.$temp3str1.$temp3str2.".".$temp3str3;
+									 	 	}
+								 		}else{
+								 			if($temp3str1 == 0){
+										    $temp3 = $temp3str2.".".$temp3str3;
+									 	 	}else{
+									 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
+									 	 	}
+										}
 
-		                    $temp3str1 = substr($tempstr, 27, 1);
-		                    $temp3str2 = substr($tempstr, 24, 1);
-		                    $temp3str3 = substr($tempstr, 25, 1);
-		                    $temp3int = base_convert($temp3str1, 16, 10);
-		                } else if ($j == 3) {
-		                    $temp1str1 = substr($tempstr, 28, 1);
-		                    $temp1str2 = substr($tempstr, 29, 1);
-		                    $temp1str3 = substr($tempstr, 26, 1);
-		                    $temp1int = base_convert($temp1str1, 16, 10);
+										$acc_add=array(
+								  				'psn'=>$dev_psn,
+								  				'psnid'=>$psnid,
+										  		'devid'=>$snint,
+										  		'temp1'=>$temp1,
+										  		'temp2'=>$temp2,
+										  		'env_temp'=>$temp3,
+										  		'sign'=>$sign,
+										  		'rssi1'=>0,
+										  		'rssi2'=>0,
+										  		'rssi3'=>0,
+										  		'cindex'=>$cindex,
+										  		'lcount'=>$lcount,
+										  		'delay'=>$delay,
+										  		'time' =>$up_time,
+										  		'sid' =>$sid,
+										  	);
+										$dev_save=array(
+													'devid'=>$snint,
+													'psn'=>$dev_psn,
+													'psnid'=>$psnid,
+													'battery'=>$battery,
+										  	 	'dev_state'=>$state,
+										  	 	'version'=>$cvs);
+										  	 	
+										$accadd_list[]=$acc_add;
+										$devsave_list[]=$dev_save;
+									}else{
+										if($j==0){
+									    $temp1str1 = substr($tempstr,3,1);
+								  		$temp1str2 = substr($tempstr,0,1);
+								    	$temp1str3 = substr($tempstr,1,1);
+								    	$temp1int =base_convert($temp1str1,16,10);
 
-		                    $temp2str1 = substr($tempstr, 33, 1);
-		                    $temp2str2 = substr($tempstr, 30, 1);
-		                    $temp2str3 = substr($tempstr, 31, 1);
-		                    $temp2int = base_convert($temp2str1, 16, 10);
+								    	$temp2str1 = substr($tempstr,4,1);
+								  		$temp2str2 = substr($tempstr,5,1);
+								    	$temp2str3 = substr($tempstr,2,1);
+								    	
+								    	$temp3str1 = substr($tempstr,9,1);
+								  		$temp3str2 = substr($tempstr,6,1);
+								    	$temp3str3 = substr($tempstr,7,1);
+							    	}else if($j==1){
+							    		$temp1str1 = substr($tempstr,10,1);
+								  		$temp1str2 = substr($tempstr,11,1);
+								    	$temp1str3 = substr($tempstr,8,1);
+								    	$temp1int =base_convert($temp1str1,16,10);
+								    	
+								    	$temp2str1 = substr($tempstr,15,1);
+								  		$temp2str2 = substr($tempstr,12,1);
+								    	$temp2str3 = substr($tempstr,13,1);	
+								    	
+								    	$temp3str1 = substr($tempstr,16,1);
+								  		$temp3str2 = substr($tempstr,17,1);
+								    	$temp3str3 = substr($tempstr,14,1);	
+							    	}else if($j==2){
+									    $temp1str1 = substr($tempstr,21,1);
+								  		$temp1str2 = substr($tempstr,18,1);
+								    	$temp1str3 = substr($tempstr,19,1);
+								    	$temp1int =base_convert($temp1str1,16,10);
+								    	
+								    	$temp2str1 = substr($tempstr,22,1);
+								  		$temp2str2 = substr($tempstr,23,1);
+								    	$temp2str3 = substr($tempstr,20,1);
+								    	
+								    	$temp3str1 = substr($tempstr,27,1);
+								  		$temp3str2 = substr($tempstr,24,1);
+								    	$temp3str3 = substr($tempstr,25,1);					    	
+							    	}else if($j==3){
+							    		$temp1str1 = substr($tempstr,28,1);
+								  		$temp1str2 = substr($tempstr,29,1);
+								    	$temp1str3 = substr($tempstr,26,1);
+								    	$temp1int =base_convert($temp1str1,16,10);
 
-		                    $temp3str1 = substr($tempstr, 34, 1);
-		                    $temp3str2 = substr($tempstr, 35, 1);
-		                    $temp3str3 = substr($tempstr, 32, 1);
-		                    $temp3int = base_convert($temp3str1, 16, 10);
-		                }
+								    	$temp2str1 = substr($tempstr,33,1);
+								  		$temp2str2 = substr($tempstr,30,1);
+								    	$temp2str3 = substr($tempstr,31,1);	
 
-		                if (($temp1int & 0x08) == 0x08) {
-		                    $temp1str1 = $temp1int & 0x07;
-		                    if ($temp1str1 == 0) {
-		                        $temp1 = '-' . $temp1str2 . "." . $temp1str3;
-		                    } else {
-		                        $temp1 = '-' . $temp1str1 . $temp1str2 . "." . $temp1str3;
-		                    }
-		                } else {
-		                    if ($temp1str1 == 0) {
-		                        $temp1 = $temp1str2 . "." . $temp1str3;
-		                    } else {
-		                        $temp1 = $temp1str1 . $temp1str2 . "." . $temp1str3;
-		                    }
-		                }
+								    	$temp3str1 = substr($tempstr,34,1);
+								  		$temp3str2 = substr($tempstr,35,1);
+								    	$temp3str3 = substr($tempstr,32,1);						    	
+							    	}
 
-		                //var_dump('temp1:'.$temp1);
-		                if (($temp2int & 0x08) == 0x08) {
-		                    $temp2str1 = $temp2int & 0x07;
-		                    if ($temp2str1 == 0) {
-		                        $temp2 = '-' . $temp2str2 . "." . $temp2str3;
-		                    } else {
-		                        $temp2 = '-' . $temp2str1 . $temp2str2 . "." . $temp2str3;
-		                    }
-		                } else {
-		                    if ($temp2str1 == 0) {
-		                        $temp2 = $temp2str2 . "." . $temp2str3;
-		                    } else {
-		                        $temp2 = $temp2str1 . $temp2str2 . "." . $temp2str3;
-		                    }
+								    if(($temp1int&0x08)==0x08){
+							    		$temp1str1=$temp1int&0x07;
+							    		if($temp1str1==0){
+							    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+							    		}else{
+							    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+							    		}
+							    	}else{
+								    		if($temp1str1==0){
+								    			$temp1 = $temp1str2.".".$temp1str3;
+								    		}else{
+								    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
+								    		}
+							    	}
 
-		                }
+									  //var_dump('temp1:'.$temp1);
+										if($temp2str1 == 0){
+									    $temp2 = $temp2str2.".".$temp2str3;
+								 	 	}else{
+								 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+								 	 	}
+								    //var_dump('temp2:'.$temp2);
+								    if($temp3str1 == 0){
+									    $temp3 = $temp3str2.".".$temp3str3;
+								 	 	}else{
+								 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
+								 	 	}
+					    
+								  	$acc_add2=array(
+								   	  'psn'=>$dev_psn,
+								   	  'psnid'=>$psnid,
+								  		'devid'=>$snint,
+								  		'temp1'=>$temp1,
+								  		'temp2'=>$temp2,
+							  			'env_temp'=>$temp3,
+							  			'sign'=>$sign,
+								  		'cindex'=>$cindex,
+								  		'lcount'=>$lcount,
+								  		'delay'=>$delay,
+								  		'time' =>$up_time,
+								  		'sid' =>$sid,
+								  	);
 
-		                //var_dump('temp2:'.$temp2);
-		                if (($temp3int & 0x08) == 0x08) {
-		                    $temp3str1 = $temp3int & 0x07;
-		                    if ($temp3str1 == 0) {
-		                        $temp3 = '-' . $temp3str2 . "." . $temp3str3;
-		                    } else {
-		                        $temp3 = '-' . $temp3str1 . $temp3str2 . "." . $temp3str3;
-		                    }
-		                } else {
-		                    if ($temp3str1 == 0) {
-		                        $temp3 = $temp3str2 . "." . $temp3str3;
-		                    } else {
-		                        $temp3 = $temp3str1 . $temp3str2 . "." . $temp3str3;
-		                    }
-		                }
+										$dev_save2=array(
+																		'devid'=>$snint,
+																		'psn'=>$dev_psn,
+																		'psnid'=>$psnid,
+																		'battery'=>$battery,
+															  	 	'dev_state'=>$state,
+															  	 	'version'=>$cvs);
 
-		                $acc_list_find = false;
-		                foreach ($accadd_list as $accadd) {
-		                    if ($accadd['time'] == $up_time &&
-		                        $accadd['psn'] == $dev_psn &&
-		                        $accadd['devid'] == $snint) {
-		                        $acc_list_find = true;
-		                        break;
-		                    }
-		                }
-		                if ($acc_list_find == false) {
-		                    $acc_add = array(
-		                        'psn' => $dev_psn,
-		                        'psnid' => $psnid,
-		                        'devid' => $snint,
-		                        'temp1' => $temp1,
-		                        'temp2' => $temp2,
-		                        'env_temp' => $temp3,
-		                        'sign' => $sign,
-														'rssi1'=>$sens,
-														'rssi2'=>$step,
-														'rssi3'=>$battery,
-		                        'cindex' => $cindex,
-		                        'lcount' => $lcount,
-		                        'delay' => $delay,
-		                        'time' => $up_time,
-		                        'sid' => $sid,
-		                    );
-		                    $accadd_list[] = $acc_add;
-		                }
-		            } else {
-		                if ($j == 0) {
-		                    $temp1str1 = substr($tempstr, 3, 1);
-		                    $temp1str2 = substr($tempstr, 0, 1);
-		                    $temp1str3 = substr($tempstr, 1, 1);
-		                    $temp1int = base_convert($temp1str1, 16, 10);
-
-		                    $temp2str1 = substr($tempstr, 4, 1);
-		                    $temp2str2 = substr($tempstr, 5, 1);
-		                    $temp2str3 = substr($tempstr, 2, 1);
-
-		                    $temp3str1 = substr($tempstr, 9, 1);
-		                    $temp3str2 = substr($tempstr, 6, 1);
-		                    $temp3str3 = substr($tempstr, 7, 1);
-		                } else if ($j == 1) {
-		                    $temp1str1 = substr($tempstr, 10, 1);
-		                    $temp1str2 = substr($tempstr, 11, 1);
-		                    $temp1str3 = substr($tempstr, 8, 1);
-		                    $temp1int = base_convert($temp1str1, 16, 10);
-
-		                    $temp2str1 = substr($tempstr, 15, 1);
-		                    $temp2str2 = substr($tempstr, 12, 1);
-		                    $temp2str3 = substr($tempstr, 13, 1);
-
-		                    $temp3str1 = substr($tempstr, 16, 1);
-		                    $temp3str2 = substr($tempstr, 17, 1);
-		                    $temp3str3 = substr($tempstr, 14, 1);
-		                } else if ($j == 2) {
-		                    $temp1str1 = substr($tempstr, 21, 1);
-		                    $temp1str2 = substr($tempstr, 18, 1);
-		                    $temp1str3 = substr($tempstr, 19, 1);
-		                    $temp1int = base_convert($temp1str1, 16, 10);
-
-		                    $temp2str1 = substr($tempstr, 22, 1);
-		                    $temp2str2 = substr($tempstr, 23, 1);
-		                    $temp2str3 = substr($tempstr, 20, 1);
-
-		                    $temp3str1 = substr($tempstr, 27, 1);
-		                    $temp3str2 = substr($tempstr, 24, 1);
-		                    $temp3str3 = substr($tempstr, 25, 1);
-		                } else if ($j == 3) {
-		                    $temp1str1 = substr($tempstr, 28, 1);
-		                    $temp1str2 = substr($tempstr, 29, 1);
-		                    $temp1str3 = substr($tempstr, 26, 1);
-		                    $temp1int = base_convert($temp1str1, 16, 10);
-
-		                    $temp2str1 = substr($tempstr, 33, 1);
-		                    $temp2str2 = substr($tempstr, 30, 1);
-		                    $temp2str3 = substr($tempstr, 31, 1);
-
-		                    $temp3str1 = substr($tempstr, 34, 1);
-		                    $temp3str2 = substr($tempstr, 35, 1);
-		                    $temp3str3 = substr($tempstr, 32, 1);
-		                }
-
-		                if (($temp1int & 0x08) == 0x08) {
-		                    $temp1str1 = $temp1int & 0x07;
-		                    if ($temp1str1 == 0) {
-		                        $temp1 = '-' . $temp1str2 . "." . $temp1str3;
-		                    } else {
-		                        $temp1 = '-' . $temp1str1 . $temp1str2 . "." . $temp1str3;
-		                    }
-		                } else {
-		                    if ($temp1str1 == 0) {
-		                        $temp1 = $temp1str2 . "." . $temp1str3;
-		                    } else {
-		                        $temp1 = $temp1str1 . $temp1str2 . "." . $temp1str3;
-		                    }
-		                }
-		                if ($temp2str1 == 0) {
-		                    $temp2 = $temp2str2 . "." . $temp2str3;
-		                } else {
-		                    $temp2 = $temp2str1 . $temp2str2 . "." . $temp2str3;
-		                }
-		                if ($temp3str1 == 0) {
-		                    $temp3 = $temp3str2 . "." . $temp3str3;
-		                } else {
-		                    $temp3 = $temp3str1 . $temp3str2 . "." . $temp3str3;
-		                }
-
-		                $tacc_list_find = false;
-		                foreach ($taccadd_list as $taccadd) {
-		                    if ($taccadd['time'] == $up_time &&
-		                        $taccadd['psn'] == $dev_psn &&
-		                        $taccadd['devid'] == $snint) {
-		                        $tacc_list_find = true;
-		                        break;
-		                    }
-		                }
-		                if ($tacc_list_find == false) {
-		                    $tacc_add = array(
-		                        'psn' => $dev_psn,
-		                        'psnid' => $psnid,
-		                        'devid' => $snint,
-		                        'temp1' => $temp1,
-		                        'temp2' => $temp2,
-		                        'env_temp' => $temp3,
-		                        'sign' => $sign,
-														'rssi1'=>$sens,
-														'rssi2'=>$step,
-														'rssi3'=>$battery,
-		                        'cindex' => $cindex,
-		                        'lcount' => $lcount,
-		                        'delay' => $delay,
-		                        'time' => $up_time,
-		                        'sid' => $sid,
-		                    );
-		                    $taccadd_list[] = $tacc_add;
-		                }
-		            }
-
-		            $acc1301_list_find = false;
-		            foreach ($acc1301add_list as $acc1301add) {
-		                if ($acc1301add['time'] == $up_time &&
-		                    $acc1301add['psnid'] == $psnid &&
-		                    $acc1301add['psn'] == $dev_psn &&
-		                    $acc1301add['devid'] == $snint) {
-		                    $acc1301_list_find = true;
-		                    break;
-		                }
-		            }
-		            if ($acc1301_list_find == false) {
-		                $acc1301_add = array(
-		                    'psn' => $dev_psn,
-		                    'psnid' => $psnid,
-		                    'devid' => $snint,
-		                    'temp1' => $temp1,
-		                    'temp2' => $temp2,
-		                    'env_temp' => $temp3,
-		                    'sign' => $sign,
-												'rssi1'=>$sens,
-												'rssi2'=>$step,
-												'rssi3'=>$battery,
-		                    'cindex' => $cindex,
-		                    'lcount' => $lcount,
-		                    'delay' => $delay,
-		                    'sid' => $sid,
-		                    'time' => $up_time,
-		                );
-		                $acc1301add_list[] = $acc1301_add;
-		            }
-		        }
+										$accadd_list2[]=$acc_add2;
+										$devsave_list[]=$dev_save2;
+									}
+									$acc1301_list_find = false;
+			            /*
+			            foreach ($acc1301add_list as $acc1301add) {
+			                if ($acc1301add['time'] == $up_time &&
+			                    $acc1301add['psnid'] == $psnid &&
+			                    $acc1301add['psn'] == $dev_psn &&
+			                    $acc1301add['devid'] == $snint) {
+			                    $acc1301_list_find = true;
+			                    break;
+			                }
+			            }
+			            */
+			            if ($acc1301_list_find == false) {
+			                $acc1301_add = array(
+			                    'psn' => $dev_psn,
+			                    'psnid' => $psnid,
+			                    'devid' => $snint,
+			                    'temp1' => $temp1,
+			                    'temp2' => $temp2,
+			                    'env_temp' => $temp3,
+			                    'sign' => $sign,
+										  		'rssi1'=>0,
+										  		'rssi2'=>0,
+										  		'rssi3'=>0,
+			                    'cindex' => $cindex,
+			                    'lcount' => $lcount,
+			                    'delay' => $delay,
+			                    'sid' => $sid,
+			                    'time' => $up_time,
+			                );
+			                $acc1301add_list[] = $acc1301_add;
+			            }
+				    	}
+						}
 		    }
 	  	}
+
 	    if(strlen($psn_err_log)>0)
 	    {
 	        $logdir = $logerror;
@@ -1626,14 +1789,6 @@ class DatapushV40Controller extends Controller {
 	        fwrite($newFile, $psn_err_log);
 	        fclose($newFile); //关闭文件
 	    }
-
-
-	    //dump($psn_list);
-	    //dump($tpsn_list);
-
-
-	    //dump($accadd_list);
-	    //dump($acc1301add);
 
 	    foreach ($psn_list as $psn_buf){
 	        $psn_buf_psnid=$psn_buf['psnid'];
@@ -1683,23 +1838,18 @@ class DatapushV40Controller extends Controller {
 
 	        }
 	    }
+
     	$mydb='access_'.$psn;
 	    $user=D($mydb);
 	    $ret=$user->addAll($accadd_list);
-	    //dump('access list:');
-	    //dump($accadd_list);
 
 			$mydb1301='access1301_'.$psn;
 	    $user1301=D($mydb1301);
 	    $ret=$user1301->addAll($acc1301addall);
-	    //dump('access1301 list:');
-	    //dump($acc1301addall);
-
+			
 	    $tuser=D('taccess');
-	    $ret=$tuser->addAll($taccadd_list);
-	    //dump('taccess list:');
-	    //dump($taccadd_list);
-	    
+	    $ret=$tuser->addAll($accadd_list2);
+	  
 	    $chuser=D('changeidlog');
 	    $ret=$chuser->addAll($change_add);
 	     
