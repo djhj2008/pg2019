@@ -73,7 +73,7 @@ class ProductController extends HomeController {
 			dump('productno:'.$productno);		
 			$product=M($mytab)->select();
 			//dump($product);		
-    	foreach($product as $v){
+    		foreach($product as $v){
     		$snstr = $v['sn'];
 				$sn_start=strlen($snstr)-4;
   			$psn = substr($snstr,0,$sn_start);
@@ -1346,7 +1346,7 @@ class ProductController extends HomeController {
 		$sn=$_POST['sn'];
 		if($sn){
 			$rid=(int)$sn;
-			$dev=M('device')->where(array('flag'=>1,'rid'=>$rid))->order('time desc')->find();
+			$dev=M('device')->where(array('rid'=>$rid))->where('flag!=2')->order('time desc')->find();
 			if($dev){
 	      $psn=$dev['psn'];
 	      $devid=$dev['devid'];
@@ -1355,7 +1355,7 @@ class ProductController extends HomeController {
 			}
 		}else{
 			$rid=(int)$_GET['sn'];
-			$dev=M('device')->where(array('flag'=>1,'rid'=>$rid))->order('time desc')->find();
+			$dev=M('device')->where(array('rid'=>$rid))->where('flag!=2')->order('time desc')->find();
 			if($dev){
 	      $psn=$dev['psn'];
 	      $devid=$dev['devid'];
@@ -1405,7 +1405,7 @@ class ProductController extends HomeController {
 		$ret=M('device')->where($wherenone)->save(array('flag'=>3));
 		echo 'add sale';
 		dump($ret);
-		$changeid=M('changeidlog')->where(array('flag'=>3))->where('old_psn >=30 and old_psn <=39')->select();
+		$changeid=M('changeidlog')->where(array('flag'=>3))->select();
 		
 		foreach($changeid as $dev){
 			//$ridlist[]=$dev['rfid'];
@@ -1568,7 +1568,7 @@ class ProductController extends HomeController {
 							$psn_now=$acc['psnid'];
 							$sign=$acc['sign'];
 						}
-						$psnid_count[$acc['psnid']]=$psnid_count[$acc['psnid']]+1;
+						$psnid_count[$acc['psnid']]+=1;
 					}
 				}
 				

@@ -39,8 +39,8 @@ class LongdxController extends HomeController {
 		    		exit;
     			}
     	}else{
-					$devnone=M('device')->where('psnid>=30 and psnid<=39')->where(array('cow_state'=>4))->select();
-					$devnlow=M('device')->where('psnid>=30 and psnid<=39')->where(array('cow_state'=>5))->select();
+					$devnone=M('device')->where(array('cow_state'=>4))->select();
+					$devnlow=M('device')->where(array('cow_state'=>5))->select();
 					
 					foreach($devnone as $dev){
 						$cow['sn']=str_pad($dev['rid'],9,'0',STR_PAD_LEFT);
@@ -68,7 +68,8 @@ class LongdxController extends HomeController {
     	$now=time();
 			//dump($token);
 			//dump($now-$token);
-    	if(!$token||$token< $now-60*5||$token>$now){
+			//dump($token-$now);
+    	if(!$token||$token< $now-60*5||$token>$now+60){
     		$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
     		echo json_encode($jarr);
     		exit;
@@ -79,10 +80,10 @@ class LongdxController extends HomeController {
       }
       $rid=(int)$sn;
       $sn=str_pad($sn,9,'0',STR_PAD_LEFT);
-			$dev = M('device')->field('psn,devid,psnid,rid,avg_temp')->where(array('rid'=>$rid,'flag'=>1))->order('time desc')->find();
+			$dev = M('device')->field('psn,devid,psnid,rid,avg_temp,psn_now,cow_state')->where(array('rid'=>$rid))->where('flag!=2')->order('time desc')->find();
 			$psn=$dev['psn'];
 			$devid=$dev['devid'];
-			
+			$psn_now=$dev['psn_now'];
 			$psnfind = M('psn')->where(array('id'=>$psn))->find();
 			if(empty($psnfind)){
 				echo "PSN NULL.";
@@ -99,65 +100,86 @@ class LongdxController extends HomeController {
 			//dump($dev);
     	$avg=(float)$dev['avg_temp'];
     	//dump($avg);
-			if(empty($dev)){
-    		$jarr=array('ret'=>array('ret_message'=>'sn error','status_code'=>10000301));
-    		echo json_encode($jarr);
-    		exit;
-			}
-			if($dev['cow_state']==4){
-    		$jarr=array('ret'=>array('ret_message'=>'sn error','status_code'=>10000301));
-    		echo json_encode($jarr);
-    		exit;
-			}
-			$now = time();
-			$time =date('Y-m-d',$now);
-			$start_time = strtotime($time)-86400;
-			$end_time = strtotime($time)+86400;	
-			
-			$mydb='access_'.$psn;
-			$acclist=M($mydb)->field('temp1,temp2,time')->where(array('devid'=>$devid,'psn'=>$psn))->where('time >= '.$start_time.' and time <= '.$end_time)
-													        ->group('time')
-													        ->limit(0,48)
-													        ->order('time asc')
-													        ->select();
-												        
-			if(empty($acclist)){
-	    	for($i=30;$i<40;$i++){
-	    		$mydb='access1301_'.$i;
+		if(empty($dev)){
+		$jarr=array('ret'=>array('ret_message'=>'sn error','status_code'=>10000301));
+		echo json_encode($jarr);
+		exit;
+		}
+		if($dev['cow_state']==4){
+		//$jarr=array('ret'=>array('ret_message'=>'sn error','status_code'=>10000301));
+		//echo json_encode($jarr);
+		//exit;
+		}
+		$now = time();
+		$time =date('Y-m-d',$now);
+		$start_time = strtotime($time)-86400*6;
+		$end_time = strtotime($time)+86400;	
+		$delay=7200;
+    	$cur_time = $now - $start_time-86400;
+    	$cur_time = (int)($cur_time/$delay)*$delay;
+    	$first_time = $cur_time+$start_time;
+    	
+    	//dump($cur_time);
+    	$count=($cur_time-7200)/3600;
+    	$count=24+$count;
+			if($psn_now>0){
+	    		$mydb='access1301_'.$psn_now;
 	    		$acclist=M($mydb)->where(array('psn'=>$psn,'devid'=>$devid))->where('time >= '.$start_time.' and time <= '.$end_time)
+	    														->field('temp1,temp2,time')
 	    														->group('time')
-													        ->limit(0,48)
 													        ->order('time asc')
 													        ->select();
-					if($acclist){
-						break;
-					}
-	    	}
+			}else{
+				$mydb='access_'.$psn;
+				$acclist=M($mydb)->field('temp1,temp2,time')->where(array('devid'=>$devid,'psn'=>$psn))->where('time >= '.$start_time.' and time <= '.$end_time)
+														        ->group('time')
+														        ->order('time asc')
+														        ->select();
+			}
+											        
+			//dump($acclist);
+			
+			if(empty($acclist)){
+    		$jarr=array('ret'=>array('ret_message'=>'sn error','status_code'=>10000301));
+    		echo json_encode($jarr);
+    		exit;
 			}
 			
-			//dump($acclist);
-			if($avg>0){
-				for($i=0;$i<count($acclist);$i++){
-	        		$temp1=$acclist[$i]['temp1'];
-	        		$temp2=$acclist[$i]['temp2'];
-	        		$temp3=$acclist[$i]['env_temp'];
+
+				foreach($acclist as $key=>$acc){
+	        	$temp1=$acc['temp1'];
+	        	$temp2=$acc['temp2'];
+	        	//dump($acc['time']);
+						if($avg>0){
 							$a=array($temp1,$temp2);
 							$t=max($a);
 							$vt=(float)$t;
 							if($vt < 32){
 								if($ntemp>32){
-									$ntemp=$ntemp;
+									if($dev['cow_state']==5){
+										$ntemp=$vt;
+									}else{
+										$ntemp=$ntemp;
+									}
 								}else{
 									$ntemp=$vt;
 								}
 							}else{
 								$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
 							}
-	        		//$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
-	        		$acclist[$i]['temp1']=$ntemp;
-				}
-			}
-  		$jarr=array('ret'=>array('ret_message'=>'success','status_code'=>10000100,'data'=>$acclist));
+						}else{
+							$a=array($temp1,$temp2);
+							$t=max($a);
+							$vt=(float)$t;
+							$ntemp=$vt;
+						}
+						
+						$acclist[$key]['temp1']=$ntemp;
+						$acclist[$key]['cur_time']=date('Y-m-d H:i:s',$acc['time']);
+				  }
+
+
+  		$jarr=array('ret'=>array('ret_message'=>'success','status_code'=>10000100,'avg'=>$avg,'data'=>$acclist));
   		echo json_encode($jarr);
 			exit;
     }
@@ -170,12 +192,32 @@ class LongdxController extends HomeController {
     	if(!$token||$token< $now-60*5||$token>$now){
     		$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
     		echo json_encode($jarr);
-    		exit;
+    		//exit;
     	}
-      $phone=$_POST['phone']; 
-      if(empty($phone)){
-      	$phone=$_GET['phone'];
-      }
+			$phone=$_POST['phone']; 
+			if(empty($phone)){
+				$phone=$_GET['phone'];
+			}
+			
+			/*
+			$mode=M('','','DB_CONFIG');
+			$admins=$mode->table('admins')->where(array('role_id'=>4,'type'=>1))->select();
+			
+			foreach($admins as $admin){
+				$phone_list[]=$admin['phone'];
+			}
+
+			$index =  in_array($phone,$phone_list);
+			if($index){
+		    	$now=time();
+		    	$time_out=$now+60*10;
+					$data['obj']="312666";
+					$data['timeout']=$time_out;
+		  		$jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100,'data'=>$data));
+		  		echo json_encode($jarr);
+		  		exit;
+			}
+			*/
 
     	$now=time();
     	$time_out=$now+60*10;
@@ -183,6 +225,7 @@ class LongdxController extends HomeController {
 			if($ret['code']==200){
 				$data['obj']=$ret['obj'];
 				$data['timeout']=$time_out;
+				//dump($data);
 	  		$jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100,'data'=>$data));
 	  		echo json_encode($jarr);
 			}else{
@@ -206,11 +249,11 @@ class LongdxController extends HomeController {
 	            mkdir($logdir);
 	        }
 	          			
-	        $filename = date("Ymd_His_").mt_rand(10, 99).".bmp"; //��ͼƬ����
-	        $newFilePath = $logdir.$filename;//ͼƬ����·��
-	        $newFile = fopen($newFilePath,"w"); //���ļ�׼��д��
+	        $filename = date("Ymd_His_").mt_rand(10, 99).".log"; //ÐÂÍ¼Æ¬Ãû³Æ
+	        $newFilePath = $logdir.$filename;//Í¼Æ¬´æÈëÂ·¾¶
+	        $newFile = fopen($newFilePath,"w"); //´ò¿ªÎÄ¼þ×¼±¸Ð´Èë
 	        fwrite($newFile,$post);
-	        fclose($newFile); //�ر��ļ�
+	        fclose($newFile); //¹Ø±ÕÎÄ¼þ
 	           
 	    }
 
@@ -233,32 +276,33 @@ class LongdxController extends HomeController {
 			
 			//dump($type);
 			//dump($cmd);
-
-			if($type==1){
-				$tmp='14860115';
-			}else if($type==2){
-				$tmp='14854123';
-			}else if($type==11){
-				$tmp='14867046';
+			$arr_type=[' ORDER_SMS_NUM'=>'14860115', 'LACTATION_CYCLE'=>'14860115', 'PREGNANCY_LOOK'=>'14871375', 'COW_PREGNANCY'=>'14854123','PREGNANCY_CYCLE'=>'14876424'];
+			if (array_key_exists($type,$arr_type)){
+				$tmp=$arr_type[$type];
 			}else{
-				$tmp='14860115';
+	      $jarr=array('ret'=>array('ret_message'=>'fail','status_code'=>10000101,'msg_type'=>$type));
+		  	echo json_encode($jarr);
+		  	exit;
 			}
-			
+	
 			foreach($array['msg'] as $msg){
 				//dump($msg['phone']);
 				unset($phone);
 				unset($smsmsg);
 				$phone[]=$msg['phone'];
-				$other='SN:';
+				$foot='防疫码:';
+				//$foot=iconv("GBK", "UTF-8", $foot); 
+				$other=$foot;
+				//dump($other);
 				for($i=0;$i<count($msg['sn']);$i++){
 					$sn=$msg['sn'][$i];
 					//dump($sn);
 					//$psn=(int)substr($sn,0,5);
-      		$devid=(int)substr($sn,5,4);
+      		$devid=substr($sn,-8);
 					if($i==0){
 						$other=$other.$devid;
 					}else{
-						if(strlen($other)>=25){
+						if(strlen($other)>=24){
 							$other=$other.'...';
 							break;
 						}else{
@@ -266,14 +310,11 @@ class LongdxController extends HomeController {
 						}
 					}
 				}
-				$ohter=$other;
-				$smsmsg[]=$msg['name'];
-				$smsmsg[]=$ohter;
+
+				$smsmsg[]=$msg['town'].$msg['village'].$msg['name'];
+				$smsmsg[]=$other;
 				//dump($smsmsg);
-				if($type==11){
-					send163msgtmp($phone,$smsmsg,$tmp);
-				}
-				//send163msg($phone,$smsmsg);
+				send163msgtmp($phone,$smsmsg,$tmp);
 			}
       $jarr=array('ret'=>array('ret_message'=>'sucess','status_code'=>10000100,'msg_type'=>$type));
 	  	echo json_encode($jarr);

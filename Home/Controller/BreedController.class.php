@@ -18,9 +18,9 @@ class BreedController extends Controller {
 
 
 			$this->assign('breedlist',$breedlist);
-	    $this->assign('date',$time);
-	    $this->assign('date2',$time2);
-	    $this->assign('count',$alarm_b);
+		    $this->assign('date',$time);
+		    $this->assign('date2',$time2);
+		    $this->assign('count',$alarm_b);
 			$this->display();
 		}
 		
@@ -416,7 +416,7 @@ class BreedController extends Controller {
 					$sn=str_pad($sn,9,'0',STR_PAD_LEFT);
 			    $psn=(int)substr($sn,0,5);
 			    $devid=(int)substr($sn,5,4);
-					$dev=$pg->table('device')->field('psn_now,avg_temp')->where(array('rid'=>$rid))->find();
+					$dev=$pg->table('device')->field('psn_now,avg_temp')->where(array('rid'=>$rid,'flag'=>1))->find();
 					if($dev){
 						$temp_avg=(float)$dev['avg_temp'];
 						if($dev['psn_now']==0){
@@ -425,6 +425,7 @@ class BreedController extends Controller {
 							$mytable='access1301_'.$dev['psn_now'];
 						}
 						dump($mytable);
+						unset($acc_list);
 						$acc_list=$pg->table($mytable)->field('temp1,temp2,time')
 													->where(array('psn'=>$psn,'devid'=>$devid))
 													->where('time>'.$start_time)
@@ -434,6 +435,10 @@ class BreedController extends Controller {
 													->order('time desc')
 													->limit(0,$temp_count)
 													->select();
+													
+						if(empty($acc_list)){
+							continue;
+						}						
 						//dump($acc_list);
 						$today = strtotime(date('H:i:s',time()));
 						//dump($sn);
@@ -442,8 +447,12 @@ class BreedController extends Controller {
 						$v=0;
 						$temp_time=0;
 						$cur_count=0;
-
+						$temp_now=0;
+						
 						foreach($acc_list as $acc){
+							if($acc['time']<= $start_time){
+								break;
+							}
 							$a=array($acc['temp1'],$acc['temp2']);
 							$t=max($a);
 							if($v < $t){
@@ -453,7 +462,9 @@ class BreedController extends Controller {
 							$sum_temp+=$t;
 							$cur_count++;
 						}
-						$temp_now=number_format($sum_temp/$cur_count,2);
+						if($sum_temp>0){
+							$temp_now=number_format($sum_temp/$cur_count,2);
+						}
 
 						//dump($temp_avg);
 						//dump($temp_now);
@@ -565,7 +576,7 @@ class BreedController extends Controller {
     	dump(date('Y-m-d H:i:s',$end_time));
     	
     	$brssi = M('brssi')->where(array('station'=>1278))->where('time>='.$end_time.' and time<='.$first_time)->select();
-    	
+
     	foreach($bdevice as $s){
     		$psn=$s['psn'];
     		$sid=$s['id'];
@@ -577,6 +588,7 @@ class BreedController extends Controller {
 						$v++;
 					}
 				}
+
 				$s['times']=$v;
     		if($v>$times){
     			$bdev_assert[]=$s['autoid'];
@@ -614,7 +626,7 @@ class BreedController extends Controller {
 			     	$other_head1=iconv("GBK", "UTF-8", $other_head1); 
 			     	$other_foot1=iconv("GBK", "UTF-8", $other_foot1);
 			     	$smsmsg[]=$other_head1;
-						$smsmsg[]=''.$count*$uptime;
+						$smsmsg[]=''.($times-$v);
 						$smsmsg[]=$other_foot1;
 						$tmp='14807416';
 						$ret=send163msgtmp($phone,$smsmsg,$tmp);

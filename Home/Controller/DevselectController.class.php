@@ -433,6 +433,18 @@ class DevselectController extends HomeController {
         $mydb='access_'.$psn;
         if($devid==NULL){
             if($selectSql=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select()){
+								for($i=30;$i<40;$i++){
+					    		$mydb='access1301_'.$i;
+					    		$acc1301list[$i]=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('time desc')->select();
+					    	}
+					    	for($i=30;$i<40;$i++){
+					    		//dump($acc1301list[$i]);
+									if(count($acc1301list[$i])>0){
+		            		foreach($acc1301list[$i] as $acc){
+		            			$selectSql[]=$acc;
+		            		}
+		            	}
+		            }
                 $this->assign('devid',$id);
                 $this->assign('date',$time);
                 $this->assign('date2',$time2);
@@ -2010,7 +2022,22 @@ class DevselectController extends HomeController {
 		$psn=M('psn')->where(array('id'=>$psnid))->find();
 		$psn_sn=$psn['sn'];
 		$devSelect=M('changeidlog')->where(array('psnid'=>$psnid))->where('old_psn != '.$psn_sn)->order('time desc')->select();
-		//dump($dev);
+		foreach($devSelect as $dev){
+			$rid=$dev['rfid'];
+			$rid_list[]=$rid;
+		}
+		$dev_list=M('device')->where(['rid'=>['in',$rid_list]])->where(['flag'=>1])->select();
+		foreach($dev_list as $dev){
+			$rid=$dev['rid'];
+			$psn_list[$rid]=$dev['psn_now'];
+		}
+		//dump($dev_list);
+		//dump($psn_list);
+		foreach($devSelect as $key=>$dev){
+			$rid=$dev['rfid'];
+			$devSelect[$key]['psn_now']=$psn_list[$rid];
+		}
+		//dump($devSelect);
 		$this->assign('devSelect',$devSelect);
 		$this->assign('psn_sn',$psn_sn);
 		$this->display();

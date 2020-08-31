@@ -7,7 +7,7 @@ class IndexController extends Controller {
 		// $checksum=crc32("Thequickbrownfoxjumpedoverthelazydog.");
 		// printf("%u\n",$checksum);
 		
-		$TIME_LEN = 18;//时间字符长度
+		$TIME_LEN = 18;//ê±??×?·?3¤?è
 		$DELAY_START = 10;
 		$HOUR_DELAY_LEN = 2;
 		$MIN_DELAY_LEN = 2;
@@ -15,9 +15,9 @@ class IndexController extends Controller {
 		
 		$TIME_DIFF_LEN=3;
 		
-		$BTSN_LEN  = 10;//统编10位1类型,2-4国家编码,5-10区域编码
-		$BDSN_LEN  = 4;//BS字符长度
-		$BSN_LEN  = $BTSN_LEN+$BDSN_LEN;//BS字符长度
+		$BTSN_LEN  = 10;//í3±à10??1ààDí,2-41ú?ò±à??,5-10??óò±à??
+		$BDSN_LEN  = 4;//BS×?·?3¤?è
+		$BSN_LEN  = $BTSN_LEN+$BDSN_LEN;//BS×?·?3¤?è
 		$BVS_LEN  = 1; //B device version
 		
     $BRSSI_MAX_LEN = 1;
@@ -28,26 +28,26 @@ class IndexController extends Controller {
 		
 		$CDATA_START = $TIME_LEN+$BSN_LEN+$BVS_LEN+$BRSSI_LEN;
 		
-		$COUNT_LEN =2; //data的条数
-		$CSN_LEN  =4;//设备字符长度
-		$SIGN_LEN =1;//信号
+		$COUNT_LEN =2; //dataμ?ì?êy
+		$CSN_LEN  =4;//éè±?×?·?3¤?è
+		$SIGN_LEN =1;//D?o?
 		$CVS_LEN =1;//client version
 		$STATE_LEN  =1;//state
 		$DELAY_LEN  =1;//delay
-		$VAILD_LEN  =1;//有效值个数
+		$VAILD_LEN  =1;//óDD§?μ??êy
 		
-		$SENS_LEN  =1;//有效值个数
+		$SENS_LEN  =1;//óDD§?μ??êy
 		
-		$VALUE_LEN = 10;//data中每个长度
+		$VALUE_LEN = 10;//data?D????3¤?è
 		$COUNT_VALUE = 4;
 
-		$DATA_LEN = ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN)*2+$VALUE_LEN*$COUNT_VALUE; //一条data长度
+		$DATA_LEN = ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN)*2+$VALUE_LEN*$COUNT_VALUE; //ò?ì?data3¤?è
 		
 		//var_dump($DATA_LEN);
 		
-		$CRC_LEN  = 4;//校验码
-		$post      =file_get_contents('php://input');//抓取内容
-    $strarr    =unpack("H*", $post);//unpack() 函数从二进制字符串对数据进行解包。
+		$CRC_LEN  = 4;//D￡?é??
+		$post      =file_get_contents('php://input');//×￥è??úèY
+    $strarr    =unpack("H*", $post);//unpack() oˉêy′ó?t????×?·?′???êy?Y??DD?a°ü?￡
     $str       =implode("", $strarr);
 
 		$str = "323032303031303130313030303231303030313634303432333030300000c00105500000000000000000000000000000000000000000000000000674";
@@ -212,9 +212,9 @@ class IndexController extends Controller {
     //echo "delay_time:";
 		//var_dump($delay_time);
 
-    $count     =substr($str,$CDATA_START*2,$COUNT_LEN*2);//2为解包后的倍数
-    $count	   =hexdec($count);//从十六进制转十进制
-    $data      =substr($str,($CDATA_START+$COUNT_LEN)*2,$count*$DATA_LEN);//取出data
+    $count     =substr($str,$CDATA_START*2,$COUNT_LEN*2);//2?a?a°üoóμ?±?êy
+    $count	   =hexdec($count);//′óê?áù????×aê?????
+    $data      =substr($str,($CDATA_START+$COUNT_LEN)*2,$count*$DATA_LEN);//è?3?data
     $env_temp = 0;
     $snint = 0;
     $battery = 0;
@@ -242,9 +242,9 @@ class IndexController extends Controller {
 			$step_list[$cur_dev['devid']]['switch']=(int)$cur_dev['step_switch'];
 		}
    	dump($cur_devs);
-    //未解包比对
+    //?′?a°ü±è??
     $len=strlen($str);
-    $crc=substr($str,$len-$CRC_LEN*2);//收到发来的crc
+    $crc=substr($str,$len-$CRC_LEN*2);//ê?μ?·￠à′μ?crc
     //var_dump($crc);
     $crc=hexdec($crc);
     //var_dump($crc);
@@ -264,7 +264,7 @@ class IndexController extends Controller {
 	    for($i=0 ; $i < $count ; $i++){
 	    	$snstr   =substr($data, $i*$DATA_LEN,$CSN_LEN*2);
 	    	//var_dump($snstr);
-	    	$snint = hexdec($snstr)&0x1fff;;	//从十六进制转十进制
+	    	$snint = hexdec($snstr)&0x1fff;;	//′óê?áù????×aê?????
 	    	$dev_psn = hexdec($snstr) >> 13;
 	    	
 	    	$rfid = $dev_psn*10000+$snint;
@@ -311,13 +311,13 @@ class IndexController extends Controller {
 	    	if($cvs>3){
 					$sensstr 	 =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
 					$vaildstr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
-	    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
+	    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1ê?áù????×?·?
 					$sens=0-hexdec($sensstr);
 					$step_list[$snint]['state']=$state;
 	    	}else{
 					$sens=0;
 					$vaildstr  = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$VAILD_LEN*2);
-	    		$tempstr   = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
+	    		$tempstr   = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1ê?áù????×?·?
 	    	}
 	    	$vaild = hexdec($vaildstr);
 	    	if($type>0){
@@ -833,15 +833,15 @@ class IndexController extends Controller {
 
 	public function pushnewsubV47()
 	{
-	    $TIME_LEN = 15;//时间字符长度
+	    $TIME_LEN = 15;//ê±??×?·?3¤?è
 	    $DELAY_START = 10;
 	    $HOUR_DELAY_LEN = 2;
 	    $MIN_DELAY_LEN = 2;
 	    $FREQ_LEN = 1;
 	    
-	    $BTSN_LEN = 10;//统编10位1类型,2-4国家编码,5-10区域编码
-	    $BDSN_LEN = 4;//BS字符长度
-	    $BSN_LEN = $BTSN_LEN + $BDSN_LEN;//BS字符长度
+	    $BTSN_LEN = 10;//í3±à10??1ààDí,2-41ú?ò±à??,5-10??óò±à??
+	    $BDSN_LEN = 4;//BS×?·?3¤?è
+	    $BSN_LEN = $BTSN_LEN + $BDSN_LEN;//BS×?·?3¤?è
 	    $BVS_LEN = 1; //B device version
 
 	    
@@ -853,25 +853,25 @@ class IndexController extends Controller {
 			
 	    $CDATA_START = $TIME_LEN + $BSN_LEN + $BVS_LEN + $BRSSI_LEN;
 
-	    $COUNT_LEN = 2; //data的条数
-	    $CSN_LEN = 4;//设备字符长度
-	    $SIGN_LEN = 1;//信号
+	    $COUNT_LEN = 2; //dataμ?ì?êy
+	    $CSN_LEN = 4;//éè±?×?·?3¤?è
+	    $SIGN_LEN = 1;//D?o?
 	    $CVS_LEN = 1;//client version
 	    $STATE_LEN = 1;//state
 	    $DELAY_LEN = 1;//delay
-	    $VAILD_LEN = 1;//有效值个数
+	    $VAILD_LEN = 1;//óDD§?μ??êy
 
-			$SENS_LEN  =1;//有效值个数
+			$SENS_LEN  =1;//óDD§?μ??êy
 			
-			$VALUE_LEN = 10;//data中每个长度
-			$VALUE_LEN_NEW = 11;//data中每个长度
+			$VALUE_LEN = 10;//data?D????3¤?è
+			$VALUE_LEN_NEW = 11;//data?D????3¤?è
 			$COUNT_VALUE = 4;
 
-			$DATA_LEN = ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN)*2+$VALUE_LEN*$COUNT_VALUE; //一条data长度
+			$DATA_LEN = ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN)*2+$VALUE_LEN*$COUNT_VALUE; //ò?ì?data3¤?è
 			
-	    $CRC_LEN = 4;//校验码
-	    $post = file_get_contents('php://input');//抓取内容
-	    $strarr = unpack("H*", $post);//unpack() 函数从二进制字符串对数据进行解包。
+	    $CRC_LEN = 4;//D￡?é??
+	    $post = file_get_contents('php://input');//×￥è??úèY
+	    $strarr = unpack("H*", $post);//unpack() oˉêy′ó?t????×?·?′???êy?Y??DD?a°ü?￡
 	    $str = implode("", $strarr);
 
 
@@ -986,9 +986,9 @@ class IndexController extends Controller {
 							);
 	    //$saveRssi=D('brssi')->add($rssi);
 
-	    $count = substr($str, $CDATA_START * 2, $COUNT_LEN * 2);//2为解包后的倍数
-	    $count = hexdec($count);//从十六进制转十进制
-	    $data = substr($str, ($CDATA_START + $COUNT_LEN) * 2, $count * $DATA_LEN);//取出data
+	    $count = substr($str, $CDATA_START * 2, $COUNT_LEN * 2);//2?a?a°üoóμ?±?êy
+	    $count = hexdec($count);//′óê?áù????×aê?????
+	    $data = substr($str, ($CDATA_START + $COUNT_LEN) * 2, $count * $DATA_LEN);//è?3?data
 	    $env_temp = 0;
 	    $snint = 0;
 	    $battery = 0;
@@ -1023,9 +1023,9 @@ class IndexController extends Controller {
 			
       $change_devs = D('changeidlog')->where(array('psnid' => $psnid))->select();
 
-	    //未解包比对
+	    //?′?a°ü±è??
 	    $len=strlen($str);
-	    $crc=substr($str,$len-$CRC_LEN*2);//收到发来的crc
+	    $crc=substr($str,$len-$CRC_LEN*2);//ê?μ?·￠à′μ?crc
 	    $crc=hexdec($crc);
 
 	    $sum=0;
@@ -1040,7 +1040,7 @@ class IndexController extends Controller {
 			if($crc==$sum){
 		    for ($i = 0; $i < $count; $i++) {
 		        $snstr = substr($data, $i * $DATA_LEN, $CSN_LEN * 2);
-		        $snint = hexdec($snstr) & 0x1fff;    //从十六进制转十进制
+		        $snint = hexdec($snstr) & 0x1fff;    //′óê?áù????×aê?????
 		        $dev_psn = hexdec($snstr) >> 13;
 		        $dev_sn = hexdec($snstr);
 
@@ -1164,13 +1164,13 @@ class IndexController extends Controller {
 			    	if($cvs>3){
 							$sensstr 	 =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
 							$vaildstr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
-			    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
+			    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1ê?áù????×?·?
 							$sens=0-hexdec($sensstr);
 							$step_list[$snint]['state']=$state;
 			    	}else{
 							$sens=0;
 							$vaildstr  = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$VAILD_LEN*2);
-			    		$tempstr   = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
+			    		$tempstr   = substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1ê?áù????×?·?
 			    	}
 
 			    	$vaild = hexdec($vaildstr);
@@ -1187,7 +1187,7 @@ class IndexController extends Controller {
 		            'version' => $cvs);
 		        $devsave_list[] = $dev_save;
 
-		        //$tempstr = substr($data, $i * $DATA_LEN + ($CSN_LEN + $SIGN_LEN + $CVS_LEN + $STATE_LEN + $DELAY_LEN + $VAILD_LEN) * 2, $VALUE_LEN * $COUNT_VALUE);//temp1十六进制字符
+		        //$tempstr = substr($data, $i * $DATA_LEN + ($CSN_LEN + $SIGN_LEN + $CVS_LEN + $STATE_LEN + $DELAY_LEN + $VAILD_LEN) * 2, $VALUE_LEN * $COUNT_VALUE);//temp1ê?áù????×?·?
 
 						if($vaild>4){
 							continue;
@@ -2098,16 +2098,16 @@ class IndexController extends Controller {
   }
   
   public function parsedata($data,$psnid,$sid,$interval){
-			$CSN_LEN  =4;//设备字符长度
-			$SIGN_LEN =1;//信号
+			$CSN_LEN  =4;//éè±?×?·?3¤?è
+			$SIGN_LEN =1;//D?o?
 			$CVS_LEN =1;//client version
 			$STATE_LEN  =1;//state
 			$DELAY_LEN  =1;//delay
-			$VAILD_LEN  =1;//有效值个数
+			$VAILD_LEN  =1;//óDD§?μ??êy
 			
-			$SENS_LEN  =1;//有效值个数
+			$SENS_LEN  =1;//óDD§?μ??êy
 			
-			$VALUE_LEN = 10;//data中每个长度
+			$VALUE_LEN = 10;//data?D????3¤?è
 			$COUNT_VALUE = 4;
 			
 			
@@ -2124,7 +2124,7 @@ class IndexController extends Controller {
 	   	$now = $now-$today;
 	   	
 			$snstr   =substr($data, 0,$CSN_LEN*2);
-    	$snint = hexdec($snstr)&0x1fff;;	//从十六进制转十进制
+    	$snint = hexdec($snstr)&0x1fff;;	//′óê?áù????×aê?????
     	$dev_psn = hexdec($snstr) >> 13;
 			$rfid = $dev_psn*10000+$snint;
 			
@@ -2167,12 +2167,12 @@ class IndexController extends Controller {
     	if($cvs>3){
 				$sensstr 	 =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
 				$vaildstr  =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
-    		$tempstr	 =	substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
+    		$tempstr	 =	substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1ê?áù????×?·?
 				$sens=0-hexdec($sensstr);
     	}else{
 				$sens=0;
 				$vaildstr  = substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$VAILD_LEN*2);
-    		$tempstr   = substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
+    		$tempstr   = substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1ê?áù????×?·?
     	}
     	$vaild = hexdec($vaildstr);
     	if($type>0){
@@ -2909,11 +2909,11 @@ class IndexController extends Controller {
           mkdir($logdir);
       }
 
-      //$filename = $res_file.date("His_") . mt_rand(100, 999) . ".log"; //新图片名称
-      //$newFilePath = $logdir . $filename;//图片存入路径
-      //$newFile = fopen($newFilePath, "w"); //打开文件准备写入
+      //$filename = $res_file.date("His_") . mt_rand(100, 999) . ".log"; //D?í?????3?
+      //$newFilePath = $logdir . $filename;//í???′?è??·??
+      //$newFile = fopen($newFilePath, "w"); //′ò?a???t×?±?D′è?
       //fwrite($newFile, $post);
-      //fclose($newFile); //关闭文件
+      //fclose($newFile); //1?±????t
   }
   
   public function testmd5(){

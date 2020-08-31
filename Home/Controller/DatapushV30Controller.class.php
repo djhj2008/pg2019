@@ -363,7 +363,7 @@ class DatapushV30Controller extends Controller {
 	    	{
 	    		$rfid_find=false;
 		    	foreach($cur_devs as $cur_dev){
-		    		if($cur_dev['rid']==$rfid){
+			    	if(($cur_dev['devid']==$snint)&&($cur_dev['psn']==$dev_psn)){
 		    			$rfid_find=true;
 		    			break;
 		    		}
@@ -999,12 +999,12 @@ class DatapushV30Controller extends Controller {
 	        $brssisnstr = substr($brssistr, $i * ($BRSSI_SN_LEN + $BRSSI_SIGN_LEN) * 2, $BRSSI_SN_LEN * 2);
 
 	        $brssisn[$i] = hexdec($brssisnstr);
-	        if ($brssisn > 0) {
+	        if ($brssisn[$i] > 0) {
 	            $brssisignstr = substr($brssistr, $i * ($BRSSI_SN_LEN + $BRSSI_SIGN_LEN) * 2 + $BRSSI_SN_LEN * 2, $BRSSI_SIGN_LEN * 2);
 	            $brssisign = hexdec($brssisignstr);
 
-	            if (($brssisign & 0x08) == 0x08) {
-	                $bsign[$i] = 0 - ($brssisign & 0x07);
+	            if (($brssisign & 0x80) == 0x80) {
+	                $bsign[$i] = 0 - ($brssisign & 0x7f);
 	            } else {
 	                $bsign[$i] = $brssisign;
 	            }
@@ -1162,28 +1162,10 @@ class DatapushV30Controller extends Controller {
 		                $changeid_find = true;
 		                if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
 		                    $change_buf_find=false;
-		                    /*
-								        foreach($change_buf as $ch_tmp)
-								        {
-					        			 	if($ch_tmp['id']==$ch_dev['id']){
-					        			 		$change_buf_find=true;
-					        			 		break;
-					        			 	}
-								        }
-								        if($change_buf_find==false)
-								        {
-			                    $tmp_dev = array(
-			                    		'id'=>$ch_dev['id'],
-			                        'old_psn' => $dev_psn,
-			                        'old_devid' => $snint,
-			                        'new_devid' => $ch_dev['new_devid']
-			                    );
-			                    $change_buf[] = $tmp_dev;
-								        }
-								        */
 		                }else if($ch_dev['flag'] == 3){
 		                	$changeid_find = false;
 		                }
+		                break;
 		            }
 		        }
 		        if ($changeid_find == false) {
@@ -1201,14 +1183,14 @@ class DatapushV30Controller extends Controller {
 		                	$dev_info=D('device')->field('rid')->where(array('devid'=>$snint,'psn'=>$dev_psn))->find();
 		                	if($dev_info){
 		                		$rfid=$dev_info['rid'];
+				                $change_dev = array('psnid' => $psnid,
+				                    'old_psn' => $dev_psn,
+				                    'old_devid' => $snint,
+				                    'sid' => $sid,
+				                    'rfid'=> $rfid,
+				                );
+					             $change_add[]= $change_dev; 
 		                	}
-			                $change_dev = array('psnid' => $psnid,
-			                    'old_psn' => $dev_psn,
-			                    'old_devid' => $snint,
-			                    'sid' => $sid,
-			                    'rfid'=> $rfid,
-			                );
-				             $change_add[]= $change_dev; 
 		        			 }
 		        		}
 		        }
