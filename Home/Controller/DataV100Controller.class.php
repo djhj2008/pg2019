@@ -104,6 +104,7 @@ class DataV100Controller extends Controller {
 		$bigdiff = $parm['bigdiff'];
 		$bigtemp = $parm['bigtemp'];
 		$interval = $parm['interval'];
+		$slaver_stop = (int)$parm['no1301'];
 				
  		$psninfo = D('psn')->where(array('tsn'=>$btsn,'sn'=>$psn))->find();
     if($psn){
@@ -144,7 +145,13 @@ class DataV100Controller extends Controller {
     	$os_ota_flag = (int)$bdevinfo['os_ota_flag'];
 			$ret['freq'] = (int)$bdevinfo['rate_id'];
     	if($bdevinfo['version']!=$app_ver){
-    		$saveSql=M('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->save(array('version'=>$app_ver));	
+    		$savebd['version']=$app_ver;
+    	}
+    	if($bdevinfo['slaver_stop']!=$slaver_stop){
+    		$savebd['slaver_stop']=$slaver_stop;
+    	}
+    	if(!empty($savebd)){
+    		$saveSql=M('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->save($savebd);	
     	}
 
     	if($ota_flag){

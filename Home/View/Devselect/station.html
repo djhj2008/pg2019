@@ -61,6 +61,7 @@
 				<th>基带ID</th>
 				<th>改号状态</th>
 				<th>改url状态</th>
+				<th>1301状态</th>
 				<th>操作</th>
 			</tr>
 		</thead>
@@ -76,6 +77,7 @@
 				<td><%$value['rate_id']%></td>
 				<td><%$value['change_flag']%></td>
 				<td><%$value['url_flag']%></td>
+				<td><%$value['slaver_stop']%></td>
 				<td>
 					<a href="<%$smarty.const.__APP__%>/add/editstation?autoid=<%$value['autoid']%>">编辑</a>
 					<a href="<%$smarty.const.__APP__%>/add/editsn?autoid=<%$value['autoid']%>">|改SN</a>
