@@ -557,7 +557,6 @@ class BreedController extends Controller {
 		}
 		
 	  public function getstationstate(){
-	  	
 			$bdevice = M('bdevice')->field('autoid,psn,id,uptime,version')->where(array('switch'=>1))->select();
 			$count = 12;
 			$delay = 3600;
@@ -594,21 +593,22 @@ class BreedController extends Controller {
     			$bdev_assert[]=$s['autoid'];
     			unset($phone);
     			unset($smsmsg);
-					$phone[]='18995411166';
+					//$phone[]='18995411166';
 					$phone[]='13311152676';
-					$phone[]='15801248751';
+					//$phone[]='15801248751';
 					$sn=str_pad($s['psn'],5,'0',STR_PAD_LEFT).str_pad($s['id'],4,'0',STR_PAD_LEFT);
 					$smsmsg[]=$sn;
-		     	$other_head1='��վ�쳣,����';
-		     	$other_foot1='��.';
-		     	$other_head1=iconv("GBK", "UTF-8", $other_head1); 
-		     	$other_foot1=iconv("GBK", "UTF-8", $other_foot1);
+		     	$other_head1='基站异常,重启';
+		     	$other_foot1='次.';
 		     	$smsmsg[]=$other_head1;
 					$smsmsg[]=''.($v-$times);
 					$smsmsg[]=$other_foot1;
 					$tmp='14807416';
 					if($v-$times>3){
-						$ret=send163msgtmp($phone,$smsmsg,$tmp);
+						//$ret=send163msgtmp($phone,$smsmsg,$tmp);
+						$weui_assert['sn']=$sn;
+						$weui_assert['count']=($v-$times);
+						$assert_list[]=$weui_assert;
 					}
 					dump($smsmsg);
     		}else if($v< $times){
@@ -621,16 +621,17 @@ class BreedController extends Controller {
 						$phone[]='15801248751';
 						$sn=str_pad($s['psn'],5,'0',STR_PAD_LEFT).str_pad($s['id'],4,'0',STR_PAD_LEFT);
 						$smsmsg[]=$sn;
-			     	$other_head1='��վ�쳣,����';
-			     	$other_foot1='Сʱδ�ϱ�.';
-			     	$other_head1=iconv("GBK", "UTF-8", $other_head1); 
-			     	$other_foot1=iconv("GBK", "UTF-8", $other_foot1);
+			     	$other_head1='基站异常,连续';
+			     	$other_foot1='小时未上报.';
 			     	$smsmsg[]=$other_head1;
 						$smsmsg[]=''.($times-$v);
 						$smsmsg[]=$other_foot1;
 						$tmp='14807416';
-						$ret=send163msgtmp($phone,$smsmsg,$tmp);
+						//$ret=send163msgtmp($phone,$smsmsg,$tmp);
 						dump($smsmsg);
+						$weui_lost['sn']=$sn;
+						$weui_lost['count']=($times-$v);
+						$lost_list[]=$weui_lost;
 	    		}else{
 	    			$bdev_err[]=$s['autoid'];
 	    		}
@@ -638,6 +639,9 @@ class BreedController extends Controller {
     			$bdev_normal[]=$s['autoid'];
     		}
     	}
+    	
+    	$this->weuipushmsg($lost_list,$assert_list);
+    	
     	echo 'LOST:';
     	dump($bdev_lost);
     	if($bdev_lost){
@@ -658,4 +662,117 @@ class BreedController extends Controller {
     	}
 			exit;
 		}
+		
+    public function weuipushmsg($lost_list,$assert_list){
+    	$mode=M('','','DB_CONFIG');
+    	$template_id = '-HzOtD2zosdFQYPhtu5NZg8hHm-X2UcNIo00dcVM4C4';	
+  		$appid = 'wx4dba4ec159da3bf7';
+  		$secret = 'bf6fac869e348f3454d68ef9956cd61b';
+    	$now = time();
+    	$tokens=M('weui_token')->where('exprie_time >'.$now)->order('time desc')->find();
+    	dump($now);
+    	dump($tokens);
+    	if($tokens){
+    		$acc_token=$tokens['access_token'];
+    	}else{
+    		$url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid='.$appid.'&secret='.$secret;
+    		$ret=http($url);
+    		dump($ret);
+				$ret=json_decode($ret,true);
+				if(!empty($ret['access_token'])){
+					$savetoken['exprie_time']=$now+(int)$ret['expires_in'];
+					$savetoken['access_token']=$ret['access_token'];
+					$token=M('weui_token')->add($savetoken);
+					$acc_token=$ret['access_token'];
+				}
+    	}
+    	
+    	dump($acc_token);
+    	{
+    		$url='https://api.weixin.qq.com/cgi-bin/tags/get?access_token='.$acc_token;
+    		$ret=http($url);
+    		$tags=json_decode($ret,true);
+    		dump($tags);
+    		foreach($tags['tags'] as $tag){
+    			dump($tag['name']);
+					if($tag['name']=='station'){
+						$tagid=$tag['id'];
+						break;
+					}
+    		}
+    	}
+    	
+    	{
+    		dump($tagid);
+    		$url = 'https://api.weixin.qq.com/cgi-bin/user/tag/get?access_token='.$acc_token;
+    		$data['tagid']=$tagid;
+    		$data['next_openid']='';
+    		$data=json_encode($data,true);
+    		$ret=http($url,$data,'POST');
+    		$users=json_decode($ret,true);
+    		$ids=$users['data']['openid'];
+    		dump($ids);
+    	}
+    	
+    	foreach($lost_list as $lost){
+    			foreach($ids as $id){
+    				$url = 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token='.$acc_token;
+	  				$sn=$lost['sn'];
+	  				$count = $lost['count'];
+	  				dump($sn);
+						$station = $mode->table('basestations')->where(array('base_code'=>$sn))->find();
+						//dump($station);
+	    			$loc = $station['address'];
+			    	$wmsg['touser']=$id;
+			    	$wmsg['template_id']=$template_id;
+			    	$msg_data['first']='您有一条新的设备故障消息';
+			    	$msg_data['keyword1']=$sn;
+			    	$msg_data['keyword2']=$loc;
+			    	$msg_data['keyword3']=$count."小时";
+			    	$msg_data['keyword4']="未上报";
+			    	$msg_data['remark']="请相关工作人员及时处理";
+			    	$wmsg['data']=$msg_data;
+			    	$wmsg=json_encode($wmsg,true);
+			    	dump($wmsg);
+			    	dump('end');
+		    		$ret=http($url,$wmsg,'POST');
+		    		$ret=json_encode($ret,true);
+		    		dump($ret);
+    			}
+    	}	
+    	foreach($assert_list as $assert){
+    			foreach($ids as $id){
+    				$url = 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token='.$acc_token;
+	  				$sn=$assert['sn'];
+	  				$count = $assert['count'];
+	  				dump($sn);
+						$station = $mode->table('basestations')->where(array('base_code'=>$sn))->find();
+						//dump($station);
+	    			$loc = $station['address'];
+	    			unset($wmsg);
+			    	$wmsg['touser']=$id;
+			    	$wmsg['template_id']=$template_id;
+			    	$msg_data['first']['value']='您有一条新的设备故障消息';
+			    	$msg_data['first']['color']="#173177";
+			    	$msg_data['keyword1']['value']=$sn;
+			    	$msg_data['keyword1']['color']="#173177";
+			    	$msg_data['keyword2']['value']=$loc;
+			    	$msg_data['keyword2']['color']="#173177";
+			    	$msg_data['keyword3']['value']=$count."次";
+			    	$msg_data['keyword3']['color']="#173177";
+			    	$msg_data['keyword4']['value']="重启";
+			    	$msg_data['keyword4']['color']="#173177";
+			    	$msg_data['remark']['value']="请相关工作人员及时处理";
+			    	$msg_data['remark']['color']="#173177";
+			    	$wmsg['data']=$msg_data;
+			    	$wmsg=json_encode($wmsg,true);
+			    	dump($wmsg);
+			    	dump('end');
+		    		$ret=http($url,$wmsg,'POST');
+		    		$ret=json_encode($ret);
+		    		dump($ret);
+    			}
+    	}	
+    	exit;
+    }
 }
