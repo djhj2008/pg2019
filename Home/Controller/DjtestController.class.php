@@ -2,10 +2,75 @@
 namespace Home\Controller;
 use Think\Controller;
 class DjtestController extends Controller {
+	
+function makeCurlFile(string $file)
+{
+    /**
+     * .xls mime为 application/vnd.ms-excel
+     * .xlsx mime为 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+     * 可参考 https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
+     * 
+     *  注意：也可以使用 finfo类动态获取，但需要装fileinfo扩展
+     *  demo:
+        $result = new finfo();
+        if (is_resource($result) === true) {
+            return $result->file($filename, FILEINFO_MIME_TYPE);
+        }
+        return false;
+     */
+    $mime = "image/jpeg";
+    $info = pathinfo($file);
+    $name = $info['basename'];
+    $output = curl_file_create($file, $mime, $name);
+    return $output;
+}
+    
+function httpfile($url, $data,$file, $method='POST'){
+    $curl = curl_init(); // 启动一个CURL会话  
+    curl_setopt($curl, CURLOPT_URL, $url); // 要访问的地址  
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false); // 对认证证书来源的检查  
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false); // 从证书中检查SSL加密算法是否存在  
+    curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']); // 模拟用户使用的浏览器  
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1); // 使用自动跳转  
+    curl_setopt($curl, CURLOPT_AUTOREFERER, 1); // 自动设置Referer  
+    if($method=='POST'){  
+        curl_setopt($curl, CURLOPT_POST, 1); // 发送一个常规的Post请求  
+        if ($file != ''){
+        	$CurlFile = $this->makeCurlFile($file);
+        	$filedata = array('upfile' => $CurlFile,'degree'=>$data['degree'],'filename'=>$data['filename'],'meter-id'=>$data['meter-id'],'meter-value'=>$data['meter-value']);
+        	//dump($filedata);
+        	curl_setopt($curl, CURLOPT_POSTFIELDS, $filedata);
+        }  
+    }
+    curl_setopt($curl, CURLOPT_TIMEOUT, 60); // 设置超时限制防止死循环  
+    curl_setopt($curl, CURLOPT_HEADER, 0); // 显示返回的Header区域内容  
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); // 获取的信息以文件流的形式返回  
+    $tmpInfo = curl_exec($curl); // 执行操作  
+    //dump(curl_errno($curl));
+    curl_close($curl); // 关闭CURL会话  
+    return $tmpInfo; // 返回数据  
+}
+	
   public function index(){
-       ob_clean();
-       echo 'test';
-       exit;
+  	//dump($_FILES);
+  	//dump($_POST);
+  	exit;
+  }
+
+  function testfile(){
+  	$root = $_SERVER['DOCUMENT_ROOT'];
+  	$data['degree']='0';
+  	$data['filename']='normalup/110000109/20200910_164756_25.jpg';
+  	$data['meter-id']='110000109';
+  	$data['meter-value']='00000';
+  	$file=$root.'/'.$data['filename'];
+  	$url='http://iot.xidima.com:6080/upload?';
+  	//$url='http://iot.xunrun.com.cn/pg/djtest/index';
+  	$ret = $this->httpfile($url,$data,$file);
+  	if(strpos($ret,'x') !== false||strpos($ret,'y') !== false){
+  		echo 'error.';
+  	}
+  	dump($ret);
   }
   
 	public function scancows_avg(){
@@ -502,7 +567,7 @@ class DjtestController extends Controller {
 			
 			$ret['freq']=1;
 			$ret['log']=1;
-			$ret['rate_flag']=1;//��Ƶ����
+			$ret['rate_flag']=1;//ÌøÆµ¿ª¹Ø
 			$ret['sens']=100;
 			
 			$station['flag']=1;
@@ -604,11 +669,11 @@ class DjtestController extends Controller {
             mkdir($logdir);
         }
 
-        $filename = date("Ymd_His_") . mt_rand(10, 99) . ".log"; //��ͼƬ����
-        $newFilePath = $logdir . $filename;//ͼƬ����·��
-        $newFile = fopen($newFilePath, "w"); //���ļ�׼��д��
+        $filename = date("Ymd_His_") . mt_rand(10, 99) . ".log"; //ÐÂÍ¼Æ¬Ãû³Æ
+        $newFilePath = $logdir . $filename;//Í¼Æ¬´æÈëÂ·¾¶
+        $newFile = fopen($newFilePath, "w"); //´ò¿ªÎÄ¼þ×¼±¸Ð´Èë
         fwrite($newFile, $post);
-        fclose($newFile); //�ر��ļ�
+        fclose($newFile); //¹Ø±ÕÎÄ¼þ
     }
 		$parm= json_decode($post,true);
 	  $app_ver=(int)$parm['ver'];

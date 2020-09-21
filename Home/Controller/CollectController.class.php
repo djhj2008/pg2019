@@ -304,7 +304,7 @@ class CollectController extends Controller {
 					exit;
 				}
 	    	
-	    	$start_time = strtotime($time);
+	    	$start_time = strtotime($time2)-86400;
 	    	$end_time = strtotime($time2)+86400;
 
         $ios_order='time asc';
@@ -313,7 +313,7 @@ class CollectController extends Controller {
         $temp1Arr = array();
         $temp2Arr = array();
         
-        $mydb='access_'.$psnid;
+        $mydb='access_base';
         
 				$psn=$psnid;
 				//$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psn,'flag'=>1))->order('devid desc')->select();
@@ -324,23 +324,27 @@ class CollectController extends Controller {
 					$devSelect[$i]['down_count']=0;
 				}
 		
-        $selectSql=M($mydb)->where('sign <'.$down_value.' and time >= '.$start_time.' and time <= '.$end_time)
+        $selectSql=M($mydb)->where('rssi1 <'.$down_value.' and time >= '.$start_time.' and time <= '.$end_time)->where(array('psn'=>$psn))
 													        ->order($ios_order)
 													        ->select();
+				//dump($selectSql);
         if($selectSql)
         {
-        		foreach($selectSql as $acc){
-        			$devid=$acc['devid'];
-        			$cur_time=$acc['time'];
-        			for($i=0;$i<count($devSelect);$i++)
-        			{
-        				if($devid==$devSelect[$i]['devid']){
-        					$devSelect[$i]['down_count']=$devSelect[$i]['down_count']+1;
-        					$devSelect[$i]['down_time'][]=$cur_time;
-        					break;
+        		foreach($devSelect as $key=>$dev){
+        			$devid=$dev['devid'];
+        			foreach($selectSql as $acc){
+        				$cur_time=$acc['time'];
+        				if($devid==$acc['devid']){
+        					if(in_array($cur_time,$devSelect[$key]['down_time'],true)){
+        						//nothing
+        					}else{
+	        					$devSelect[$key]['down_count']=$devSelect[$key]['down_count']+1;
+	        					$devSelect[$key]['down_time'][]=$cur_time;
+        					}
+        					//dump($devSelect[$key]);
         				}
         			}
-						}
+        		}
         }
 
         $this->assign('devSelect',$devSelect);
@@ -397,7 +401,7 @@ class CollectController extends Controller {
         $temp1Arr = array();
         $temp2Arr = array();
         
-        $mydb='access_'.$psnid;
+        $mydb='access_base';
         
 				$psn=$psnid;
 
@@ -511,5 +515,5 @@ class CollectController extends Controller {
 
 			}
 			exit;
-	}
+		}
 }

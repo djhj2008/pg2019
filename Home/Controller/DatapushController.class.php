@@ -53,7 +53,7 @@ class DatapushController extends Controller {
     $logbase="lora_backup30/";
     $logerr="lora_error30/";
     $logreq="lora_req30/";
-    
+    ob_clean();
     {
         $logdir =$logbase;
         if(!file_exists($logdir)){
@@ -393,8 +393,11 @@ class DatapushController extends Controller {
 	    
 	    $tempstr=substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
     	for($j=0;$j < $vaild;$j++){
-
-	    	$up_time = $real_time-$interval*$freq+$interval*($j+1)+$interval*($freq-$vaild);
+    		if($freq>1){
+	    		$up_time = $start+$interval*$j+$interval*($freq-$vaild);
+    		}else{
+    			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
+    		}
 		    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
 		    
 	    	if($type==0){
@@ -647,16 +650,11 @@ class DatapushController extends Controller {
 			//var_dump($temp1);
     	//var_dump($temp2);
     }
-    if($psnid==4){
-    	$mydb='access_'.$psn;
-	    $user=D($mydb);
-			$access1=$user->addAll($accadd_list);
-    }else{
-    	$mydb='access_'.$psn;
-	    $user=D($mydb);
-			$access1=$user->addAll($accadd_list);
-    }
-		
+
+  	$mydb='access_base';
+    $user=D($mydb);
+		$access1=$user->addAll($accadd_list); 
+    
     $user2=D('taccess');
 		$access2=$user2->addAll($accadd_list2);
 		//dump($user->getlastsql());
@@ -1170,8 +1168,11 @@ class DatapushController extends Controller {
 
 	        $tempstr = substr($data, $i * $DATA_LEN + ($CSN_LEN + $SIGN_LEN + $CVS_LEN + $STATE_LEN + $DELAY_LEN + $VAILD_LEN) * 2, $VALUE_LEN * $COUNT_VALUE);//temp1十六进制字符
 	        for ($j = 0; $j < $vaild; $j++) {
-
-	            $up_time = $real_time - $interval * $freq + $interval * ($j + 1) + $interval * ($freq - $vaild);
+			    		if($freq>1){
+				    		$up_time = $start+$interval*$j+$interval*($freq-$vaild);
+			    		}else{
+			    			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
+			    		}
 	            $up_time = strtotime(date('Y-m-d H:i', $up_time) . ':00');
 
 	            if ($type == 0) {
@@ -1499,7 +1500,7 @@ class DatapushController extends Controller {
 	        $psn_buf_psn=$psn_buf['psn'];
 	        if(count($psn_buf['devid'])>0){
 	            $wheredev['devid']=array('in',$psn_buf['devid']);
-	            $curdb1301='access1301_'.$psn_buf_psn;
+	            $curdb1301='access1301_base';
 	            $acc1301_values=D($curdb1301)->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<='.$end)->select();
 	            //dump($acc1301_values);
 	            foreach($psnallinfo as $psninfo){
@@ -1542,22 +1543,17 @@ class DatapushController extends Controller {
 
 	        }
 	    }
-    	$mydb='access_'.$psn;
+    	$mydb='access_base';
 	    $user=D($mydb);
 	    $ret=$user->addAll($accadd_list);
-	    //dump('access list:');
-	    //dump($accadd_list);
 
-			$mydb1301='access1301_'.$psn;
+			$mydb1301='access1301_base';
 	    $user1301=D($mydb1301);
 	    $ret=$user1301->addAll($acc1301addall);
-	    //dump('access1301 list:');
-	    //dump($acc1301addall);
 
 	    $tuser=D('taccess');
 	    $ret=$tuser->addAll($taccadd_list);
-	    //dump('taccess list:');
-	    //dump($taccadd_list);
+
 	    
 	    $chuser=D('changeidlog');
 	    $ret=$chuser->addAll($change_add);

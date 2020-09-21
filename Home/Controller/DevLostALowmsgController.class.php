@@ -18,6 +18,8 @@ class DevLostALowmsgController extends Controller {
 			$sn_codes[]=$cow['sn_code'];
 			$farmers[]=$cow['farmer_id'];
 		}
+		//dump($cows);
+		
 		$whererid['rid']=array('in',$rids);
 		//dump($whererid);
 		$devs = M('device')->where($whererid)->where(array('flag'=>1))->select();
@@ -26,6 +28,8 @@ class DevLostALowmsgController extends Controller {
 		
 		//dump(count($devs));
 		dump($bdevs);
+		$devwhitelist = M('devmsg')->where(array('flag'=>1))->select();
+		dump($devwhitelist);
 		
 		foreach($devs as $dev){
 			$psn_find=false;
@@ -39,13 +43,31 @@ class DevLostALowmsgController extends Controller {
 				if($psn_now==$bdev['psn']){
 					echo 'remove dev:';
 					dump($rid);
-					$index = (int) array_search($rid,$rids,TRUE);
-					dump($cow_ids[$index]);
-					unset($cow_ids[$index]);
+					$index = array_search($rid,$rids,TRUE);
+					dump($index);
+					if($index==false){
+						
+					}else{
+						dump($cow_ids[$index]);
+						unset($cow_ids[$index]);
+					}
 				}
 			}
 		}
-
+		
+		foreach($devwhitelist as $dwmsg){
+			$rid=(int)$dwmsg['sn_code'];
+			echo 'remove wl dev:';
+			dump($rid);
+			$index = array_search($rid,$rids,TRUE);
+			dump($index);
+			if($index==false){
+				
+			}else{
+				dump($cow_ids[$index]);
+				unset($cow_ids[$index]);	
+			}
+		}
 		//dump($cow_ids);
 		//exit;
 		$farmers=array_unique($farmers);
@@ -129,13 +151,15 @@ class DevLostALowmsgController extends Controller {
 					}
 				}
 				if($dev_msg_find==false){
-					$msg['s_time']=$cow_sel[$cow['id']];
-					$msg['farmer_name']=$farmer_sel[$cow['farmer_id']];
-					$msg['phone']=$phone_sel[$cow['farmer_id']];
-					$msg['viliage']=$village_sel[$cow['village_id']];
-					$msg['town']=$town_sel[$cow['town_id']];
-					$msg['sn_code']=$cow['sn_code'];
-					$msg_list[]=$msg;
+					if(empty($phone_sel[$cow['farmer_id']])===false){
+						$msg['s_time']=$cow_sel[$cow['id']];
+						$msg['farmer_name']=$farmer_sel[$cow['farmer_id']];
+						$msg['phone']=$phone_sel[$cow['farmer_id']];
+						$msg['village']=$village_sel[$cow['village_id']];
+						$msg['town']=$town_sel[$cow['town_id']];
+						$msg['sn_code']=$cow['sn_code'];
+						$msg_list[]=$msg;
+					}
 				}
 			}
 		}
@@ -168,9 +192,9 @@ class DevLostALowmsgController extends Controller {
 			
 			$tmp = '14867046';
 			$phone=array($phone);
-			$foot='∑¿“ﬂ¬Î:'.substr($sn,-8);
-			$foot=iconv("GBK", "UTF-8", $foot); 
-			send163msgtmp($phone,$smsmsg,$tmp);
+			$foot='Èò≤Áñ´Á†Å:'.substr($sn,-8);
+			dump($smsmsg);
+			//send163msgtmp($phone,$smsmsg,$tmp);
 			//$smsmsg[]=$town.$viliage.$farmer;
 			$smsmsg=array($town.$viliage.$farmer,$foot);
 			$ret=send163msgtmp($phone,$smsmsg,$tmp);

@@ -558,7 +558,7 @@ class BreedController extends Controller {
 		
 	  public function getstationstate(){
 			$bdevice = M('bdevice')->field('autoid,psn,id,uptime,version')->where(array('switch'=>1))->select();
-			$count = 12;
+			$count = 4;
 			$delay = 3600;
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now));
@@ -571,10 +571,11 @@ class BreedController extends Controller {
     	$timeall[]=$end_time;
     	$timeall[]=$first_time;
     	
+    	dump(count($bdevice));
     	dump(date('Y-m-d H:i:s',$first_time));
     	dump(date('Y-m-d H:i:s',$end_time));
     	
-    	$brssi = M('brssi')->where(array('station'=>1278))->where('time>='.$end_time.' and time<='.$first_time)->select();
+    	$brssi = M('brssi')->where(array('station'=>1278))->where('time>='.$end_time.' and time<='.$first_time)->order('time desc')->select();
 
     	foreach($bdevice as $s){
     		$psn=$s['psn'];
@@ -590,6 +591,8 @@ class BreedController extends Controller {
 
 				$s['times']=$v;
     		if($v>$times){
+    			echo 'assert';
+    			dump($sn);
     			$bdev_assert[]=$s['autoid'];
     			unset($phone);
     			unset($smsmsg);
@@ -604,14 +607,16 @@ class BreedController extends Controller {
 					$smsmsg[]=''.($v-$times);
 					$smsmsg[]=$other_foot1;
 					$tmp='14807416';
-					if($v-$times>3){
+					dump($smsmsg);
+					if($v-$times>2){
 						//$ret=send163msgtmp($phone,$smsmsg,$tmp);
 						$weui_assert['sn']=$sn;
 						$weui_assert['count']=($v-$times);
 						$assert_list[]=$weui_assert;
 					}
-					dump($smsmsg);
     		}else if($v< $times){
+					echo 'lost:'.str_pad($s['psn'],5,'0',STR_PAD_LEFT).str_pad($s['id'],4,'0',STR_PAD_LEFT);;
+    			dump('lose:'.($times-$v));
     			if($v==0){
     				$bdev_lost[]=$s['autoid'];
 	    			unset($phone);
@@ -624,7 +629,7 @@ class BreedController extends Controller {
 			     	$other_head1='基站异常,连续';
 			     	$other_foot1='小时未上报.';
 			     	$smsmsg[]=$other_head1;
-						$smsmsg[]=''.($times-$v);
+						$smsmsg[]=''.($times-$v)*$uptime;
 						$smsmsg[]=$other_foot1;
 						$tmp='14807416';
 						//$ret=send163msgtmp($phone,$smsmsg,$tmp);
@@ -633,14 +638,34 @@ class BreedController extends Controller {
 						$weui_lost['count']=($times-$v);
 						$lost_list[]=$weui_lost;
 	    		}else{
-	    			$bdev_err[]=$s['autoid'];
+		    		foreach($brssi as $r){
+							if($r['psnid']==$psn&&$r['bsn']==$sid){
+								$u_t=$r['time'];
+								$new_flag=false;
+								if($u_t>($first_time-3600)&&$u_t<=($first_time+600)){
+									$new_flag=true;
+									break;
+								}
+							}
+						}
+						if($new_flag==false){
+								$sn=str_pad($s['psn'],5,'0',STR_PAD_LEFT).str_pad($s['id'],4,'0',STR_PAD_LEFT);
+								$weui_lost['sn']=$sn;
+								$weui_lost['count']=($times-$v);
+								$lost_list[]=$weui_lost;
+						}
 	    		}
     		}else{
     			$bdev_normal[]=$s['autoid'];
     		}
     	}
     	
-    	$this->weuipushmsg($lost_list,$assert_list);
+    	
+    	dump($lost_list);
+    	if(count($lost_list)>0||count($assert_list)>0){
+    		$this->weuipushmsg($lost_list,$assert_list);
+    	}
+    	
     	
     	echo 'LOST:';
     	dump($bdev_lost);
@@ -669,9 +694,18 @@ class BreedController extends Controller {
   		$appid = 'wx4dba4ec159da3bf7';
   		$secret = 'bf6fac869e348f3454d68ef9956cd61b';
     	$now = time();
+    	
+			$start_time = strtotime(date('Y-m-d',$now));
+    	$cur_time = ($now - $start_time)/3600;
+    	
+    	if($cur_time<6||$cur_time>10){
+    		return;
+    	}
+    	
     	$tokens=M('weui_token')->where('exprie_time >'.$now)->order('time desc')->find();
     	dump($now);
     	dump($tokens);
+
     	if($tokens){
     		$acc_token=$tokens['access_token'];
     	}else{
@@ -722,20 +756,29 @@ class BreedController extends Controller {
 	  				dump($sn);
 						$station = $mode->table('basestations')->where(array('base_code'=>$sn))->find();
 						//dump($station);
+						$jwmsg='';
+						unset($wmsg);
 	    			$loc = $station['address'];
 			    	$wmsg['touser']=$id;
 			    	$wmsg['template_id']=$template_id;
-			    	$msg_data['first']='您有一条新的设备故障消息';
-			    	$msg_data['keyword1']=$sn;
-			    	$msg_data['keyword2']=$loc;
-			    	$msg_data['keyword3']=$count."小时";
-			    	$msg_data['keyword4']="未上报";
-			    	$msg_data['remark']="请相关工作人员及时处理";
+			    	$msg_data['first']['value']='您有一条新的设备故障消息';
+			    	$msg_data['first']['color']="#173177";
+			    	$msg_data['keyword1']['value']=$sn;
+			    	$msg_data['keyword1']['color']="#173177";
+			    	$msg_data['keyword2']['value']=$loc;
+			    	$msg_data['keyword2']['color']="#173177";
+			    	$msg_data['keyword3']['value']=$count."小时";
+			    	$msg_data['keyword3']['color']="#173177";
+			    	$msg_data['keyword4']['value']="未上报";
+			    	$msg_data['keyword4']['color']="#173177";
+			    	$msg_data['remark']['value']="请相关工作人员及时处理";
+			    	$msg_data['remark']['color']="#173177";
 			    	$wmsg['data']=$msg_data;
-			    	$wmsg=json_encode($wmsg,true);
 			    	dump($wmsg);
+			    	$jwmsg=json_encode($wmsg,true);
+			    	dump($jwmsg);
 			    	dump('end');
-		    		$ret=http($url,$wmsg,'POST');
+		    		$ret=http($url,$jwmsg,'POST');
 		    		$ret=json_encode($ret,true);
 		    		dump($ret);
     			}
@@ -748,6 +791,7 @@ class BreedController extends Controller {
 	  				dump($sn);
 						$station = $mode->table('basestations')->where(array('base_code'=>$sn))->find();
 						//dump($station);
+						$jwmsg='';
 	    			$loc = $station['address'];
 	    			unset($wmsg);
 			    	$wmsg['touser']=$id;
@@ -765,14 +809,13 @@ class BreedController extends Controller {
 			    	$msg_data['remark']['value']="请相关工作人员及时处理";
 			    	$msg_data['remark']['color']="#173177";
 			    	$wmsg['data']=$msg_data;
-			    	$wmsg=json_encode($wmsg,true);
-			    	dump($wmsg);
+			    	$jwmsg=json_encode($wmsg,true);
+			    	dump($jwmsg);
 			    	dump('end');
-		    		$ret=http($url,$wmsg,'POST');
+		    		$ret=http($url,$jwmsg,'POST');
 		    		$ret=json_encode($ret);
 		    		dump($ret);
     			}
     	}	
-    	exit;
     }
 }

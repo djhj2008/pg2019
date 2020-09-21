@@ -475,7 +475,11 @@ class DatapushV50Controller extends Controller {
 				}
 				
 	    	for($j=0;$j < $vaild;$j++){
-		    	$up_time = $real_time-$interval*$freq+$interval*($j+1)+$interval*($freq-$vaild);
+	    		if($freq>1){
+		    		$up_time = $start+$interval*$j+$interval*($freq-$vaild);
+	    		}else{
+	    			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
+	    		}
 			    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
 		    	if($cvs>3){
 		    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);
@@ -797,9 +801,9 @@ class DatapushV50Controller extends Controller {
 		//dump($accadd_list2);
 		//dump($rfid_list);
 		
-  	$mydb='access_'.$psn;
+  	$mydb='access_base';
     $user=D($mydb);
-		$access1=$user->addAll($accadd_list);
+		$access1=$user->addAll($accadd_list); 
     		
     $user2=D('taccess');
 		$access2=$user2->addAll($accadd_list2);
@@ -1368,7 +1372,11 @@ class DatapushV50Controller extends Controller {
 						}
 
 			    	for($j=0;$j < $vaild;$j++){
-				    	$up_time = $real_time-$interval*$freq+$interval*($j+1)+$interval*($freq-$vaild);
+			    		if($freq>1){
+				    		$up_time = $start+$interval*$j+$interval*($freq-$vaild);
+			    		}else{
+			    			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
+			    		}
 					    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
 				    	if($cvs>3){
 				    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);
@@ -1773,7 +1781,7 @@ class DatapushV50Controller extends Controller {
 	        $psn_buf_psn=$psn_buf['psn'];
 	        if(count($psn_buf['devid'])>0){
 	            $wheredev['devid']=array('in',$psn_buf['devid']);
-	            $curdb1301='access1301_'.$psn_buf_psn;
+	            $curdb1301='access1301_base';
 	            $acc1301_values=D($curdb1301)->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<='.$end)->select();
 	            //dump($acc1301_values);
 	            foreach($psnallinfo as $psninfo){
@@ -1818,11 +1826,11 @@ class DatapushV50Controller extends Controller {
 	        }
 	    }
 
-    	$mydb='access_'.$psn;
+    	$mydb='access_base';
 	    $user=D($mydb);
 	    $ret=$user->addAll($accadd_list);
 
-			$mydb1301='access1301_'.$psn;
+			$mydb1301='access1301_base';
 	    $user1301=D($mydb1301);
 	    $ret=$user1301->addAll($acc1301addall);
 			

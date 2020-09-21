@@ -54,6 +54,7 @@
 				<th>SID</th>
         <th>延迟</th>
         <th>信号</th>
+        <th>小板信号</th>
         <th>频点</th>
         <th>丢失</th>    
 				<th>时间</th>
@@ -72,12 +73,13 @@
 				<td><%$value['sid']%></td>
 	      <td><%$value['delay']%></td>
 	      <td><%$value['sign']%></td>
+	      <td><%$value['rssi1']%></td>
 	      <td><%$value['cindex']%></td>
 	      <td><%$value['lcount']%></td>
 				<td><%date('Y-m-d H:i:s',$value['time'])%></td>
 				<td><%$value['cur_time']%></td>
 				<td>
-				<a href="<%$smarty.const.__APP__%>/product/querytemp?devid=<%$value['devid']%>&psn=<%$value['psn']%>">查看温度</a>
+				<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">查看温度</a>
 				</td>
 			</tr>
 			<%/foreach%>

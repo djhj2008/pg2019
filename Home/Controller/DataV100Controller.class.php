@@ -105,8 +105,9 @@ class DataV100Controller extends Controller {
 		$bigtemp = $parm['bigtemp'];
 		$interval = $parm['interval'];
 		$slaver_stop = (int)$parm['no1301'];
+		$ccid = $parm['ccid'];
 				
- 		$psninfo = D('psn')->where(array('tsn'=>$btsn,'sn'=>$psn))->find();
+ 		$psninfo = D('psn')->where(array('sn'=>$psn))->find();
     if($psn){
     	$psnid = $psninfo['id'];
 			$delay_up = $psninfo['delay_up']; 
@@ -150,6 +151,10 @@ class DataV100Controller extends Controller {
     	if($bdevinfo['slaver_stop']!=$slaver_stop){
     		$savebd['slaver_stop']=$slaver_stop;
     	}
+    	if($bdevinfo['number']!=$ccid){
+    		$savebd['number']=$ccid;
+    	}
+    	
     	if(!empty($savebd)){
     		$saveSql=M('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->save($savebd);	
     	}
@@ -298,7 +303,7 @@ class DataV100Controller extends Controller {
 		    		  		}
 		    		  }
 		    		  foreach($rfid_list as $rfid_dev){
-		    		  	if($rfid_dev['devid']==$devid){
+		    		  	if($rfid_dev['devid']==$devid&&$dev_psn==$rfid_dev['psn']){
 		    		  		$change_dev_find=true;
 		    		  		break;
 		    		  	}
@@ -333,7 +338,7 @@ class DataV100Controller extends Controller {
 		}
 		
 		if($accadd_list){
-	  	$mydb='access_'.$psn;
+	  	$mydb='access_base';
 	    $user=D($mydb);
 			$user->addAll($accadd_list);
 		}
@@ -478,7 +483,7 @@ class DataV100Controller extends Controller {
 		$bsnint = ((int)$parm['sn'])& 0x1fff;
 		$count = $parm['count'];
 		$small = $parm['small'];
-		$bigdiff = $parm['bigdiff'];
+		$bigdiff = 0;
 		$interval = $parm['interval'];
 
     $psnallinfo = D('psn')->select();
@@ -522,10 +527,12 @@ class DataV100Controller extends Controller {
 		$rssi['bsn']=$bsnint;
 		$rssi['rssi']=$brssimax;
 		$rssi['delay']=$bigdiff;
+		$rssi['temp']=$bigtemp;
 		$rssi['station']=1301;
+		$rssi['time']=time();
 		
 		if($rssi){
-			$saveRssi=D('brssi')->addAll($rssi);
+			$saveRssi=D('brssi')->add($rssi);
 		}
 
 		if($count!=count($small)){
@@ -670,7 +677,7 @@ class DataV100Controller extends Controller {
         $psn_buf_psn=$psn_buf['psn'];
         if(count($psn_buf['devid'])>0){
             $wheredev['devid']=array('in',$psn_buf['devid']);
-            $curdb1301='access1301_'.$psn_buf_psn;
+            $curdb1301='access1301_base';
             $acc1301_values=D($curdb1301)->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<='.$end)->select();
 
             foreach($psnallinfo as $psninfo){
@@ -716,13 +723,13 @@ class DataV100Controller extends Controller {
     }
     
 		if($accadd_list){
-    	$mydb='access_'.$psn;
+    	$mydb='access_base';
 	    $user=D($mydb);
 	    $user->addAll($accadd_list);
 		}
-    
+		
     if($acc1301addall){
-			$mydb1301='access1301_'.$psn;
+			$mydb1301='access1301_base';
 	    $user1301=D($mydb1301);
 	    $user1301->addAll($acc1301addall);
     }		
@@ -917,11 +924,15 @@ class DataV100Controller extends Controller {
 	    $end = $real_time;
 	    
 			if($vaild>4){
-				continue;
+				$vaild=4;
 			}  	
 
     	for($j=0;$j < $vaild;$j++){
-	    	$up_time = $real_time-$interval*$freq+$interval*($j+1)+$interval*($freq-$vaild);
+    		if($freq>1){
+	    		$up_time = $start+$interval*$j+$interval*($freq-$vaild);
+    		}else{
+    			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
+    		}
 		    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
 	    	if($cvs>3){
 	    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);

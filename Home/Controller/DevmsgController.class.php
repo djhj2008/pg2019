@@ -11,7 +11,7 @@ class DevmsgController extends Controller {
 	public function lostdevlist(){
 		$mode=M('','','DB_CONFIG');
 
-		$devmsg=M('devmsg')->where(array('state'=>0))->select();
+		$devmsg=M('devmsg')->select();
 		foreach($devmsg as $dev){
 			$sncode_list[]= $dev['sn_code'];
 		}
@@ -24,6 +24,10 @@ class DevmsgController extends Controller {
 		//dump($cow_sel);
 		//exit;
 		foreach($devmsg as $key=>$dev){
+			if($cow_sel[$dev['sn_code']]!=3){
+				unset($devmsg[$key]);
+				continue;
+			}
 			$devmsg[$key]['survival_state']=$cow_sel[$dev['sn_code']];
 		}
 		
@@ -31,6 +35,50 @@ class DevmsgController extends Controller {
 		$this->assign('devmsg',$devmsg);
 		$this->display();
 	}
+	
+	public function sendmsg(){
+
+		$id=$_GET['id'];
+		$msg=M('devmsg')->where(array('id'=>$id))->find();
+
+		if($msg){
+			$tmp = '14867046';
+			$phone = $msg['phone'];
+			$town = $msg['town'];
+			$village = $msg['town'];
+			$farmer = $msg['farmer_name'];
+			$village = $msg['village'];
+			$sn=$msg['sn_code'];
+			$phone=array($phone);
+			$foot='é˜²ç–«ç :'.substr($sn,-8);
+			$foot=iconv("GBK", "UTF-8", $foot); 
+			//$smsmsg[]=$town.$viliage.$farmer;
+			$smsmsg=array($town.$village.$farmer,$foot);
+			$ret=send163msgtmp($phone,$smsmsg,$tmp);
+			if($ret['code']==200){
+				M('devmsg')->where(array('id'=>$id))->save(array('state'=>1));
+			}else{
+				M('devmsg')->where(array('id'=>$id))->save(array('state'=>2));
+			}
+
+		}
+		$this ->redirect('/Devmsg/lostdevlist',NULL,0,'');
+	}
+	
+	public function setflag(){
+
+		$id=$_GET['id'];
+		$msg=M('devmsg')->where(array('id'=>$id))->find();
+		$flag = $msg['flag'];
+		if($flag==0){
+			M('devmsg')->where(array('id'=>$id))->save(array('flag'=>1));
+		}else{
+			M('devmsg')->where(array('id'=>$id))->save(array('flag'=>0));
+		}
+		
+		$this ->redirect('/Devmsg/lostdevlist',NULL,0,'');
+	}
+	
 	
 	public function addmsg(){
 		$phone=$_POST['phone'];
@@ -41,17 +89,17 @@ class DevmsgController extends Controller {
 		}else{
 			$id=$_GET['id'];
 			$town=$_POST['town'];
-			$viliage=$_POST['viliage'];
+			$village=$_POST['village'];
 			$farmer=$_POST['farmer'];
 			$sn=$_POST['sn'];
 			
 			$tmp = '14867046';
 			$phone=array($phone);
-			$foot='·ÀÒßÂë:'.substr($sn,-8);
+			$foot='é˜²ç–«ç :'.substr($sn,-8);
 			$foot=iconv("GBK", "UTF-8", $foot); 
 			send163msgtmp($phone,$smsmsg,$tmp);
 			//$smsmsg[]=$town.$viliage.$farmer;
-			$smsmsg=array($town.$viliage.$farmer,$foot);
+			$smsmsg=array($town.$village.$farmer,$foot);
 			$ret=send163msgtmp($phone,$smsmsg,$tmp);
 			if($ret['code']==200){
 				$this ->redirect('/Devmsg/addmsg',array('id'=>$id,'errcode'=>'1001'),0,'');

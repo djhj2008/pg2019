@@ -292,7 +292,7 @@ class DevselectController extends HomeController {
     		$date = date("Y-m-d");
  				$this->assign('date',$date);
  				$this->assign('date2',$date);
-        echo "<script type='text/javascript'>alert('Ã»ÓÐ²éÑ¯µ½½á¹û.');distory.back();</script>";
+        echo "<script type='text/javascript'>alert('No data.');distory.back();</script>";
     }
 	  $this->display();
 				
@@ -369,7 +369,7 @@ class DevselectController extends HomeController {
 		$psnid = $_GET['psnid'];
 		$sql = 'devid ='.$id.' and psn= '.$psnid.' and time >= '.$start_time.' and time < '.$end_time;
 		//var_dump($sql);
-		$selectSql=M('access')->where($sql)->group('time')->order('time desc')->select();
+		$selectSql=M('access_base')->where($sql)->group('time')->order('time desc')->select();
 		if(empty($selectSql)){
 				$now = time();
 				$v = strtotime(date('Y-m-d',$now))-86400;
@@ -405,203 +405,52 @@ class DevselectController extends HomeController {
 
 			$psninfo = M('psn')->where(array('id'=>$psnid))->find();
 			$psn=$psninfo['sn'];
-      $shed = $dev['shed'];
 			$tcc=substr($psninfo['tsn'],0,7);
 			
 			$devrid=M('device')->field('rid')->where(array('devid'=>$id,'psn'=>$psn))->find();
 			$rid=$devrid['rid'];
 			$this->assign('rid',$rid);
 			
-        $devSelect=M('device')->field('devid')->where(array('flag'=>1,'dev_type'=>1,'psn'=>$psn))->find();
-        if($devSelect!=NULL){
-            $devid=$devSelect['devid'];
-
-        }
-        
-        $devSelect2=M('device')->field('devid')->where(array('flag'=>1,'dev_type'=>2,'psn'=>$psn))->find();
-        if($devSelect2!=NULL){
-            $devid2=$devSelect2['devid'];
-
-        }
-
-        $devSelect3=M('device')->field('devid')->where(array('flag'=>1,'dev_type'=>3,'psn'=>$psn))->find();
-        if($devSelect3!=NULL){
-            $devid3=$devSelect3['devid'];
-
-        }
-
-        $mydb='access_'.$psn;
-        if($devid==NULL){
-            if($selectSql=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select()){
-								for($i=30;$i<40;$i++){
-					    		$mydb='access1301_'.$i;
-					    		$acc1301list[$i]=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('time desc')->select();
-					    	}
-					    	for($i=30;$i<40;$i++){
-					    		//dump($acc1301list[$i]);
-									if(count($acc1301list[$i])>0){
-		            		foreach($acc1301list[$i] as $acc){
-		            			$selectSql[]=$acc;
-		            		}
-		            	}
-		            }
-                $this->assign('devid',$id);
-                $this->assign('date',$time);
-                $this->assign('date2',$time2);
-                $this->assign('id',$id);
-								foreach($selectSql as $key=>$acc){
-									if($key<count($selectSql)-1){
-										$step = (int)$acc['rssi2'];
-										$pre_step = (int)$selectSql[$key+1]['rssi2'];
-										if($step-$pre_step>=0){
-											$cur_step = $step-$pre_step;
-										}else{
-											if(($acc['rssi3']&0x03)==0x01){
-												$cur_step=0;
-											}else{
-												$cur_step=65535-$pre_step+$step;
-											}
-										}
-										$selectSql[$key]['step2']='+'.$cur_step;
-									}
-								}
-                $this->assign('selectSql',$selectSql);
-            }else{
-								for($i=30;$i<40;$i++){
-					    		$mydb='access1301_'.$i;
-					    		$acc1301list[$i]=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select();
-					    	}
-					    	for($i=30;$i<40;$i++){
-					    		//dump($acc1301list[$i]);
-									if(count($acc1301list[$i])>0){
-		            		foreach($acc1301list[$i] as $acc){
-		            			$selectSql[]=$acc;
-		            		}
-		            	}
-		            }
-                $this->assign('devid',$id);
-                $this->assign('id',$id);
-                $this->assign('selectSql',$selectSql);
-                $date = date("Y-m-d");
-                $this->assign('date',$date);
-                $this->assign('date2',$date);
-                //echo "<script type='text/javascript'>alert('NO DATA.');distory.back();</script>"; 
-            }
-
-            $this->display();
-            exit;
-        }
-
-        $tmpSql=M('taccess')->where('devid ='.$devid.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id asc')->select();
-
-				if($devid2!=NULL){
-        	$tmpSql2=M('taccess')->where('devid ='.$devid2.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id asc')->select();
-					//var_dump($tmpSql2);
-				}
-				
-				if($devid3!=NULL){
-        	$tmpSql3=M('taccess')->where('devid ='.$devid3.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id asc')->select();
-					//var_dump($tmpSql3);
-				}
-
-        if($selectSql=M($mydb)->group('time')->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->order('id desc')->select()){
-            $this->assign('devid',$id);
-            $this->assign('date',$time);
-            $this->assign('date2',$time2);
-            $this->assign('id',$id);
-						/*
-            for($i=0;$i<count($selectSql);$i++){
-                if($tmpSql!=NULL){
-                		$max=count($tmpSql)-1;
-                    for($j=0;$j<count($tmpSql);$j++){
-                        if($selectSql[$i]['time']==$tmpSql[$j]['time']){
-                            $selectSql[$i]['env_temp1']=number_format($tmpSql[$j]['temp1'],2);
-                            $selectSql[$i]['env_temp2']=number_format($tmpSql[$j]['temp2'],2);
-                            break;
-                        }
-                        else if($selectSql[$i]['time'] > $tmpSql[$j]['time']){
-                            $selectSql[$i]['env_temp1']=number_format($tmpSql[$max]['temp1'],2);
-                            $selectSql[$i]['env_temp2']=number_format($tmpSql[$max]['temp2'],2);
-                        }
-                        else{
-                        	  $selectSql[$i]['env_temp1']=255; 
-                    				$selectSql[$i]['env_temp2']=255;
-                        }                          
-                    }
-                }else{
-                    $selectSql[$i]['env_temp1']=255; 
-                    $selectSql[$i]['env_temp2']=255;
-                }
-                if($tmpSql2!=NULL){
-                		$max=count($tmpSql2)-1;
-                    for($j=0;$j<count($tmpSql2);$j++){
-                        if($selectSql[$i]['time']==$tmpSql2[$j]['time']){
-                            $selectSql[$i]['env_temp3']=number_format($tmpSql2[$j]['temp1'],2);
-                            $selectSql[$i]['env_temp4']=number_format($tmpSql2[$j]['temp2'],2);
-                            break;
-                        }
-                        else if($selectSql[$i]['time'] > $tmpSql2[$j]['time']){
-                            $selectSql[$i]['env_temp3']=number_format($tmpSql2[$max]['temp1'],2);
-                            $selectSql[$i]['env_temp4']=number_format($tmpSql2[$max]['temp2'],2);
-                        }
-                        else{
-                        	  $selectSql[$i]['env_temp3']=255; 
-                    				$selectSql[$i]['env_temp4']=255;
-                        }   
-                    }
-                }else{
-                    $selectSql[$i]['env_temp3']=255; 
-                    $selectSql[$i]['env_temp4']=255;
-                } 
-                if($tmpSql3!=NULL){
-                		$max=count($tmpSql3)-1;
-                    for($j=0;$j<count($tmpSql3);$j++){
-                        if($selectSql[$i]['time']==$tmpSql3[$j]['time']){
-                            $selectSql[$i]['env_temp5']=number_format($tmpSql3[$j]['temp1'],2);
-                            $selectSql[$i]['env_temp6']=number_format($tmpSql3[$j]['temp2'],2);
-                            break;
-                        }
-                        else if($selectSql[$i]['time'] > $tmpSql3[$j]['time']){
-                            $selectSql[$i]['env_temp5']=number_format($tmpSql3[$max]['temp1'],2);
-                            $selectSql[$i]['env_temp6']=number_format($tmpSql3[$max]['temp2'],2);
-                        }
-                        else{
-                        	  $selectSql[$i]['env_temp5']=255; 
-                    				$selectSql[$i]['env_temp6']=255;
-                        }   
-                    }
-                }else{
-                    $selectSql[$i]['env_temp5']=255; 
-                    $selectSql[$i]['env_temp6']=255;
-                }                        
-                                   
-            }
-						*/
-						foreach($selectSql as $key=>$acc){
-							if($key>0){
-								$step = (int)$acc['rssi2'];
-								$pre_step = (int)$selectSql[$key-1]['rssi2'];
-								if($step-$pre_step>0){
-									$cur_step = $step-$pre_step;
+      $mydb='access_base';
+      $selectSql=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select();
+      //dump($psn);
+      //dump($id);
+      if($selectSql){
+      		//dump($selectSql);
+          $this->assign('devid',$id);
+          $this->assign('date',$time);
+          $this->assign('date2',$time2);
+          $this->assign('id',$id);
+					foreach($selectSql as $key=>$acc){
+						if($key<count($selectSql)-1){
+							$step = (int)$acc['rssi2'];
+							$pre_step = (int)$selectSql[$key+1]['rssi2'];
+							if($step-$pre_step>=0){
+								$cur_step = $step-$pre_step;
+							}else{
+								if(($acc['rssi3']&0x03)==0x01){
+									$cur_step=0;
 								}else{
-									if($step>0){
-										$cur_step=65535-$pre_step+$step;
-									}
+									$cur_step=65535-$pre_step+$step;
 								}
-								$selectSql[$key]['rssi2']=$step.' +'.$cur_step;
-							}							
+							}
+							$selectSql[$key]['step2']='+'.$cur_step;
 						}
-            $this->assign('selectSql',$selectSql);
-            //var_dump($selectSql);
-
-        }else{
-        		$date = date("Y-m-d");
-	 	 				$this->assign('date',$date);
-	 	 				$this->assign('date2',$date);
-            echo "<script type='text/javascript'>alert('Ã»ÓÐ²éÑ¯µ½½á¹û.');distory.back();</script>";
-        }
+					}
+          $this->assign('selectSql',$selectSql);
+      }else{
+          $this->assign('devid',$id);
+          $this->assign('id',$id);
+          $this->assign('selectSql',$selectSql);
+          $date = date("Y-m-d");
+          $this->assign('date',$date);
+          $this->assign('date2',$date);
+          //echo "<script type='text/javascript'>alert('NO DATA.');distory.back();</script>"; 
+      }
+      $this->display();
+      exit;
+      
     }
-		$this->display();
 	}
 	
 	public function addfactory(){
@@ -1549,12 +1398,10 @@ class DevselectController extends HomeController {
 			
 			$userinfo=M('usermsginfo')->where(array('psnid'=>$psn))->select();
 			$sub=',';
-     	$other_head1='Éè±¸(';
-     	$foot=')ÌåÎÂÉý¸ß,';
-     	$other_foot1=')ÌåÎÂÒÑ»Ö¸´Õý³£,';
-     	$other_head1=iconv("GBK", "UTF-8", $other_head1); 
-     	$foot=iconv("GBK", "UTF-8", $foot); 
-     	$other_foot1=iconv("GBK", "UTF-8", $other_foot1); 
+     	$other_head1='è®¾å¤‡(';
+     	$foot=')ä½“æ¸©å‡é«˜,';
+     	$other_foot1=')ä½“æ¸©å·²æ¢å¤æ­£å¸¸,';
+
 		
 			if($adddev){
 				foreach($adddev as $dev){
@@ -1871,10 +1718,10 @@ class DevselectController extends HomeController {
       $first = reset($accSelect);
       $end = end($accSelect);
 
-      $firstDay = substr($first[cur_time],0,strpos($first[cur_time],' '));//¿ªÊ¼ÈÕÆÚ
-      $endDay = substr($end[cur_time],0,strpos($end[cur_time],' '));//×îºóÈÕÆÚ
+      $firstDay = substr($first[cur_time],0,strpos($first[cur_time],' '));
+      $endDay = substr($end[cur_time],0,strpos($end[cur_time],' '));
 
-      $days = (strtotime($endDay)-strtotime($firstDay))/86400+1;//ÌìÊý
+      $days = (strtotime($endDay)-strtotime($firstDay))/86400+1;
       $startStr = $firstDay . '00:00:00';
       $endStr = $firstDay .  '23:59:59';
 
@@ -1939,7 +1786,7 @@ class DevselectController extends HomeController {
         
 				$dev=M('device')->where(array('devid'=>$devid,'psnid'=>$psnid))->find();
 				if($dev==NULL){
-					//echo "<script type='text/javascript'>alert('Éè±¸²»´æÔÚ.');distory.back();</script>";
+					//echo "<script type='text/javascript'>alert('NO DEV.');distory.back();</script>";
 					$this->display();
 					exit;
 				}
@@ -2320,7 +2167,7 @@ class DevselectController extends HomeController {
 
 				$dev=M('device')->where(array('devid'=>$devid,'psn'=>$psnid))->find();
 				if($dev==NULL){
-					//echo "<script type='text/javascript'>alert('Éè±¸²»´æÔÚ.');distory.back();</script>";
+					//echo "<script type='text/javascript'>alert('NO DEV.');distory.back();</script>";
 					$this->display();
 					exit;
 				}
@@ -2611,10 +2458,9 @@ class DevselectController extends HomeController {
 			
 			$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
 			$psn=$bdevinfo['psn'];
-			$tcc=substr($bdevinfo['tsn'],0,7);
 					
 			$delay_str= $bdevinfo['uptime'];
-			$count= $bdevinfo['count'];
+			$count= (int)$bdevinfo['count'];
 			
 			$delay = substr($delay_str,0, 2);
 			$delay = (int)$delay;
@@ -2629,6 +2475,10 @@ class DevselectController extends HomeController {
 			//$delay = 3600*$delay;
 			$delay_sub = $delay/$count;
 
+			if($count>2){
+				$count=2;
+			}
+			
     	$now = time();
 			$start_time = strtotime(date('Y-m-d',$now));
     	//var_dump($start_time);
@@ -2638,7 +2488,7 @@ class DevselectController extends HomeController {
     	//dump($cur_time);
     	$cur_time = (int)($cur_time/$delay)*$delay;
     	//dump($cur_time);
-    	$first_time = $cur_time-$delay+$start_time;
+    	$first_time = $cur_time-$delay*$count+$start_time;
 			//dump(date('Y-m-d H:i:s',$first_time));
 			//dump(date('Y-m-d H:i:s',$first_time));
     	if($psnid==12)
@@ -2648,7 +2498,7 @@ class DevselectController extends HomeController {
     		$devlist=M('device')->where(array('psnid'=>$psnid,'flag'=>1))->order('devid asc')->select();
     	}
     	//dump(count($devlist));
-    	$mydb='access_'.$psn;
+    	$mydb='access_base';
 			$accSelect2=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->order('devid asc')->select();
 			//dump('accSelect2:');
 			//dump($accSelect2);
@@ -2702,10 +2552,10 @@ class DevselectController extends HomeController {
 		$psnid=$_GET['psnid'];
 
 		$bdevinfo = M('bdevice')->where(array('psnid'=>$psnid))->find();
-		$tcc=substr($bdevinfo['tsn'],0,7);
+		
 		$psn=$bdevinfo['psn'];
 		$delay_str= $bdevinfo['uptime'];
-		$count= $bdevinfo['count'];
+		$count= (int)$bdevinfo['count'];
 		
 		$delay = substr($delay_str,0, 2);
 		$delay = (int)$delay;
@@ -2713,6 +2563,10 @@ class DevselectController extends HomeController {
 		$delay = 3600*$delay;
 		$delay_sub = $delay/$count;
 
+		if($count>2){
+			$count=2;
+		}
+		
   	$now = time();
 		$start_time = strtotime(date('Y-m-d',$now));
   	//var_dump($start_time);
@@ -2722,22 +2576,28 @@ class DevselectController extends HomeController {
   	$cur_time = $now - $start_time;
   	//var_dump($cur_time);
   	$cur_time = (int)($cur_time/$delay)*$delay;
-  	$first_time = $cur_time-$delay+$start_time;
-  	$pre_time = $cur_time-$delay+$start_time-$delay;
-  	$pre2_time = $cur_time-$delay+$start_time-$delay*2;
-  	$pre3_time = $cur_time-$delay+$start_time-$delay*3;
+  	$first_time = $cur_time-$delay*$count+$start_time;
+  	$pre_time = $cur_time-$delay*$count+$start_time-$delay*$count;
+  	$pre2_time = $cur_time-$delay*$count+$start_time-$delay*$count*2;
+  	$pre3_time = $cur_time-$delay*$count+$start_time-$delay*$count*3;
 		//dump(date('Y-m-d H:s:i',$first_time));
 		//dump(date('Y-m-d H:s:i',$pre_time));
 		//dump(date('Y-m-d H:s:i',$pre2_time));
 		
   	$devlist=M('device')->where(array('psn'=>$psn,'flag'=>1))->order('id asc')->select();
+  	
+  	if(empty($devlist)){
+			$this->assign('devSelect',$devSelect);
+			$this->display();
+  		exit;
+  	}
   	foreach($devlist as $key=>$dev){
   		$devidlist[]=$dev['devid'];
   	}
   	
   	$wheredev['devid']=array('in',$devidlist);
 
-  	$mydb='access_'.$psn;
+  	$mydb='access_base';
   	$accSelect1=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->where($wheredev)->order('devid asc')->select();
 		$accSelect2=M($mydb)->where(array('psn'=>$psn,'time'=>$pre_time))->where($wheredev)->order('devid asc')->select();
 		$accSelect3=M($mydb)->where(array('psn'=>$psn,'time'=>$pre2_time))->where($wheredev)->order('devid asc')->select();
@@ -2992,7 +2852,7 @@ class DevselectController extends HomeController {
             $date = date("Y-m-d");
             $this->assign('date',$date);
             $this->assign('date2',$date);
-            echo "<script type='text/javascript'>alert('Éè±¸²»´æÔÚ.');distory.back();</script>";
+            echo "<script type='text/javascript'>alert('NO DEV.');distory.back();</script>";
             $this->display();
             exit;
         }
@@ -3035,7 +2895,7 @@ class DevselectController extends HomeController {
                 $date = date("Y-m-d");
                 $this->assign('date',$date);
                 $this->assign('date2',$date);
-                 echo "<script type='text/javascript'>alert('Ã»ÓÐ²éÑ¯µ½½á¹û.');distory.back();</script>"; 
+                 echo "<script type='text/javascript'>alert('NO DATA.');distory.back();</script>"; 
             }
             $this->display();
             exit;
@@ -3133,7 +2993,7 @@ class DevselectController extends HomeController {
         		$date = date("Y-m-d");
 	 	 				$this->assign('date',$date);
 	 	 				$this->assign('date2',$date);
-            echo "<script type='text/javascript'>alert('Ã»ÓÐ²éÑ¯µ½½á¹û.');distory.back();</script>";
+            echo "<script type='text/javascript'>alert('NO DATA.');distory.back();</script>";
         }
     }
 		$this->display();

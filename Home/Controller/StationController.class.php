@@ -976,13 +976,20 @@ class StationController extends Controller {
 			}
 			
 			foreach($devlist as $dev){
-				$rid=$dev['rid'];
-				$devcowstate[$rid]=$dev['cow_state'];		
+				$rid=(int)$dev['rid'];
+				$devcowstate[$rid]=$dev['cow_state'];
 				$devflag[$rid]=$dev['id'];
 			}
+			
+			dump($devcowstate);
 			//dump($devflag);
 			foreach($cowlist as $cow){
-				$rid=(int)$cow['sn_code'];				
+				$rid=(int)$cow['sn_code'];
+				dump($rid);
+				dump($cow['health_state']);
+				dump($cow['survival_state']);
+				dump($devcowstate[$rid]);
+
 				if($cow['survival_state']==2||$cow['survival_state']==4)
 				{
 					$cowstop[]=$rid;

@@ -6,7 +6,6 @@
 	<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script>
 	
 	<!-- 新 Bootstrap 核心 CSS 文件 -->
-	<!--<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css">-->
 				<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
         <!-- DataTables -->
         <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
@@ -25,7 +24,6 @@
         <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
 				<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
 				<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
-		
   <style>
     b {color: #23527C;}
   </style>
@@ -55,6 +53,8 @@
         <th>类型</th>
         <th>短信状态</th>
         <th>牛最新状态</th>
+        <th>标记</th>
+        <th>人工标记</th>
         <th>操作</th>
      </tr>
      </thead>
@@ -64,11 +64,18 @@
     	<td><%$v.farmer_name%></td>
     	<td><%$v.phone%></td>
     	<td><%$v.town%></td>
-    	<td><%$v.viliage%></td>
+    	<td><%$v.village%></td>
       <td><%$v.sn_code%></td>
       <td><%date('Y-m-d H:i:s',$v.s_time)%></td>
       <td>丢失</td>
-      <td><%$v.state%></td>
+      <td>
+      <%if $v.state eq 1 %>
+					已发送
+			<%else if $v.state eq 2 %>
+					发送失败
+			<%else%>
+					未发送
+			<%/if%></td>
       <td>
       <%if $v.survival_state eq 3 %>
 					走失
@@ -78,7 +85,34 @@
 					其他
 			<%/if%>
 			</td>
-      <td><a href="<%$smarty.const.__APP__%>/devmsg/addmsg?id=<%$v.id%>">发送短信</a></td>
+      <td>
+      <%if $v.flag eq 1 %>
+					已标记
+			<%else%>
+					未标记
+			<%/if%>
+			</td>
+      <td>
+     		<%if $v.flag eq 0 %>
+     			<a href="<%$smarty.const.__APP__%>/devmsg/setflag?id=<%$v.id%>">标记正常</a>
+     		<%else%>
+     			<a href="<%$smarty.const.__APP__%>/devmsg/setflag?id=<%$v.id%>">取消标记</a>
+     		<%/if%>
+			</td>
+      <td>
+      	 <%if $v.state eq 0 %>
+      	 <%if $v.survival_state eq 3 %>
+      	<a href="<%$smarty.const.__APP__%>/devmsg/sendmsg?id=<%$v.id%>">发送农户|</a>
+      	<%/if%>
+      	<%else if $v.state eq 2 %>
+      	<%if $v.survival_state eq 3 %>
+      	<a href="<%$smarty.const.__APP__%>/devmsg/sendmsg?id=<%$v.id%>">失败重发|</a>
+      	<%/if%>
+      	<%/if%>
+      	<%if $v.survival_state eq 3 %>
+      		<a href="<%$smarty.const.__APP__%>/devmsg/addmsg?id=<%$v.id%>">发送他人</a>
+      	<%/if%>
+      </td>
     </tr>
     <%/foreach%>
      </tbody>
@@ -112,7 +146,9 @@
     <!-- App js -->
     <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.core.js"></script>
     <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.app.js"></script>
+    
 <script type="text/javascript">
+
             $(document).ready(function() {
                 //Buttons examples
                 var table = $('#datatable-buttons').DataTable({
@@ -120,7 +156,7 @@
                     iDisplayLength: 25,
                     info: true,
                     buttons: ['excel','pdf'],
-			              order: [[ 4, "desc" ]],
+			              order: [[ 5, "desc" ]],
 										columnDefs: [
 												{
 											      "targets": 1,

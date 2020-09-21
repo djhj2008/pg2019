@@ -388,7 +388,7 @@ class ManagerController extends HomeController {
 
         }
 
-        $mydb='access_'.$psn;
+        $mydb='access_base';
         if($devid==NULL){
             if($selectSql=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select()){
                 $this->assign('devid',$id);
@@ -413,18 +413,6 @@ class ManagerController extends HomeController {
 								}
                 $this->assign('selectSql',$selectSql);
             }else{
-								for($i=30;$i<40;$i++){
-					    		$mydb='access1301_'.$i;
-					    		$acc1301list[$i]=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select();
-					    	}
-					    	for($i=30;$i<40;$i++){
-					    		//dump($acc1301list[$i]);
-									if(count($acc1301list[$i])>0){
-		            		foreach($acc1301list[$i] as $acc){
-		            			$selectSql[]=$acc;
-		            		}
-		            	}
-		            }
                 $this->assign('devid',$id);
                 $this->assign('id',$id);
                 $this->assign('selectSql',$selectSql);

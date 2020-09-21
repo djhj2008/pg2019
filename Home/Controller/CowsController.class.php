@@ -16,8 +16,6 @@ class CowsController extends Controller {
 			dump($a);
 			dump($b);
 			dump($c);
-			//$c = Db::name(表名)->field(字段)->where(条件)->union([$a, $b])->buildSql();
-			//$list = $mode->table($c . ' a')->order('time desc')->limit(0,100)->select();
 			$mydb='access_35';
 			$list = $mode->table($c. ' d')->field('temp1,temp2,env_temp,time,psn,psnid,devid')->order('time desc')->select();
 			dump($list);
