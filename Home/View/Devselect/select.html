@@ -40,8 +40,9 @@
  	<div class="navbar navbar-default navbar-fixed-left" >
 		<ul class="nav navbar-nav" >
 			<li class="active"><a href="<%$smarty.const.__APP__%>/devselect/select"><b >首页</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/devmsg/pushmsg"><b >短信推送</b></a></li>
 			<li><a href="<%$smarty.const.__APP__%>/devmsg/lostdevlist"><b>异常设备</b></a></li>
-			<li><a href="<%$smarty.const.__APP__%>/product/villagelist"><b>隆德县</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/collect/downValue"><b>高温与步数</b></a></li>
 			<li><a href="<%$smarty.const.__APP__%>/product/querysntemp"><b>温度查询</b></a></li>
 			<li><a href="<%$smarty.const.__APP__%>/acadd/checkrssi"><b>基站RSSI</b></a></li>
 			<li><a href="<%$smarty.const.__APP__%>/manager/logout"><b>退出登陆</b></a></li>
@@ -52,6 +53,9 @@
 		<div class="container" >
 		  <div class="weui-btn-area">
 		    <button class="weui-btn weui-btn_primary" onclick="addserver()">添加牧场</button>
+		  </div>
+		  <div class="weui-btn-area">
+		    <button class="weui-btn weui-btn_primary" onclick="stepconfig()">步数温度检测配置</button>
 		  </div>
 		  <!--div class="weui-btn-area">
 		    <button class="weui-btn weui-btn_primary" onclick="querytemp()">温度查询</button>
@@ -76,7 +80,7 @@
 				<td><%$value['info']%></td>
 				<td><%$value['tsn']%></td>
 				<td><%$value['sn']%></td>
-				<td><a href="<%$smarty.const.__APP__%>/collect/downValue?psnid=<%$value['id']%>">低温</a>
+				<td><a href="<%$smarty.const.__APP__%>/collect/downValue?psnid=<%$value['id']%>">高温与步数</a>
 					<a href="<%$smarty.const.__APP__%>/devselect/devsignlost?psnid=<%$value['id']%>">|Delay次数</a>
 					</td>
 				<td>
@@ -169,6 +173,9 @@
       } );
       function addserver(){
           window.location.href="<%$smarty.const.__APP__%>/add/addserver";
+      }
+      function stepconfig(){
+          window.location.href="<%$smarty.const.__APP__%>/collect/config";
       }
       function querytemp(){
           window.location.href="<%$smarty.const.__APP__%>/product/querysntemp";

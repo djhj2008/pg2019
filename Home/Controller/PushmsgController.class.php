@@ -47,7 +47,7 @@ class PushmsgController extends Controller {
      		$msg[]='';
      	}
      	//$phone[]='15010150766';
-     	//dump(iconv_get_encoding());
+
      	dump($msg);
      	dump($phone);
      	if($phone&&$other){

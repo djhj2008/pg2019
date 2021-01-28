@@ -37,18 +37,16 @@ class CollectController extends Controller {
         
         if($dev){
         	$psn_now=$dev['psn_now'];
+        	$avg_step=$dev['avg_step'];
         }
-        if($psn_now>0){
-        	$mydb='access1301_'.$psn_now;
-        }else{
-        	$mydb='access_'.$psnid;
-        }
+
+        $mydb='access_base';
         
         $selectSql=M($mydb)->where('devid ='.$devid.' and psn= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)
 													        ->group('time')
 													        ->order($ios_order)
 													        ->select();
-        if($selectSql)
+        /*if($selectSql)
         {
         		$day_count=($end_time-$start_time)/86400;		
         	
@@ -92,7 +90,53 @@ class CollectController extends Controller {
         		//dump($dateArr);
         		//dump($temp1Arr);
         		//dump($temp2Arr);    		
-        }
+        }*/
+        
+        $next_time=0;
+				foreach($selectSql as $key=>$acc){
+					if($key > 1){
+						$step = (int)$acc['rssi2'];
+						$next_step = 0;
+						$cur_time =  (int)$acc['time'];
+						//echo 'cmp:';
+						//dump(date('Y-m-d H:i:s',$cur_time));
+						//dump(date('Y-m-d H:i:s',$next_time));
+						if($next_time>0&&$cur_time> $next_time){
+							continue;
+						}
+						
+						foreach($selectSql as $acc2){
+							$next_time = (int)$acc2['time'];
+							if($next_time-$cur_time==7200){
+								$next_step =  (int)$acc2['rssi2'];	
+								break;
+							}
+						}
+						//dump($pre_step);
+						if($next_step==0){
+							continue;
+						}
+						if($next_step-$step>=0){
+							$cur_step = $next_step-$step;
+						}else{
+							if(($acc['rssi3']&0x03)==0x01){
+								$cur_step=0;
+							}else{
+								if($step< 50000){
+
+								}else{
+									$cur_step=65535-$step+$next_step;
+								}
+							}
+						}
+						$selectSql[$key]['step3']=$cur_step-$avg_step;
+						$selectSql[$key]['step2']='+'.$cur_step;
+						array_push($dateArr,date('m-d H:i:s',$cur_time));
+						array_push($temp1Arr,$cur_step);
+						array_push($temp2Arr,$cur_step-$avg_step);
+					}
+				}
+        
 	      $this->assign('temp1Arr',json_encode(array_reverse($temp1Arr)));
 	      $this->assign('temp2Arr',json_encode(array_reverse($temp2Arr)));
 	      $this->assign('dateArr',json_encode(array_reverse($dateArr)));
@@ -176,106 +220,322 @@ class CollectController extends Controller {
 
 	      $this->display();
     }
-    
-    public function downValue(){
-    		$count_num=15;
-				if(empty($_POST['time'])||empty($_POST['time2'])){
-					  $now = time();
-					  $v = strtotime(date('Y-m-d',$now))-86400*15;
-					  $time =date('Y-m-d',$v);
-		  			$time2 =date('Y-m-d',$now);
-				}else{
-				  	$time =  $_POST['time'];
-				  	$time2 =  $_POST['time2'];
-				}
-		    $down_value=32;
+
+    public function downValuesync(){
+				ini_set("memory_limit","2048M");
+			  $now = time();
+			  $v = strtotime(date('Y-m-d H:i:s',$now));
+				$hours = 12;
+		    //$down_value= 35;//$_POST['temp'];
 		    
 				$psnid = $_GET['psnid'];
-	    	
-	    	$start_time = strtotime($time);
-	    	$end_time = strtotime($time2)+86400;
-
-        $ios_order='time asc';
-        
-        $dateArr = array();
-        $temp1Arr = array();
-        $temp2Arr = array();
-        
-        $mydb='access_'.$psnid;
+				
+				$psninfo = M('psn')->where(array('id'=>$psnid))->find();
+				$psn=$psninfo['sn'];
+				$down_value= $psninfo['htemplev1'];//$_POST['temp'];
+				$step_value= $psninfo['hstep'];
+				$hstep_count= $psninfo['hstep_count'];
+				echo 'PSN:';
+				dump($psn);
+				dump($down_value);
+				dump($step_value);
+	    	$start_time = $v;
+	    	$end_time = $start_time-3600*$hours;
+				dump(date('Y-m-d H:i:s',$start_time));
+				dump(date('Y-m-d H:i:s',$end_time));
+				
+        $mydb='access_base';
         
 				$psn=$psnid;
 				$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psn))->order('devid desc')->select();
-		
-				for($i=0;$i<count($devSelect);$i++)
-				{
-					$devSelect[$i]['down_count']=0;
-				}
-		
-        $selectSql=M($mydb)->where('temp1 <'.$down_value.' and time >= '.$start_time.' and time <= '.$end_time)
-													        ->order($ios_order)
-													        ->select();
-        if($selectSql)
-        {
-        		foreach($selectSql as $acc){
-        			$devid=$acc['devid'];
-        			$psn=$acc['psn'];
-        			$cur_time=$acc['time'];
-        			for($i=0;$i<count($devSelect);$i++)
-        			{
-        				if($devid==$devSelect[$i]['devid']&&$psn==$devSelect[$i]['psn']){
-        					$devSelect[$i]['down_count']=$devSelect[$i]['down_count']+1;
-        					$devSelect[$i]['down_time'][]=$cur_time;
-        					break;
-        				}
-        			}
-						}
-        }
-				/*		        
-        foreach($devSelect as $dev){
-        	 $devid=$dev['devid'];
-        	 $start_time=$end_time-86400;
-        	 $today_avg=0;
-        	 $today_avg2=0;
-        	 if($dev['down_count']>0){
-	  	        $todayvalue=M($mydb)->where('devid ='.$devid.' and psn= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)
-													        ->group('time')
-													        ->order($ios_order)
-													        ->select();
+				
+        $accs=M($mydb)->field('id,psn,devid,temp1,temp2,rssi2,rssi3,time')->where(['psn'=>$psn])->where('time <= '.$start_time.' and time >= '.$end_time)
+									        ->order('time asc')
+									        ->select();
 
-        			$today_sum=0;
-        			$today_sum2=0;
-        			$today_count=0;
-        			$today_time=date('Y-m-d',$today_start);
-	        		foreach($todayvalue as $acc){
-									$temp1=$acc['temp1'];
-									$temp2=$acc['temp2'];
-									$temp3=$acc['env_temp'];
-									$a=array($temp1,$temp2);
-									$t=max($a);
-									$vt=(float)$t;
-									$today_sum+=$vt;
-									$today_sum2+=$temp3;
-									$today_count++;
+				foreach($accs as $key=>$acc){
+					$devid=$acc['devid'];
+					$temp1=$acc['temp1'];
+					$temp2=$acc['temp2'];
+					$step=$acc['rssi2'];
+					$temp=max($temp1,$temp2);
+					if($temp>$down_value){
+						$temp_list[$devid][]=$acc['time'];
+					}
+					$dev['step']=$step;
+					$dev['time']=$acc['time'];
+					$dev['rssi3']=$acc['rssi3'];
+					$step_list[$devid][]=$dev;
+				}
+						
+				//dump($temp_list);
+				//dump($step_list);		
+								
+				foreach($devSelect as $key=>$dev){
+					$devid=$dev['devid'];
+					$high_flag=0;
+					$step_flag=0;
+					$pre_time=0;
+					if(count($temp_list[$devid])>=3){
+						dump($devid);
+						foreach($temp_list[$devid] as $time){
+							if($pre_time>0){
+								if($time-$pre_time==3600){
+									$high_flag+=1;
+								}else{
+									$high_flag=0;
+								}
 							}
-							$today_avg=$today_sum/$today_count;
-							$today_avg2=$today_sum2/$today_count;
-        		}
-        		if($today_avg>32){
-	        		for($i=0;$i<count($devSelect);$i++)
-	      			{
-	      				if($devid==$devSelect[$i]['devid']){
-	      					$devSelect[$i]['down_count']=0;
-	      					break;
-	      				}
-	      			}
-        		}
-        }
-        */
-        $this->assign('devSelect',$devSelect);
-	      //dump($devSelect);
+							$pre_time=$time;
+							if($high_flag>=3){
+								//dump($devid);
+								$ids[]=$devid;
+								break;
+							}
+						}
+					}
+					//dump($ids);
+					$pre_time=0;
+					if(count($step_list[$devid])>=3){
+						foreach($step_list[$devid] as $key2=>$step_info){
+							if($key2< count($step_list[$devid])-1){
+								$step = $step_info['step'];
+								$cur_time = $step_info['time'];
+								$next_time = (int)$step_list[$devid][$key2+1]['time'];
+								
+								//dump(date('Y-m-d H:i:s',$cur_time));
+								//dump($step);
+								if($cur_time==$next_time){
+									continue;
+								}
+								if($next_time-$cur_time==3600){
+									$next_step = (int)$step_list[$devid][$key2+1]['step'];
+									//dump($next_step);
+									if($next_step-$step>=0){
+										$cur_step = $next_step-$step;
+									}else{
+										if(($step_info['rssi3']&0x03)==0x01){
+											$cur_step=0;
+										}else{
+											$cur_step=65535+$next_step-$step;
+										}
+										if($next_step==0){
+											$cur_step=0;
+										}
+									}
+								}else{
+									$cur_step=0;
+								}
+							}
+
+							if($cur_step>=$step_value){
+								//dump($devid);
+								//dump(date('Y-m-d H:i:s',$cur_time));
+								//dump(date('Y-m-d H:i:s',$pre_time));
+								//dump($cur_time-$pre_time);
+								//dump($cur_step);
+								//dump($step_flag);
+								if($pre_time>0){
+									if($cur_time-$pre_time==3600){
+										$step_flag+=1;
+									}else{
+										$step_flag=0;
+									}
+								}else{
+									$step_flag+=1;
+								}
+							}
+							$pre_time=$cur_time;
+							if($step_flag>=$hstep_count){
+								//dump($devid);
+								$stepids[]=$devid;
+								break;
+							}
+						}
+					}
+				}
+				dump($ids);
+				dump($stepids);
+				$ret=M('device')->where(array('psn'=>$psn,'step_state'=>1))->save(array('step_state'=>0));
+				$ret=M('device')->where(array('psn'=>$psn,'high_state'=>1))->save(array('high_state'=>0));
+
+				if(count($stepids)>0){
+					$wherestep['devid']=['in',$stepids];
+					$ret=M('device')->where(array('psn'=>$psn))->where($wherestep)->save(array('step_state'=>1));
+				}
+				
+				if(count($ids)>0){
+					$wheredev['devid']=['in',$ids];
+					$ret=M('device')->where(array('psn'=>$psn))->where($wheredev)->save(array('high_state'=>1));
+				}
+				exit;
+    }
+
+    public function downValue2(){
+				ini_set("memory_limit","2048M");
+			  $now = time();
+			  $v = strtotime(date('Y-m-d H:i:s',$now));
+				$hours = 12;
+		    $down_value= 35;//$_POST['temp'];
+		    
+				$psnid = $_GET['psnid'];
+				
+				$psninfo = M('psn')->where(array('id'=>$psnid))->find();
+				$psn=$psninfo['sn'];
+				$down_value= $psninfo['htemplev1'];//$_POST['temp'];
+
+	    	$start_time = $v;
+	    	$end_time = $start_time-3600*$hours;
+
+        $mydb='access_base';
+        
+				$psn=$psnid;
+				$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psn))->order('devid desc')->select();
+				
+        $accs=M($mydb)->where(['psn'=>$psn])->where('time <= '.$start_time.' and time >= '.$end_time)
+									        ->order('time asc')
+									        ->select();
+
+				foreach($accs as $key=>$acc){
+					$devid=$acc['devid'];
+					$temp1=$acc['temp1'];
+					$temp2=$acc['temp2'];
+					$temp=max($temp1,$temp2);
+					if($temp>$down_value){
+						$temp_list[$devid][]=$acc['time'];
+					}
+				}
+				//dump($temp_list);
+				//exit;
+				
+				foreach($devSelect as $key=>$dev){
+					$devid=$dev['devid'];
+					$high_flag=0;
+					$pre_time=0;
+					if(count($temp_list)>=3){
+						foreach($temp_list[$devid] as $time){
+							if($pre_time>0){
+								if($time-$pre_time==3600){
+									$high_flag+=1;
+								}else{
+									$high_flag=0;
+								}
+							}
+							$pre_time=$time;
+						}
+						if($high_flag>=3){
+							//dump($devid);
+							$ids[]=$devid;
+						}
+					}
+				}
+				
+				
+				if(count($ids)>0){
+					$wheredev['devid']=['in',$ids];
+					$ret=M('device')->where(array('psn'=>$psn))->where($wheredev)->save(array('high_state'=>1));
+				}
+				
+				$devs=M('device')->where(array('psn'=>$psn,'high_state'=>1))->select();
+        $this->assign('devSelect',$devs);
+	      $this->display();
+    }
+         
+    public function downValue(){
+				$psnid = $_GET['psnid'];
+				if($psnid==NULL){
+					$devs=M('device')->where('high_state=1 or step_state=1')->select();
+	        $this->assign('devSelect',$devs);
+		      $this->display();
+		      exit;
+				}
+				$psninfo = M('psn')->where(array('id'=>$psnid))->find();
+				$psn=$psninfo['sn'];
+				$devs=M('device')->where('high_state=1 or step_state=1')->where(['psn'=>$psn])->select();
+        $this->assign('devSelect',$devs);
 	      $this->display();
     }
 
+		public function hightempset(){
+			$temp=$_GET['temp'];
+			if($temp>32){
+				$ret=M('psn')->where('1')->save(array('htemplev1'=>$temp));
+				$this->assign('temp',$temp);
+			}
+			dump($ret);
+			dump($temp);
+			//$this->display();
+			exit;
+		}
+
+		public function hightempget(){
+
+
+			$ret=M('psn')->find();
+				
+			dump($ret['htemplev1']);
+			//$this->display();
+			exit;
+		}
+		
+		public function highstepset(){
+			$step=$_GET['step'];
+			if($step>100){
+				$ret=M('psn')->where('1')->save(array('hstep'=>$step));
+				//$this->assign('step',$step);
+			}
+			dump($ret);
+			dump($step);
+			//$this->display();
+			exit;
+		}
+
+		public function highstepget(){
+
+
+			$ret=M('psn')->find();
+				
+			dump($ret['hstep']);
+			//$this->display();
+			exit;
+		}
+		
+		public function config(){
+			$htemplev1=$_POST['htemplev1'];
+			$hstep=$_POST['hstep'];
+			$hstep_count=$_POST['hstep_count'];
+			
+			$psninfo=M('psn')->find();
+			
+			if($htemplev1==NULL&&$hstep==NULL&&$hstep_count==NULL){
+				//dump($psninfo);
+				$this->assign('psninfo',$psninfo);
+				$this->display();
+				exit;
+			}
+						
+
+			if($psninfo['htemplev1']!=$htemplev1){
+				$psnsave['htemplev1']=$htemplev1;
+			}
+			if($psninfo['hstep']!=$hstep){
+				$psnsave['hstep']=$hstep;
+			}
+			if($psninfo['hstep_count']!=$hstep_count){
+				$psnsave['hstep_count']=$hstep_count;
+			}
+			
+			if(!empty($psnsave)){
+				$ret=M('psn')->where('1')->save($psnsave);
+				$psninfo=M('psn')->find();
+				$this->assign('psninfo',$psninfo);
+				$this->display();
+			}else{
+				$this->assign('psninfo',$psninfo);
+				$this->display();
+			}
+		}	
+			
     public function signdownValue(){
     		$count_num=15;
 				if(empty($_POST['time'])||empty($_POST['time2'])){
@@ -440,10 +700,6 @@ class CollectController extends Controller {
 						}
 					}
 				}
-				
-				
-				
-				
 
 				$this->assign('acclist',$acclist2);
 				$this->assign('devlost',$acc_lost);

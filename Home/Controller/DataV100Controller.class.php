@@ -486,6 +486,10 @@ class DataV100Controller extends Controller {
 		$bigdiff = 0;
 		$interval = $parm['interval'];
 
+		$hour_delay = $interval[0];
+		$min_delay	= $interval[1];
+		$freq				= $interval[2];
+
     $psnallinfo = D('psn')->select();
     //dump($psnallinfo);
     $dev_psnid_find = false;

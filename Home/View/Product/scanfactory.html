@@ -45,6 +45,7 @@
      <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
      <thead>
 			<tr>
+				<th>RFID</th>
 				<th>DEVID</th>
 				<th>状态</th>
 				<th>工厂SN</th>
@@ -55,6 +56,7 @@
 		  <tbody>
 			<%foreach $devSelect as $value%>
 			<tr>
+				<td><%$value['fsn']%></td>
 				<td><%$value['devid']%></td>
 				<%if $value['state'] eq 3 %>
 				<td>数据丢失</td>

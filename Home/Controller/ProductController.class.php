@@ -168,8 +168,15 @@ class ProductController extends HomeController {
   	foreach($devlist as $dev){
   		$devidlist[]=$dev['devid'];
   	}
-
+  	
   	$wheredev['devid']=array('in',$devidlist);
+
+		$alldevs=M('device')->where(array('psnid'=>$psnid))->select();
+
+  	//dump($devidlist);
+  	//dump($psnid);
+  	//dump($alldevs);
+		//dump(count($rfidlist));
 
   	$mydb='access_base';
   	$accSelect1=M($mydb)->where(array('psn'=>$psn,'time'=>$first_time))->where($wheredev)->order('devid asc')->select();
@@ -261,6 +268,7 @@ class ProductController extends HomeController {
 		}
 
 		$devSelect=M('factory')->where(array('psnid'=>$psnid,'productno'=>$productno))->where('state>=0')->order('devid asc')->select();
+		
 		$this->assign('devSelect',$devSelect);
 		$this->display();
 	}
@@ -932,7 +940,7 @@ class ProductController extends HomeController {
         		$date = date("Y-m-d");
 	 	 				$this->assign('date',$date);
 	 	 				$this->assign('date2',$date);
-            echo "<script type='text/javascript'>alert('没有查询到结果.');distory.back();</script>";
+            echo "<script type='text/javascript'>alert('没詯锟疥懐锟斤拷锟结夯.');distory.back();</script>";
         }
     }
 		$this->display();

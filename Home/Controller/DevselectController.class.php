@@ -405,15 +405,43 @@ class DevselectController extends HomeController {
 
 			$psninfo = M('psn')->where(array('id'=>$psnid))->find();
 			$psn=$psninfo['sn'];
-			$tcc=substr($psninfo['tsn'],0,7);
+
+	  	if(empty($psnid)){
+	  		$psn=$_GET['psn'];
+	  	}
 			
-			$devrid=M('device')->field('rid')->where(array('devid'=>$id,'psn'=>$psn))->find();
+			$devrid=M('device')->field('rid,avg_step')->where(array('devid'=>$id,'psn'=>$psn))->find();
 			$rid=$devrid['rid'];
 			$this->assign('rid',$rid);
+			$avg_step=$devrid['avg_step'];
 			
-      $mydb='access_base';
-      $selectSql=M($mydb)->where('devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time)->group('time')->order('time desc')->select();
-      //dump($psn);
+      $mydb=['access_base','access_base202011','access_base202010'];
+      
+      $wherestr='devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time;
+
+      //$s1=M()->table('access_base')->where($wherestr)->group('time')->order('time desc')>buildSql();
+      
+      
+      $s1_time = strtotime('2020-11-01 00:00:00');
+      $s2_time = strtotime('2020-12-01 00:00:00');
+      if($start_time<$s1_time){
+ 				$s1=M()->table('access_base202010')->where($wherestr)->group('time')->order('time desc')->select();
+				foreach($s1 as $s){
+					$selectSql[]=$s;
+				}
+      }
+      if($start_time<$s2_time){
+ 				$s2=M()->table('access_base202011')->where($wherestr)->group('time')->order('time desc')->select();
+				foreach($s2 as $s){
+					$selectSql[]=$s;
+				}
+      }
+
+      $s3=M()->table('access_base')->where($wherestr)->group('time')->order('time desc')->select();
+			foreach($s3 as $s){
+				$selectSql[]=$s;
+			}
+			
       //dump($id);
       if($selectSql){
       		//dump($selectSql);
@@ -421,20 +449,47 @@ class DevselectController extends HomeController {
           $this->assign('date',$time);
           $this->assign('date2',$time2);
           $this->assign('id',$id);
+          $next_time=0;
 					foreach($selectSql as $key=>$acc){
 						if($key<count($selectSql)-1){
 							$step = (int)$acc['rssi2'];
-							$pre_step = (int)$selectSql[$key+1]['rssi2'];
+							$pre_step = 0;
+							$cur_time =  (int)$acc['time'];
+							//echo 'cmp:';
+							//dump(date('Y-m-d H:i:s',$cur_time));
+							//dump(date('Y-m-d H:i:s',$next_time));
+							if($next_time>0&&$cur_time> $next_time){
+								continue;
+							}
+							
+							foreach($selectSql as $acc2){
+								$pre_time =  (int)$acc2['time'];
+								$next_time = $cur_time-7200;
+								if($cur_time-$pre_time==7200){
+									$pre_step =  (int)$acc2['rssi2'];	
+									break;
+								}
+							}
+							//dump($pre_step);
+							if($pre_step==0){
+								continue;
+							}
 							if($step-$pre_step>=0){
 								$cur_step = $step-$pre_step;
 							}else{
 								if(($acc['rssi3']&0x03)==0x01){
 									$cur_step=0;
 								}else{
-									$cur_step=65535-$pre_step+$step;
+									if($pre_step<50000){
+
+									}else{
+										$cur_step=65535-$pre_step+$step;
+									}
 								}
 							}
+							$selectSql[$key]['step3']=$cur_step-$avg_step;
 							$selectSql[$key]['step2']='+'.$cur_step;
+							
 						}
 					}
           $this->assign('selectSql',$selectSql);
@@ -1869,11 +1924,17 @@ class DevselectController extends HomeController {
 		$psn=M('psn')->where(array('id'=>$psnid))->find();
 		$psn_sn=$psn['sn'];
 		$devSelect=M('changeidlog')->where(array('psnid'=>$psnid))->where('old_psn != '.$psn_sn)->order('time desc')->select();
+		if($devSelect==NULl){
+			$this->assign('psn_sn',$psn_sn);
+			$this->display();
+			exit;
+		}
 		foreach($devSelect as $dev){
 			$rid=$dev['rfid'];
 			$rid_list[]=$rid;
 		}
-		$dev_list=M('device')->where(['rid'=>['in',$rid_list]])->where(['flag'=>1])->select();
+		//$dev_list=M('device')->where(['rid'=>['in',$rid_list]])->where(['flag'=>1])->select();
+		$dev_list=M('device')->where(['rid'=>['in',$rid_list]])->select();
 		foreach($dev_list as $dev){
 			$rid=$dev['rid'];
 			$psn_list[$rid]=$dev['psn_now'];
@@ -2706,10 +2767,17 @@ class DevselectController extends HomeController {
   	foreach($devlist as $key=>$dev){
   		$devidlist[]=$dev['devid'];
   	}
-  	
+  	if(empty($devlis)){
+        $date = date("Y-m-d");
+        $this->assign('date',$date);
+        $this->assign('date2',$date);
+        echo "<script type='text/javascript'>alert('请先激活设备.');distory.back();</script>";
+        $this->display();
+        exit;
+  	}
   	$wheredev['devid']=array('in',$devidlist);
 
-  	$mydb='access_'.$psn;
+  	$mydb='access_base';
   	$accSelect1=M($mydb)->where(array('psn'=>$psn))->where($wheredev)->where('time >= '.$end_time)->order('devid asc')->select();
 
 		foreach($accSelect1 as $acc){
@@ -2729,7 +2797,7 @@ class DevselectController extends HomeController {
   			if($n==$dev['devid']){
   				$devlist[$m]['lost']=$lost;
   				$rid=$tcc.str_pad($dev['rid'],8,'0',STR_PAD_LEFT);
-  				$devlist[$m]['rid']=$rid;
+  				//$devlist[$m]['rid']=$rid;
   				//dump($n);
   				//dump($lost);
   				break;
@@ -2821,7 +2889,7 @@ class DevselectController extends HomeController {
 		}
 		$start_time = strtotime($time);
 		$end_time = strtotime($time2)+86400;
-		$mydb='access1301_'.$psn;
+		$mydb='access1301_base';
 		$selectSql=M($mydb)->where('psnid= '.$psnid.' and time >= '.$start_time.' and time <= '.$end_time)->order('time desc')->select();
     $this->assign('date',$time);
     $this->assign('date2',$time2);

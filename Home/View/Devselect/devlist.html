@@ -54,12 +54,10 @@
 			<tr>
 				<th>RFID</th>
 				<th>DEVID</th>
-				<th>SN</th>
-				<th>舍</th>
 				<th>电量</th>
-				<th>设备状态</th>
 				<th>牛状态</th>
-				<th>Assert</th>
+				<th>周均步数</th>
+				<th>周有效步次</th>
 				<th>停止标志</th>
 				<th>基础温度</th>
 				<th>查看</th>
@@ -71,12 +69,10 @@
 			<tr>
 				<td><%$value['rid']%></td>
 				<td><%$value['devid']%></td>
-				<td><%$value['sn']%></td>
-				<td><%$value['shed']%></td>
 				<td><%$value['battery']%></td>
-				<td><%$value['dev_state']%></td>
 				<td><%$value['cow_state']%></td>
-				<td><%$value['dev_assert']%></td>
+				<td><%$value['avg_step']%></td>
+				<td><%$value['step_count']%></td>
 				<td>
 					<%if $value['re_flag'] eq 1 %>
 					停止

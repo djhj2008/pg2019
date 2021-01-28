@@ -47,8 +47,10 @@
      <thead>
 			<tr>
 				<th>RFID</th>
+				<th>温度状态</th>
+				<th>步数状态</th>
+				<th>厂号</th>
 				<th>DEVID</th>
-				<th>低温次数</th>
 				<th>查看</th>
 			</tr>
 		</thead>
@@ -56,8 +58,10 @@
 			<%foreach $devSelect as $value%>
 			<tr>
 				<td><%$value['rid']%></td>
+				<td><%$value['high_state']%></td>
+				<td><%$value['step_state']%></td>
+				<td><%$value['psn']%></td>
 				<td><%$value['devid']%></td>
-				<td><%$value['down_count']%></td>
 				<td>
 					<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">查看温度</a>
 					<a href="<%$smarty.const.__APP__%>/collect/monthValue?devid=<%$value['devid']%>&psnid=<%$value['psnid']%>">|温度图</a>

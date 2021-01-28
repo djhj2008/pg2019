@@ -26,7 +26,7 @@
 </div>
 
 <div class="container" >
-    <div id="main" style="height:200px;"></div>
+    <div id="main" style="height:400px;"></div>
 </div>
 
 
@@ -68,7 +68,7 @@
 				        }
             },
             legend: {
-                data:['体温','环境温度'],
+                data:['步数','差值'],
             },
     toolbox: {
         show: true,
@@ -104,14 +104,14 @@
             yAxis: {
                 type: 'value',
                 axisLabel: {
-                    formatter: '{value}°C'
+                    formatter: '{value}'
                 },
-                min:cur_min,
-                max:42,
+                min:-5000,
+                max:10000,
             },
             series: [
                 {
-                    name:'体温',
+                    name:'步数',
                     type:'line',
                     data:temp1,
                     markPoint: {
@@ -128,7 +128,7 @@
 
                 },
                 {
-                    name:'环境温度',
+                    name:'差值',
                     type:'line',
                     data:temp2,
 

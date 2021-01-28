@@ -78,6 +78,7 @@
 				<th>计步器开关</th>
 				<th>总步数</th>
 				<th>步数</th>
+				<th>步差</th>	
 				<th>跳频开关</th>
 				<th>计步器配置</th>
 				<th>工程状态</th>
@@ -117,6 +118,7 @@
       <%/if%>
 			<td><%$v['rssi2']%></td>
 			<td><%$v['step2']%></td>
+			<td><%$v['step3']%></td>
       <%if ($v['rssi3']&0x04) eq 0x04 %>
       <td>1</td>
       <%else%>
@@ -176,7 +178,7 @@
                     iDisplayLength: 25,
                     info: true,
                     buttons: ['excel','pdf'],
-			              order: [[ 21, "desc" ]],
+			              order: [[ 22, "desc" ]],
 										columnDefs: [
 												{
 											      "targets": 1,

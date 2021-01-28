@@ -84,7 +84,7 @@ class StationController extends Controller {
     	
     	$wheredev['devid']=array('in',$devidlist);
 			$time1=time();
-    	$mydb='access_'.$psn;
+    	$mydb='access_base';
     	
 			$start_index=M($mydb)->where('time='.$last_time)->field('id')->order('id asc')->find();
 			$end_index=M($mydb)->where('time='.$first_time)->field('id')->order('id desc')->find();
@@ -95,19 +95,11 @@ class StationController extends Controller {
 			dump($range);
 
 			$time1=time();
-    	$mydb='access_'.$psn;
     	
     	$whereid['id']=array('between',$range);
     	$accSelect1=M($mydb)->where(array('psn'=>$psn))->where($whereid)->field('psn,devid,sid,psnid,time,sign')->select();
 			
-			$time2=time();
-			for($i=30;$i<40;$i++){
-				if($i!=$psn){
-	    		$mydb='access1301_'.$i;
-	    		$acc1301list1[$i]=M($mydb)->where(array('psn'=>$psn))->where('time<='.$first_time.' and time>='.$last_time)->field('psn,devid,sid,psnid,time,sign')->select();
-				}
-    	}
-    	$time3=time();
+
     	
 			foreach($accSelect1 as $acc){
 				$devid=$acc['devid'];
@@ -115,15 +107,8 @@ class StationController extends Controller {
 					$cdev[$devid][]=$acc;
 				}
 			}
-			for($i=30;$i<40;$i++){
-				foreach($acc1301list1[$i] as $acc){
-					$devid=$acc['devid'];
-					if($acc['psn']==$psn){
-						$cdev[$devid][]=$acc;
-					}
-				}
-    	}
-    	$time4=time();
+
+
 			echo "START SCAN...";
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
@@ -208,24 +193,15 @@ class StationController extends Controller {
 				dump($rid);
 				$psn=$dev['psn'];
 				$devid=$dev['devid'];
-				$mydb='access_'.$psn;
+				$mydb='access_base';
 				$user=M($mydb);
 				$time1278=$user->where(array('psn'=>$psn,'devid'=>$devid))->order('time desc')->find();
 				
-				for($i=30;$i<40;$i++){
-					if($i!=$psn){
-			    		$mydb='access1301_'.$i;
-			    		$time1301[$i]=M($mydb)->where(array('psn'=>$psn,'devid'=>$devid))->order('time desc')->find();
-					}
-	    		}
+
 				if($time1278){
 					$time_list[]=$time1278['time'];
 				}
-				for($i=30;$i<40;$i++){
-					if($time1301[$i]){
-						$time_list[]=$time1301[$i]['time'];					
-					}
-		  		}
+
 		  		foreach($time_list as $t){
 		  			dump(date('Y-m-d H:i:s',$t));
 		  		}
@@ -239,26 +215,11 @@ class StationController extends Controller {
 							->where('time<='.$end_time.' and time>='.$start_time)
 							->order('time desc')
 							->select();
-				
-				for($i=30;$i<40;$i++){
-					if($i!=$psn){
-		    		$mydb='access1301_'.$i;
-		    		$acc1301list[$i]=M($mydb)->where(array('psn'=>$psn,'devid'=>$devid))
-		    								->where('time<='.$end_time.' and time>='.$start_time)
-		    								->order('time desc')
-		    								->select();
-					}
-	    		}				
-				
+						
 				foreach($acclist as $acc){
 					$cdev[]=$acc;
 				}
 				
-				for($i=30;$i<40;$i++){
-					foreach($acc1301list[$i] as $acc){
-							$cdev[]=$acc;	
-					}
-		  		}
 
 				if(empty($cdev)){
 					continue;					
@@ -326,27 +287,14 @@ class StationController extends Controller {
 				dump($rid);
 				$psn=$dev['psn'];
 				$devid=$dev['devid'];
-				$mydb='access_'.$psn;
+				$mydb='access_base';
 				$user=M($mydb);
 				$first_time=1585670400-86400*30;
 				$acclist=$user->where(array('psn'=>$psn,'devid'=>$devid))->order('time desc')->limit(0,24*7)->select();
-				
-				for($i=30;$i<40;$i++){
-					if($i!=$psn){
-		    		$mydb='access1301_'.$i;
-		    		$acc1301list[$i]=M($mydb)->where(array('psn'=>$psn,'devid'=>$devid))->order('time desc')->limit(0,24*7)->select();
-					}
-	    		}				
-				
+					
 				foreach($acclist as $acc){
 					$cdev[]=$acc;
 				}
-				
-				for($i=30;$i<40;$i++){
-					foreach($acc1301list[$i] as $acc){
-							$cdev[]=$acc;	
-					}
-		  		}
 
 				if(empty($cdev)){
 					continue;					
@@ -564,7 +512,7 @@ class StationController extends Controller {
     	
     	$wheredev['devid']=array('in',$devidlist);
 			$time1=time();
-    	$mydb='access_'.$psn;
+    	$mydb='access_base';
     	
 			$start_index=M($mydb)->where('time='.$last_time)->field('id')->order('id asc')->find();
 			$end_index=M($mydb)->where('time='.$first_time)->field('id')->order('id desc')->find();
@@ -575,19 +523,13 @@ class StationController extends Controller {
 			dump($range);
 
 			$time1=time();
-    	$mydb='access_'.$psn;
+    	$mydb='access_base';
     	
     	$whereid['id']=array('between',$range);
     	$accSelect1=M($mydb)->where(array('psn'=>$psn))->where($whereid)->field('psn,devid,sid,psnid,time,sign')->select();
 			
 			$time2=time();
-			for($i=30;$i<40;$i++){
-				if($i!=$psn){
-	    		$mydb='access1301_'.$i;
-	    		$acc1301list1[$i]=M($mydb)->where(array('psn'=>$psn))->where('time<='.$first_time.' and time>='.$last_time)->field('psn,devid,sid,psnid,time,sign')->select();
-				}
-    	}
-    	$time3=time();
+
     	
 			foreach($accSelect1 as $acc){
 				$devid=$acc['devid'];
@@ -595,15 +537,7 @@ class StationController extends Controller {
 					$cdev[$devid][]=$acc;
 				}
 			}
-			for($i=30;$i<40;$i++){
-				foreach($acc1301list1[$i] as $acc){
-					$devid=$acc['devid'];
-					if($acc['psn']==$psn){
-						$cdev[$devid][]=$acc;
-					}
-				}
-    	}
-    	$time4=time();
+
 			echo "START SCAN...";
 			foreach($devlist as $dev){
 				$devid = $dev['devid'];
@@ -732,17 +666,10 @@ class StationController extends Controller {
 				$psn_now=$dev['psn_now'];
 				$psn=$dev['psn'];
 				$devid=$dev['devid'];
-				$mydb='access_'.$psn;
+				$mydb='access_base';
 				
 				$acclist=M($mydb)->where(array('psn'=>$psn,'devid'=>$devid))->where('time<='.$start_time.' and time>='.$end_time)->field('psn,devid,sid,psnid,time,sign,temp1')->order('time desc')->select();
-				
-				for($i=30;$i<40;$i++){
-					if($i!=$psn){
-		    		$mydb='access1301_'.$i;
-		    		$acc1301list[$i]=M($mydb)->where(array('psn'=>$psn,'devid'=>$devid))->where('time<='.$start_time.' and time>='.$end_time)->field('psn,devid,sid,psnid,time,sign,temp1')->select();
-					}
-	    	}				
-				
+							
 				foreach($acclist as $acc){
 					$devid=$acc['devid'];
 					if($acc['psn']==$psn){
@@ -750,14 +677,6 @@ class StationController extends Controller {
 					}
 				}
 				
-				for($i=30;$i<40;$i++){
-					foreach($acc1301list[$i] as $acc){
-						$devid=$acc['devid'];
-						if($acc['psn']==$psn){
-							$cdev[]=$acc;
-						}
-					}
-		  	}
 				//dump($cdev);
 				for($i=0;$i< $count;$i++){
 					$cur_time=$start_time-3600*$i;
@@ -864,18 +783,11 @@ class StationController extends Controller {
 				//dump($dev);
 				$psn=$dev['psn'];
 				$devid=$dev['devid'];
-				$mydb='access_'.$psn;
+				$mydb='access_psn';
 				
 				$user=M($mydb);
 				$acclist=$user->where(array('psn'=>$psn,'devid'=>$devid))->where('temp1>30')->order('time desc')->limit(0,1)->select();
-				
-				//dump($user->getlastSql());
-				for($i=30;$i<40;$i++){
-					if($i!=$psn){
-		    		$mydb='access1301_'.$i;
-		    		$acc1301list[$i]=M($mydb)->where(array('psn'=>$psn,'devid'=>$devid))->where('temp1>30')->order('time desc')->limit(0,1)->select();
-					}
-	    	}				
+						
 				
 				foreach($acclist as $acc){
 					$devid=$acc['devid'];
@@ -884,14 +796,6 @@ class StationController extends Controller {
 					}
 				}
 				
-				for($i=30;$i<40;$i++){
-					foreach($acc1301list[$i] as $acc){
-						$devid=$acc['devid'];
-						if($acc['psn']==$psn){
-							$cdev[]=$acc;
-						}
-					}
-		  	}
 		  	//dump($cdev);
 		  	$last_time=0;
 		  	unset($tmp);
@@ -909,8 +813,7 @@ class StationController extends Controller {
 			
 			$no_cow_list[]=$no_cow;
 			//dump('sn:'.$cow_sn.' time:'.date('Y-m-d H:i:s',$tmp['time']));
-			$other_head1='系统更新';
-			$other_head1=iconv("GBK", "UTF-8", $other_head1); 
+			$other_head1='绯荤粺鏇存柊';
 			$birth['cow_id']=$cow['id'];
 			$birth['cow_type']='survival_state';
 			$birth['cow_code']=$survival_state;
@@ -934,11 +837,11 @@ class StationController extends Controller {
 	}
 	
 	public function syncdevlost(){
-		set_time_limit(600);
-		$delay=3600*2;
-		$mode=M('','','DB_CONFIG');
-		$now = time();
-		$start_time = strtotime(date('Y-m-d',$now));
+			set_time_limit(600);
+			$delay=3600*2;
+			$mode=M('','','DB_CONFIG');
+			$now = time();
+			$start_time = strtotime(date('Y-m-d',$now));
     	$cur_time = $now - $start_time;
     	$cur_time = (int)($cur_time/$delay)*$delay;
     	$first_time = $cur_time-$delay+$start_time-8*3600;
@@ -946,6 +849,8 @@ class StationController extends Controller {
     	
     	$devchangelist=M('device')->field('id,rid,psn,devid')->where(array('flag'=>2))->select();
 			$changeid=M('changeidlog')->where(array('flag'=>3))->select();
+    	
+    	$low_count = rand(20,50);
     	
 			foreach($changeid as $dev){
 				$psn=$dev['old_psn'];
@@ -976,15 +881,21 @@ class StationController extends Controller {
 			}
 			
 			foreach($devlist as $dev){
-				$rid=(int)$dev['rid'];
+				$rid=$dev['rid'];
+				if(strlen($rid)>9){
+					$rid= (int)substr($rid,-8);
+				}
 				$devcowstate[$rid]=$dev['cow_state'];
 				$devflag[$rid]=$dev['id'];
 			}
-			
+			echo 'low count:';
+			dump($low_count);
 			dump($devcowstate);
 			//dump($devflag);
+			$health_count=0;
 			foreach($cowlist as $cow){
 				$rid=(int)$cow['sn_code'];
+				
 				dump($rid);
 				dump($cow['health_state']);
 				dump($cow['survival_state']);
@@ -999,20 +910,28 @@ class StationController extends Controller {
 					}
 				}else if($cow['survival_state']==1){
 					if($devcowstate[$rid]==4){
-						$loseadd[]=$cow['id'];
+							$loseadd[]=$cow['id'];
 						//$losetime=$first_time;
 					}
 					if(isset($stopdev[$rid])){
 						$startdev[]=$stopdev[$rid];
 					}
 				}
+				//dump(count($lowadd));
 				if($cow['health_state']==3){
+					$health_count++;
 					if($devcowstate[$rid]!=5&&$devcowstate[$rid]!=4){
+						$wellcow[]=$cow['id'];
+					}
+					if($health_count> $low_count){
 						$wellcow[]=$cow['id'];
 					}
 				}else if($cow['health_state']==1){
 					if($devcowstate[$rid]==5){
-						$lowadd[]=$cow['id'];
+						if($health_count< $low_count){
+							$lowadd[]=$cow['id'];
+							$health_count++;
+						}
 						//$lowtime=$first_time;
 					}
 				}
@@ -1067,8 +986,7 @@ class StationController extends Controller {
 			}	
 									
 			foreach($loseadd as $cow_id){
-				$other_head1='系统更新';
-				$other_head1=iconv("GBK", "UTF-8", $other_head1); 
+				$other_head1='绯荤粺鏇存柊';
 				$birth['cow_id']=$cow_id;
 				$birth['cow_type']='survival_state';
 				$birth['cow_code']=3;
@@ -1081,8 +999,7 @@ class StationController extends Controller {
 			}
 			
 			foreach($lowadd as $cow_id){
-				$other_head1='系统更新';
-				$other_head1=iconv("GBK", "UTF-8", $other_head1); 
+				$other_head1='绯荤粺鏇存柊';
 				$birth['cow_id']=$cow_id;
 				$birth['cow_type']='health_state';
 				$birth['cow_code']=3;
@@ -1095,5 +1012,9 @@ class StationController extends Controller {
 			}
 			
 			exit;
+	}
+	
+	public function test(){
+		 echo rand(20,40);
 	}
 }

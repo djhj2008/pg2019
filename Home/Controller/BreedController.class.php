@@ -408,22 +408,21 @@ class BreedController extends Controller {
 		  dump(date('Y-m-d',$start_time));
 		  								
 			$pg=M();
+			$tcc='2640423';
 			foreach($childlist as $key=>$child){
 					$auto_id=$child['id'];
 					$sn=$child['sn_code'];
 
 					$rid=(int)$sn;
-					$sn=str_pad($sn,9,'0',STR_PAD_LEFT);
-			    $psn=(int)substr($sn,0,5);
-			    $devid=(int)substr($sn,5,4);
-					$dev=$pg->table('device')->field('psn_now,avg_temp')->where(array('rid'=>$rid,'flag'=>1))->find();
+					if($rid< 300030){
+						$rid=$tcc.str_pad($rid,8,'0',STR_PAD_LEFT);
+					}
+					$dev=$pg->table('device')->field('avg_temp')->where(array('rid'=>$rid))->where('flag != 2')->find();
 					if($dev){
+						$psn=$dev['psn'];
+						$devid=$dev['devid'];
 						$temp_avg=(float)$dev['avg_temp'];
-						if($dev['psn_now']==0){
-							$mytable='access_'.$psn;
-						}else{
-							$mytable='access1301_'.$dev['psn_now'];
-						}
+						$mytable='access_base';
 						dump($mytable);
 						unset($acc_list);
 						$acc_list=$pg->table($mytable)->field('temp1,temp2,time')
@@ -612,7 +611,7 @@ class BreedController extends Controller {
 						//$ret=send163msgtmp($phone,$smsmsg,$tmp);
 						$weui_assert['sn']=$sn;
 						$weui_assert['count']=($v-$times);
-						$assert_list[]=$weui_assert;
+						//$assert_list[]=$weui_assert;
 					}
     		}else if($v< $times){
 					echo 'lost:'.str_pad($s['psn'],5,'0',STR_PAD_LEFT).str_pad($s['id'],4,'0',STR_PAD_LEFT);;
@@ -642,7 +641,7 @@ class BreedController extends Controller {
 							if($r['psnid']==$psn&&$r['bsn']==$sid){
 								$u_t=$r['time'];
 								$new_flag=false;
-								if($u_t>($first_time-3600)&&$u_t<=($first_time+600)){
+								if($u_t>($first_time-600)&&$u_t<=($first_time+600)){
 									$new_flag=true;
 									break;
 								}

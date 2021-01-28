@@ -135,27 +135,3 @@ class BdeviceController extends Controller {
 			exit;
 	  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-		/*if($_POST['id'] && $_POST['aip']=='pc'){
-			$id=(int)$_POST['id'];
-			$find=M('bdevice')->where(
-				array(
-					'id'=>$_POST['id']
-					)
-				)->select();
-			var_dump($find);
-			exit;
-		}*/
-		/*$jarr=array('ret'=>array('ret_message'=>'OK'.date('YmdHis',time()),'status_code'=>10001000,'date'=>$find,));
-                echo json_encode(array('UserInfo'=>$jarr));*/

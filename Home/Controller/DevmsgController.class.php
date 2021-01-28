@@ -10,8 +10,12 @@ class DevmsgController extends Controller {
   
 	public function lostdevlist(){
 		$mode=M('','','DB_CONFIG');
+		$time = time();
+		$start_time=date('Y-m-d H:i:s',$time-86400*7);
+		dump($start_time);
+		$table=M('devmsg');
+		$devmsg=$table->where('time>="'.$start_time.'"')->select();
 
-		$devmsg=M('devmsg')->select();
 		foreach($devmsg as $dev){
 			$sncode_list[]= $dev['sn_code'];
 		}
@@ -51,7 +55,6 @@ class DevmsgController extends Controller {
 			$sn=$msg['sn_code'];
 			$phone=array($phone);
 			$foot='防疫码:'.substr($sn,-8);
-			$foot=iconv("GBK", "UTF-8", $foot); 
 			//$smsmsg[]=$town.$viliage.$farmer;
 			$smsmsg=array($town.$village.$farmer,$foot);
 			$ret=send163msgtmp($phone,$smsmsg,$tmp);
@@ -96,7 +99,6 @@ class DevmsgController extends Controller {
 			$tmp = '14867046';
 			$phone=array($phone);
 			$foot='防疫码:'.substr($sn,-8);
-			$foot=iconv("GBK", "UTF-8", $foot); 
 			send163msgtmp($phone,$smsmsg,$tmp);
 			//$smsmsg[]=$town.$viliage.$farmer;
 			$smsmsg=array($town.$village.$farmer,$foot);
@@ -106,6 +108,58 @@ class DevmsgController extends Controller {
 				exit;
 			}
 			$this ->redirect('/Devmsg/addmsg',array('id'=>$id,'errcode'=>'1002'),0,'');
+			exit;
+		}
+		$this->assign('errcode',$errcode);
+		$this->assign('msg',$msg);
+		$this->display();
+	}
+	public function pushmsg(){
+		$phone1=$_POST['phone'];
+		$phone2=$_POST['phone2'];
+		$phone3=$_POST['phone3'];
+		$phone4=$_POST['phone4'];
+		if(empty($phone1)){
+			$errcode=$_GET['errcode'];
+		}else{
+			$town=$_POST['town'];
+			$village=$_POST['village'];
+			$farmer=$_POST['farmer'];
+			$sn=$_POST['sn'];
+			$type=$_POST['type'];
+			if($type==0){
+				$tmp='14867045';
+			}else if($type==1){
+				$tmp='14860115';
+			}else if($type==2){
+				$tmp='14867046';
+			}
+
+			if($phone1){
+				$phone[]=$phone1;
+			}
+			if($phone2){
+				$phone[]=$phone2;
+			}
+			if($phone3){
+				$phone[]=$phone3;
+			}
+			if($phone4){
+				$phone[]=$phone4;
+			}
+			$foot='防疫码:'.$sn;
+
+			$smsmsg[]=$town.$village.$farmer;
+			$smsmsg[]=$foot;
+
+			$ret=send163msgtmp($phone,$smsmsg,$tmp);
+			//dump($phone);
+			//exit;
+			if($ret['code']==200){
+				$this ->redirect('/Devmsg/pushmsg',array('id'=>$id,'errcode'=>'1001'),0,'');
+				exit;
+			}
+			$this ->redirect('/Devmsg/pushmsg',array('id'=>$id,'errcode'=>'1002'),0,'');
 			exit;
 		}
 		$this->assign('errcode',$errcode);

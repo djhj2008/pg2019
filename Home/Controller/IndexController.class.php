@@ -7,19 +7,29 @@ class IndexController extends Controller {
 		//$psn=23;
 		//$devs=M('device')->where(array('psn'=>$psn))->select();
 		//dump($devs);
-		$mydb='rfid30p';
+		$psnid=$_GET['psnid'];
+		$mydb='rfid'.$psnid;
 		$rfids=M($mydb)->select();
-		//dump($rfids);
+		echo 'count:';
+		dump(count($rfids));
 		//exit;
 		foreach($rfids as $rfid){
 			$devid=(int)substr($rfid['sbi_sn'],-4);
 			$psn=(int)substr($rfid['sbi_sn'],0,5);
 			//dump($rfid['SBI_SN']);
-			dump($psn);
-			dump($devid);
-			$rid=substr($rfid['sbi_fym'],0,15);
-			dump($rid);
-			$ret=M('device')->where(array('psn'=>$psn,'devid'=>$devid))->save(array('rid'=>$rid));
+			$dev = M('device')->where(array('psn'=>$psn,'devid'=>$devid))->find();
+
+		if($dev){
+					if(strlen($dev['rid'])!=15){
+						dump(strlen($dev['rid']));
+						dump($psn);
+						dump($devid);
+						$rid=substr($rfid['sbi_fym'],0,15);
+						dump($rid);
+						//$ret=M('device')->where(array('psn'=>$psn,'devid'=>$devid))->save(array('rid'=>$rid));
+					}
+		}
+
 		}
 		//dump($rfids);
 		
@@ -142,7 +152,6 @@ class IndexController extends Controller {
 				  }
 			  }
     	}
-
     	$url_flag = (int)$bdevinfo['url_flag'];
 			$url_url = $bdevinfo['url'];
 			$change_flag= (int)$bdevinfo['change_flag'];
@@ -153,10 +162,11 @@ class IndexController extends Controller {
 				$url['url']=$url_url;
 				$ret['url']=$url;
 			}
+
 			if($change_flag==1){
 				$station['new']=$new_bsn;
 				$ch_psnint=(int)substr($new_bsn,0,5);
-				$ch_bsnint=(int)substr($new_bsn,5,4); 
+				$ch_bsnint=(int)substr($new_bsn,5,4);
 				$ch_bdevinfo=D('bdevice')->where(array('id'=>$ch_bsnint,'psn'=>$ch_psnint))->find();
 				if($ch_bdevinfo)
 				{
@@ -183,6 +193,7 @@ class IndexController extends Controller {
 			}else{
 					$rssi['rssi'.$key] = $sign;
 			}
+			
 		}
 		$rssi['psnid']=$psnid;
 		$rssi['bsn']=$bsnint;
@@ -190,9 +201,9 @@ class IndexController extends Controller {
 		$rssi['delay']=$bigdiff;
 		$rssi['temp']=$bigtemp;
 		$rssi['time']=time();
-		
+
 		if($rssi){
-			//$saveRssi=D('brssi')->add($rssi);
+			$saveRssi=D('brssi')->add($rssi);
 		}
 
 		if($count!=count($small)){
@@ -216,10 +227,10 @@ class IndexController extends Controller {
 			$step_list[$cur_dev['devid']]['state']=(int)$cur_dev['dev_state'];
 			$step_list[$cur_dev['devid']]['switch']=(int)$cur_dev['step_switch'];
 		}
-		
+		   	
 		foreach($small as $data){
-			//dump($data);
-			$rfdev_ret=$this->parsedata($now,$data,$psn,$psnid,$bsnint,$interval);
+
+			$rfdev_ret=$this->parsedata($data,$psnid,$bsnint,$interval);
 			if($rfdev_ret['ret']=='success'){
 				$dev_save = $rfdev_ret['rfdev'];
 				$devid = (int)$dev_save['devid'];
@@ -230,6 +241,7 @@ class IndexController extends Controller {
 				$devsave_list[]=$dev_save;
 				$devbuf[]=$devid;
 				$rfid = $dev_psn*10000+$devid;
+				dump($dev_save);
 				
 				$list1 = $rfdev_ret['list1'];
 				
@@ -258,7 +270,7 @@ class IndexController extends Controller {
 		    		  			$rfid=$ch_dev['rfid'];
 		    		  			if($ch_dev['flag']==2){
 		    		  				$change_dev_find=false;
-		    		  				//$ret=M('changeidlog')->where(array('id'=>$ch_dev['id']))->save(array('flag'=>3));
+		    		  				$ret=M('changeidlog')->where(array('id'=>$ch_dev['id']))->save(array('flag'=>3));
 		    		  			}
 		    		  		}
 		    		  }
@@ -298,18 +310,13 @@ class IndexController extends Controller {
 		}
 		
 		if($accadd_list){
-	  	$mydb='access_base';
+	  	$mydb='access_'.$psn;
 	    $user=D($mydb);
-			//$ret = $user->addAll($accadd_list);
-			dump($ret);
+	    //dump($psn);
+	    //dump($accadd_list);
+			//$user->addAll($accadd_list);
 		}
-    dump($accadd_list);
-    if($accadd_list){
-    	$mydb='access_'.$psn;
-	    $user=D($mydb);
-	    //$user->addAll($accadd_list);
-		}
-		
+    
     if($accadd_list2){
 	    $user2=D('taccess');
 			//$user2->addAll($accadd_list2);
@@ -317,7 +324,8 @@ class IndexController extends Controller {
 
 		if($rfid_list){
 			$user3=D('device');
-			//$user3->addAll($rfid_list);
+			dump($rfid_list);
+			$user3->addAll($rfid_list);
 		}
 		
 		foreach($cur_devs as $dev){
@@ -344,7 +352,7 @@ class IndexController extends Controller {
 				}
 			}
 		}
-
+		dump($re_devs);
   	foreach($re_devs as $redev){
   			$devid_tmp=$redev['devid'];
   			foreach($devbuf as $devre){
@@ -354,7 +362,8 @@ class IndexController extends Controller {
   				}
   			}
   	}
-
+		dump($devres);
+		dump($re_devs2);
   	foreach($re_devs2 as $redev){
   			$devid_tmp=$redev['devid'];
   			foreach($devbuf as $devre){
@@ -364,7 +373,7 @@ class IndexController extends Controller {
   				}
   			}
   	}
-
+		dump($devres2);
 		$devres_count=count($re_devs);
 		foreach($re_devs as $re_dev){
 				$devre_id = $redev['devid'];
@@ -380,7 +389,7 @@ class IndexController extends Controller {
 			//$dev1=D('device')->where($whereredev)->where(array('psn'=>$psn))->save(array(re_flag=>2));
 		}
 
-		if(!empty($devres2)){ 
+		if(!empty($devres2)){
 			$whereredev2['devid']=array('in',$devres2);
 			//$dev1=D('device')->where($whereredev2)->where(array('psn'=>$psn))->save(array(re_flag=>3));
 		}
@@ -417,393 +426,25 @@ class IndexController extends Controller {
     $this->savelog($sn_header,$sn_footer,$logbase,$req_file,$label);
   	exit;
   }
-
-  public function slaverV10(){
-  	$post = file_get_contents('php://input');
-    $sid = $_GET['sid'];
-    $sn_footer = (int)$sid & 0x1fff;
-    $sn_header = (int)$sid >> 13;
-    $logbase="lora_json/V10/";
-    $res_file="slaver_res";
-    $err_file="slaver_err";
-    $req_file="slaver_req";
-    $log_flag=true;
-		$ret['cmd']="slaver";
-  	$ret['ret']='success';
-  	$ret['msg']='SUCCESS.';
-  	
-    if($log_flag)
-    {
-			$this->savelog($sn_header,$sn_footer,$logbase,$res_file,$post);
-    }
-		$parm= json_decode($post,true);
-		if($parm==false){
-    	$ret['ret']='fail';
-    	$ret['msg']='PSN NULL.';
-			$label = json_encode($ret);
-	    echo $label;
-	    $this->savelog($sn_header,$sn_footer,$logbase,$req_file,$label);
-    	exit;
-		}
-		
-		$psn = ((int)$parm['sn'])>>13;
-		$bsnint = ((int)$parm['sn'])& 0x1fff;
-		$count = $parm['count'];
-		$small = $parm['small'];
-		$bigdiff = 0;
-		$interval = $parm['interval'];
-
-    $psnallinfo = D('psn')->select();
-    //dump($psnallinfo);
-    $dev_psnid_find = false;
-    $psn_index = 0;
-
-    foreach ($psnallinfo as $psninfo) {
-        if ($psn == $psninfo['sn']) {
-            $dev_psnid_find = true;
-            $psnid = $psninfo['id'];
-            break;
-        }
-    }
-
-    if ($dev_psnid_find == false) {
-    	$ret['ret']='fail';
-    	$ret['msg']='PSN ID NULL.';
-			$label = json_encode($ret);
-			echo $label;
-	    $this->savelog($sn_header,$sn_footer,$logbase,$req_file,$label);
-	    exit;
-    } else {
-      $psn_list[$psn_index]['psnid'] = $psnid;
-      $psn_list[$psn_index]['psn'] = $psn;
-    }
-		
-		$brssimax=0-(int)$parm['maxrssi'];
-		$bigsync=$parm['bigsync'];
-		foreach($bigsync as $key=>$v){
-			$rssi['sn'.$key]=(int)$v['serial'];
-			$sign=(int)$v['rssi'];
-			if(($sign&0x80)==0x80){
-					$rssi['rssi'.$key] = 0-($sign&0x7f);
-			}else{
-					$rssi['rssi'.$key] = $sign;
-			}
-			
-		}
-		$rssi['psnid']=$psnid;
-		$rssi['bsn']=$bsnint;
-		$rssi['rssi']=$brssimax;
-		$rssi['delay']=$bigdiff;
-		$rssi['temp']=$bigtemp;
-		$rssi['station']=1301;
-		$rssi['time']=time();
-				
-		if($rssi){
-			//$saveRssi=D('brssi')->add($rssi);
-		}
-
-		if($count!=count($small)){
-    	$ret['ret']='fail';
-    	$ret['msg']='Count err.';
-			$label = json_encode($ret);
-	    echo $label;
-	    $this->savelog($sn_header,$sn_footer,$logbase,$req_file,$label);
-    	exit;
-		}
-		
-		$cur_devs =D('device')->where(array('psnid'=>$psnid))->order('devid asc')->select();
-		
-    $change_devs = D('changeidlog')->where(array('psnid' => $psnid))->select();
-   			   	
-		foreach($small as $data){
-			//dump($data);
-			$rfdev_ret=$this->parsedata($data,$psn,$psnid,$bsnint,$interval);
-			if($rfdev_ret['ret']=='success'){
-				$dev_save = $rfdev_ret['rfdev'];
-				$devid = $dev_save['devid'];
-				$dev_psn = $dev_save['psn'];
-				$devsave_list[]=$dev_save;
-				
-				$list1 = $rfdev_ret['list1'];
-				
-				foreach($list1 as $acc_add){
-					$accadd_list[]= $acc_add;
-					$acc1301add_list[] = $acc_add;
-				}
-				
-        if ($dev_psn != $psn) {
-            $dev_psnid_find = false;
-            foreach ($psnallinfo as $psninfo) {
-                if ($dev_psn == $psninfo['sn']) {
-                    $dev_psnid_find = true;
-                    $dev_psnid = $psninfo['id'];
-                    break;
-                }
-            }
-            if ($dev_psnid_find == false) {
-                $psn_err_log = $psn_err_log . $btsn . ',' . $dev_psn . ',' . $devid . ' other not find.';
-                continue;
-            }
-        }
-        $psn_list_find = false;
-
-        for ($j = 0; $j < $psn_index + 1; $j++) {
-            if ($psn_list[$j]['psnid'] == $dev_psnid) {
-                $psn_list_find = true;
-                if(empty($psn_list[$j]['devid'])){
-                	$psn_list[$j]['devid'][] = $devid;
-                }else{
-                	$psn_list_devid_find=false;
-                	foreach($psn_list[$j]['devid'] as $psn_list_devid)
-                	{
-                		if($devid==$psn_list_devid){
-                			$psn_list_devid_find=true;
-                			break;
-                		}
-                	}
-                	if($psn_list_devid_find==false){
-              			$psn_list[$j]['devid'][] = $devid;
-              		}
-                }
-                break;
-            }
-        }
-
-        if ($psn_list_find == false) {
-            $psn_index = $psn_index + 1;
-            $psn_list[$psn_index]['psnid'] = $dev_psnid;
-            $psn_list[$psn_index]['psn'] = $dev_psn;
-            $psn_list[$psn_index]['devid'][] = $devid;
-        }
-        
-        $changeid_find = false;
-        foreach ($change_devs as $ch_dev) {
-            if ($ch_dev['old_psn'] == $dev_psn
-                && $ch_dev['old_devid'] == $devid) {
-                $changeid_find = true;
-                if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
-                    $change_buf_find=false;
-                }else if($ch_dev['flag'] == 3){
-                	$changeid_find = false;
-                }
-            }
-        }
-        if ($changeid_find == false) {
-        		if($dev_psn!=$psn){
-        			 $change_add_find=false;
-        			 foreach($change_add as $chadd)
-        			 {
-	        			 	if($chadd['psnid']==$psnid&&
-	        			 	$chadd['old_psn']==$dev_psn&&
-	        			 	$chadd['old_devid']==$devid){
-	        			 		$change_add_find=true;
-	        			 	}
-        			 }
-        			 if($change_add_find==false){
-                	$dev_info=D('device')->field('rid')->where(array('devid'=>$devid,'psn'=>$dev_psn))->find();
-                	if($dev_info){
-                		$rfid=$dev_info['rid'];
-		                $change_dev = array('psnid' => $psnid,
-		                    'old_psn' => $dev_psn,
-		                    'old_devid' => $devid,
-		                    'sid' => $bsnint,
-		                    'rfid'=> $rfid,
-		                );
-			             $change_add[]= $change_dev; 
-                	}
-        			 }
-        		}
-        }
-			}
-		
-		}
-
-    $day_begin = strtotime(date('Y-m-d', time()));
-    $hour_time = 60 * 60;
-    $pre_time = 5 * 60;
-    $hour_pre_time = 15 * 60;
-    $now = time();
-    $today = strtotime(date('Y-m-d', $now) . '00:00:00');
-    $now = $now - $today;
-
-    if ($min_delay == 0) {
-        $real_time = ((int)(($now + $hour_pre_time) / ($hour_delay * $hour_time)) - 1) * $hour_delay * $hour_time;
-        $real_time = $today + $real_time;
-        $interval = ($hour_delay / $freq) * $hour_time;
-    } else {
-        $real_time = ((int)(($now + $pre_time) / ($min_delay * 60) - 1)) * $min_delay * 60;
-        $real_time = $today + $real_time;
-        $interval = ($min_delay / $freq) * 60;
-    }
-
-    $start = $real_time - $interval * $freq;
-    $end = $real_time;
-	    
-    foreach ($psn_list as $psn_buf){
-        $psn_buf_psnid=$psn_buf['psnid'];
-        $psn_buf_psn=$psn_buf['psn'];
-        if(count($psn_buf['devid'])>0){
-            $wheredev['devid']=array('in',$psn_buf['devid']);
-            $curdb1301='access1301_base';
-            $acc1301_values=D($curdb1301)->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<='.$end)->select();
-
-            foreach($psnallinfo as $psninfo){
-                if($psn_buf_psnid==$psninfo['id']){
-                    $blacklist_psn=$psninfo['sn'];
-                    break;
-                }
-            }
-            foreach($acc1301add_list as $acc1301add){
-                if($acc1301add['psn']==$psn_buf_psn){
-                    $acc1301add_find=false;
-                    foreach($acc1301_values as $acc1301_value){
-                        if($acc1301_value['time']==$acc1301add['time']&&
-                            $acc1301_value['psnid']==$acc1301add['psnid']&&
-                            $acc1301_value['psn']==$acc1301add['psn']&&
-                            $acc1301_value['devid']==$acc1301add['devid'])
-                        {
-                            if(count($blacklist)<64){
-                                $blpsn_str=str_pad($blacklist_psn,5,'0',STR_PAD_LEFT).str_pad($acc1301add['devid'],4,'0',STR_PAD_LEFT);
-                                $inlist=false;
-                                foreach($blacklist as $black){
-                                    if($black==$blpsn_str){
-                                        $inlist=true;
-                                        break;
-                                    }
-                                }
-                                if($inlist==false){
-                                    $blacklist[]=$blpsn_str;
-                                }
-                            }
-                            $acc1301add_find=true;
-
-                            break;
-                        }
-                    }
-                    if($acc1301add_find==false){
-                        $acc1301addall[]=$acc1301add;
-                    }
-                }
-            }
-
-        }
-    }
-    
-		if($accadd_list){
-    	$mydb='access_base';
-	    $user=D($mydb);
-	    //$user->addAll($accadd_list);
-		}
-		
-    if($acc1301addall){
-			$mydb1301='access1301_base';
-	    $user1301=D($mydb1301);
-	    //$user1301->addAll($acc1301addall);
-    }		
-
-		if($change_add){
-	    $chuser=D('changeidlog');
-	    //$chuser->addAll($change_add);
-		}
-		
-		foreach($cur_devs as $dev){
-			$devid = $dev['devid'];
-			$dev_psn =$dev['psn'];
-			$battery= $dev['battery'];
-			$dev_state= $dev['dev_state'];
-			$version= $dev['version'];
-			foreach($devsave_list as $devsave){
-				unset($mysave);
-				if($devid==$devsave['devid']&&$dev_psn==$devsave['psn']){
-					if($battery!=$devsave['battery']){
-						$mysave['battery']=$devsave['battery'];
-					}
-					if($dev_state!=$devsave['dev_state']){
-						$mysave['dev_state']=$devsave['dev_state'];
-					}
-					if($version!=$devsave['version']){
-						$mysave['version']=$devsave['version'];
-					}
-					if(!empty($mysave)){
-						//$dev1=M('device')->where(array('devid'=>$devid,'psn'=>$dev_psn))->save($mysave);
-					}
-				}
-			}
-		}
-	
-    foreach ($change_devs as $ch_dev) {
-        if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
-							if($ch_dev['flag'] == 1){
-								$ch_list_buf[]=$ch_dev['id'];
-							}
-              $tmp_dev = array(
-              		'id'=>$ch_dev['id'],
-                  'old_psn' => $ch_dev['old_psn'],
-                  'old_devid' => $ch_dev['old_devid'],
-                  'new_devid' => $ch_dev['new_devid']
-              );
-              $change_buf[] = $tmp_dev;
-							if(count($change_buf)>=128){
-								break;
-							}
-        } 
-    }
-    if(count($ch_list_buf)>0){
-    	$where_ch_dev['id']=array('in',$ch_list_buf);
-    	//$dev=M('changeidlog')->where($where_ch_dev)->save(array('flag'=>2));
-    }
-	
-    $changedev_count=count($change_buf);
-
-    foreach($change_buf as $chdev){
-        $ch_psn = $chdev['old_psn'];
-        $ch_devid=$chdev['old_devid'];
-        $new_devid=$chdev['new_devid'];
-        $olddev_str=str_pad($ch_psn,5,'0',STR_PAD_LEFT).str_pad($ch_devid,4,'0',STR_PAD_LEFT);
-        $newdev_str=str_pad($psn,5,'0',STR_PAD_LEFT).str_pad($new_devid,4,'0',STR_PAD_LEFT);
-        $changedev['o']=(int)$olddev_str;
-        $changedev['n']=(int)$newdev_str;
-        $changedev_list[]=$changedev;
-    }
-    $change_res['count']=$changedev_count;
-    $change_res['dev']=$changedev_list;
-    $ret['change'] = $change_res;
-
-    foreach($blacklist as $name){
-        $blacklist_list[]=(int)$name;
-    }
-    $blacklist_res['count']=count($blacklist);
-    $blacklist_res['dev']=$blacklist_list;
-		$ret['blacklist'] = $blacklist_res;
-		
-		$ret['time']=date('Y-m-d H:i:s', time());
-
-  	$ret['ret']='success';
-  	$ret['msg']='SUCCESS.';
-		$label = json_encode($ret);
-    echo $label;
-    $this->savelog($sn_header,$sn_footer,$logbase,$req_file,$label);
-  	exit;
-  }
   
-  public function parsedata($data,$psn,$psnid,$sid,$interval){
-			$CSN_LEN  =4;//Éè±¸×Ö·û³¤¶È
-			$SIGN_LEN =1;//ÐÅºÅ
+  public function parsedata($data,$psnid,$sid,$interval){
+			$CSN_LEN  =4;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?3ï¿½æ¿¨ï¿½
+			$SIGN_LEN =1;//D?o?
 			$CVS_LEN =1;//client version
 			$STATE_LEN  =1;//state
 			$DELAY_LEN  =1;//delay
-			$VAILD_LEN  =1;//ÓÐÐ§Öµ¸öÊý
+			$VAILD_LEN  =1;//ï¿½ï¿½DDï¿½ê¿¦Ê¿?ï¿½ï¿½y
 			
-			$SENS_LEN  =1;//ÓÐÐ§Öµ¸öÊý
+			$SENS_LEN  =1;//ï¿½ï¿½DDï¿½ê¿¦Ê¿?ï¿½ï¿½y
 			
-			$VALUE_LEN = 10;//dataÖÐÃ¿¸ö³¤¶È
+			$VALUE_LEN = 10;//data?D????3ï¿½æ¿¨ï¿½
 			$COUNT_VALUE = 4;
 			
 			
 			$hour_delay = $interval[0];
 			$min_delay	= $interval[1];
 			$freq				= $interval[2];
-			
+		
 	    $day_begin = strtotime(date('Y-m-d',time()));
 	    $hour_time = 60*60;
 	    $pre_time =5*60;
@@ -813,7 +454,7 @@ class IndexController extends Controller {
 	   	$now = $now-$today;
 	   	
 			$snstr   =substr($data, 0,$CSN_LEN*2);
-    	$snint = hexdec($snstr)&0x1fff;;	//´ÓÊ®Áù½øÖÆ×ªÊ®½øÖÆ
+    	$snint = hexdec($snstr)&0x1fff;;	//ï¿½ä¨®ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½????ï¿½!ï¿½ï¿½?????
     	$dev_psn = hexdec($snstr) >> 13;
 			$rfid = $dev_psn*10000+$snint;
 			
@@ -856,12 +497,12 @@ class IndexController extends Controller {
     	if($cvs>3){
 				$sensstr 	 =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
 				$vaildstr  =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
-    		$tempstr	 =	substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1Ê®Áù½øÖÆ×Ö·û
+    		$tempstr	 =	substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½????ï¿½ï¿½ï¿½ï¿½?
 				$sens=0-hexdec($sensstr);
     	}else{
 				$sens=0;
 				$vaildstr  = substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$VAILD_LEN*2);
-    		$tempstr   = substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1Ê®Áù½øÖÆ×Ö·û
+    		$tempstr   = substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½????ï¿½ï¿½ï¿½ï¿½?
     	}
     	$vaild = hexdec($vaildstr);
     	if($type>0){
@@ -892,14 +533,11 @@ class IndexController extends Controller {
 	    
 			if($vaild>4){
 				$vaild=4;
+				return;
 			}  	
 
     	for($j=0;$j < $vaild;$j++){
-    		if($freq>1){
-	    		$up_time = $start+$interval*$j+$interval*($freq-$vaild);
-    		}else{
-    			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
-    		}
+	    	$up_time = $real_time-$interval*$freq+$interval*($j+1)+$interval*($freq-$vaild);
 		    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
 	    	if($cvs>3){
 	    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);
@@ -1213,6 +851,381 @@ class IndexController extends Controller {
 			return	$ret;
   }
   
+  public function slaverV10(){
+  	$post = file_get_contents('php://input');
+    $sid = $_GET['sid'];
+    $sn_footer = (int)$sid & 0x1fff;
+    $sn_header = (int)$sid >> 13;
+    $logbase="lora_json/V10/";
+    $res_file="slaver_res";
+    $err_file="slaver_err";
+    $req_file="slaver_req";
+    $log_flag=true;
+		$ret['cmd']="slaver";
+  	$ret['ret']='success';
+  	$ret['msg']='SUCCESS.';
+  	
+    if($log_flag)
+    {
+			$this->savelog($sn_header,$sn_footer,$logbase,$res_file,$post);
+    }
+		$parm= json_decode($post,true);
+		if($parm==false){
+    	$ret['ret']='fail';
+    	$ret['msg']='PSN NULL.';
+			$label = json_encode($ret);
+	    echo $label;
+	    $this->savelog($sn_header,$sn_footer,$logbase,$req_file,$label);
+    	exit;
+		}
+		
+		$psn = ((int)$parm['sn'])>>13;
+		$bsnint = ((int)$parm['sn'])& 0x1fff;
+		$count = $parm['count'];
+		$small = $parm['small'];
+		$bigdiff = 0;
+		$interval = $parm['interval'];
+
+    $psnallinfo = D('psn')->select();
+    //dump($psnallinfo);
+    $dev_psnid_find = false;
+    $psn_index = 0;
+
+    foreach ($psnallinfo as $psninfo) {
+        if ($psn == $psninfo['sn']) {
+            $dev_psnid_find = true;
+            $psnid = $psninfo['id'];
+            break;
+        }
+    }
+
+    if ($dev_psnid_find == false) {
+    	$ret['ret']='fail';
+    	$ret['msg']='PSN ID NULL.';
+			$label = json_encode($ret);
+			echo $label;
+	    $this->savelog($sn_header,$sn_footer,$logbase,$req_file,$label);
+	    exit;
+    } else {
+      $psn_list[$psn_index]['psnid'] = $psnid;
+      $psn_list[$psn_index]['psn'] = $psn;
+    }
+		
+		$brssimax=0-(int)$parm['maxrssi'];
+		$bigsync=$parm['bigsync'];
+		foreach($bigsync as $key=>$v){
+			$rssi['sn'.$key]=(int)$v['serial'];
+			$sign=(int)$v['rssi'];
+			if(($sign&0x80)==0x80){
+					$rssi['rssi'.$key] = 0-($sign&0x7f);
+			}else{
+					$rssi['rssi'.$key] = $sign;
+			}
+			
+		}
+		$rssi['psnid']=$psnid;
+		$rssi['bsn']=$bsnint;
+		$rssi['rssi']=$brssimax;
+		$rssi['delay']=$bigdiff;
+		$rssi['temp']=$bigtemp;
+		$rssi['station']=1301;
+		$rssi['time']=time();
+		
+		if($rssi){
+			//$saveRssi=D('brssi')->add($rssi);
+		}
+
+		if($count!=count($small)){
+    	$ret['ret']='fail';
+    	$ret['msg']='Count err.';
+			$label = json_encode($ret);
+	    echo $label;
+	    $this->savelog($sn_header,$sn_footer,$logbase,$req_file,$label);
+    	exit;
+		}
+		
+		$cur_devs =D('device')->where(array('psnid'=>$psnid))->order('devid asc')->select();
+		
+    $change_devs = D('changeidlog')->where(array('psnid' => $psnid))->select();
+   			   	
+		foreach($small as $data){
+			//dump($data);
+			$rfdev_ret=$this->parsedata($data,$psn,$psnid,$bsnint,$interval);
+			if($rfdev_ret['ret']=='success'){
+				$dev_save = $rfdev_ret['rfdev'];
+				$devid = $dev_save['devid'];
+				$dev_psn = $dev_save['psn'];
+				$devsave_list[]=$dev_save;
+				
+				$list1 = $rfdev_ret['list1'];
+				
+				foreach($list1 as $acc_add){
+					$accadd_list[]= $acc_add;
+					$acc1301add_list[] = $acc_add;
+				}
+				
+        if ($dev_psn != $psn) {
+            $dev_psnid_find = false;
+            foreach ($psnallinfo as $psninfo) {
+                if ($dev_psn == $psninfo['sn']) {
+                    $dev_psnid_find = true;
+                    $dev_psnid = $psninfo['id'];
+                    break;
+                }
+            }
+            if ($dev_psnid_find == false) {
+                $psn_err_log = $psn_err_log . $btsn . ',' . $dev_psn . ',' . $devid . ' other not find.';
+                continue;
+            }
+        }
+        $psn_list_find = false;
+
+        for ($j = 0; $j < $psn_index + 1; $j++) {
+            if ($psn_list[$j]['psnid'] == $dev_psnid) {
+                $psn_list_find = true;
+                if(empty($psn_list[$j]['devid'])){
+                	$psn_list[$j]['devid'][] = $devid;
+                }else{
+                	$psn_list_devid_find=false;
+                	foreach($psn_list[$j]['devid'] as $psn_list_devid)
+                	{
+                		if($devid==$psn_list_devid){
+                			$psn_list_devid_find=true;
+                			break;
+                		}
+                	}
+                	if($psn_list_devid_find==false){
+              			$psn_list[$j]['devid'][] = $devid;
+              		}
+                }
+                break;
+            }
+        }
+
+        if ($psn_list_find == false) {
+            $psn_index = $psn_index + 1;
+            $psn_list[$psn_index]['psnid'] = $dev_psnid;
+            $psn_list[$psn_index]['psn'] = $dev_psn;
+            $psn_list[$psn_index]['devid'][] = $devid;
+        }
+        
+        $changeid_find = false;
+        foreach ($change_devs as $ch_dev) {
+            if ($ch_dev['old_psn'] == $dev_psn
+                && $ch_dev['old_devid'] == $devid) {
+                $changeid_find = true;
+                if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
+                    $change_buf_find=false;
+                }else if($ch_dev['flag'] == 3){
+                	$changeid_find = false;
+                }
+            }
+        }
+        if ($changeid_find == false) {
+        		if($dev_psn!=$psn){
+        			 $change_add_find=false;
+        			 foreach($change_add as $chadd)
+        			 {
+	        			 	if($chadd['psnid']==$psnid&&
+	        			 	$chadd['old_psn']==$dev_psn&&
+	        			 	$chadd['old_devid']==$devid){
+	        			 		$change_add_find=true;
+	        			 	}
+        			 }
+        			 if($change_add_find==false){
+                	$dev_info=D('device')->field('rid')->where(array('devid'=>$devid,'psn'=>$dev_psn))->find();
+                	if($dev_info){
+                		$rfid=$dev_info['rid'];
+		                $change_dev = array('psnid' => $psnid,
+		                    'old_psn' => $dev_psn,
+		                    'old_devid' => $devid,
+		                    'sid' => $bsnint,
+		                    'rfid'=> $rfid,
+		                );
+			             $change_add[]= $change_dev; 
+                	}
+        			 }
+        		}
+        }
+			}
+		
+		}
+
+    $day_begin = strtotime(date('Y-m-d', time()));
+    $hour_time = 60 * 60;
+    $pre_time = 5 * 60;
+    $hour_pre_time = 15 * 60;
+    $now = time();
+    $today = strtotime(date('Y-m-d', $now) . '00:00:00');
+    $now = $now - $today;
+    
+		$hour_delay = $interval[0];
+		$min_delay	= $interval[1];
+		$freq				= $interval[2];
+
+    if ($min_delay == 0) {
+        $real_time = ((int)(($now + $hour_pre_time) / ($hour_delay * $hour_time)) - 1) * $hour_delay * $hour_time;
+        $real_time = $today + $real_time;
+        $interval = ($hour_delay / $freq) * $hour_time;
+    } else {
+        $real_time = ((int)(($now + $pre_time) / ($min_delay * 60) - 1)) * $min_delay * 60;
+        $real_time = $today + $real_time;
+        $interval = ($min_delay / $freq) * 60;
+    }
+
+
+
+    $start = $real_time - $interval * $freq;
+    $end = $real_time;
+	    
+	    
+    foreach ($psn_list as $psn_buf){
+        $psn_buf_psnid=$psn_buf['psnid'];
+        $psn_buf_psn=$psn_buf['psn'];
+        if(count($psn_buf['devid'])>0){
+            $wheredev['devid']=array('in',$psn_buf['devid']);
+            $curdb1301='access1301_base';
+            $acc1301_values=D($curdb1301)->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<'.$end)->select();
+
+            foreach($psnallinfo as $psninfo){
+                if($psn_buf_psnid==$psninfo['id']){
+                    $blacklist_psn=$psninfo['sn'];
+                    break;
+                }
+            }
+            foreach($acc1301add_list as $acc1301add){
+                if($acc1301add['psn']==$psn_buf_psn){
+                    $acc1301add_find=false;
+                    foreach($acc1301_values as $acc1301_value){
+                        if($acc1301_value['time']==$acc1301add['time']&&
+                            $acc1301_value['psnid']==$acc1301add['psnid']&&
+                            $acc1301_value['psn']==$acc1301add['psn']&&
+                            $acc1301_value['devid']==$acc1301add['devid'])
+                        {
+                            if(count($blacklist)<64){
+                                $blpsn_str=str_pad($blacklist_psn,5,'0',STR_PAD_LEFT).str_pad($acc1301add['devid'],4,'0',STR_PAD_LEFT);
+                                $inlist=false;
+                                foreach($blacklist as $black){
+                                    if($black==$blpsn_str){
+                                        $inlist=true;
+                                        break;
+                                    }
+                                }
+                                if($inlist==false){
+                                    $blacklist[]=$blpsn_str;
+                                }
+                            }
+                            $acc1301add_find=true;
+
+                            break;
+                        }
+                    }
+                    if($acc1301add_find==false){
+                        $acc1301addall[]=$acc1301add;
+                    }
+                }
+            }
+
+        }
+    }
+    
+		if($accadd_list){
+    	$mydb='access_base';
+	    $user=D($mydb);
+	    //$user->addAll($accadd_list);
+		}
+		
+    if($acc1301addall){
+			$mydb1301='access1301_base';
+	    $user1301=D($mydb1301);
+	    //$user1301->addAll($acc1301addall);
+    }		
+
+		if($change_add){
+	    $chuser=D('changeidlog');
+	    //$chuser->addAll($change_add);
+		}
+		
+		foreach($cur_devs as $dev){
+			$devid = $dev['devid'];
+			$dev_psn =$dev['psn'];
+			$battery= $dev['battery'];
+			$dev_state= $dev['dev_state'];
+			$version= $dev['version'];
+			foreach($devsave_list as $devsave){
+				unset($mysave);
+				if($devid==$devsave['devid']&&$dev_psn==$devsave['psn']){
+					if($battery!=$devsave['battery']){
+						$mysave['battery']=$devsave['battery'];
+					}
+					if($dev_state!=$devsave['dev_state']){
+						$mysave['dev_state']=$devsave['dev_state'];
+					}
+					if($version!=$devsave['version']){
+						$mysave['version']=$devsave['version'];
+					}
+					if(!empty($mysave)){
+						//$dev1=M('device')->where(array('devid'=>$devid,'psn'=>$dev_psn))->save($mysave);
+					}
+				}
+			}
+		}
+	
+    foreach ($change_devs as $ch_dev) {
+        if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
+							if($ch_dev['flag'] == 1){
+								$ch_list_buf[]=$ch_dev['id'];
+							}
+              $tmp_dev = array(
+              		'id'=>$ch_dev['id'],
+                  'old_psn' => $ch_dev['old_psn'],
+                  'old_devid' => $ch_dev['old_devid'],
+                  'new_devid' => $ch_dev['new_devid']
+              );
+              $change_buf[] = $tmp_dev;
+							if(count($change_buf)>=128){
+								break;
+							}
+        } 
+    }
+    if(count($ch_list_buf)>0){
+    	$where_ch_dev['id']=array('in',$ch_list_buf);
+    	//$dev=M('changeidlog')->where($where_ch_dev)->save(array('flag'=>2));
+    }
+	
+    $changedev_count=count($change_buf);
+
+    foreach($change_buf as $chdev){
+        $ch_psn = $chdev['old_psn'];
+        $ch_devid=$chdev['old_devid'];
+        $new_devid=$chdev['new_devid'];
+        $olddev_str=str_pad($ch_psn,5,'0',STR_PAD_LEFT).str_pad($ch_devid,4,'0',STR_PAD_LEFT);
+        $newdev_str=str_pad($psn,5,'0',STR_PAD_LEFT).str_pad($new_devid,4,'0',STR_PAD_LEFT);
+        $changedev['o']=(int)$olddev_str;
+        $changedev['n']=(int)$newdev_str;
+        $changedev_list[]=$changedev;
+    }
+    $change_res['count']=$changedev_count;
+    $change_res['dev']=$changedev_list;
+    $ret['change'] = $change_res;
+
+    foreach($blacklist as $name){
+        $blacklist_list[]=(int)$name;
+    }
+    $blacklist_res['count']=count($blacklist);
+    $blacklist_res['dev']=$blacklist_list;
+		$ret['blacklist'] = $blacklist_res;
+		
+		$ret['time']=date('Y-m-d H:i:s', time());
+
+  	$ret['ret']='success';
+  	$ret['msg']='SUCCESS.';
+		$label = json_encode($ret);
+    echo $label;
+    $this->savelog($sn_header,$sn_footer,$logbase,$req_file,$label);
+  	exit;
+  }
+  
   public function savelog($sn_header,$sn_footer,$logbase,$res_file,$post){
 	    $logdir = $logbase;
       if (!file_exists($logdir)) {
@@ -1231,11 +1244,11 @@ class IndexController extends Controller {
           mkdir($logdir);
       }
 
-      //$filename = $res_file.date("His_") . mt_rand(100, 999) . ".log"; //D?¨ª?????3?
-      //$newFilePath = $logdir . $filename;//¨ª???¡ä?¨¨??¡¤??
-      //$newFile = fopen($newFilePath, "w"); //¡ä¨°?a???t¡Á?¡À?D¡ä¨¨?
+      //$filename = $res_file.date("His_") . mt_rand(100, 999) . ".log"; //D?ï¿½ï¿½?????3?
+      //$newFilePath = $logdir . $filename;//ï¿½ï¿½???ï¿½â¿¨ï¿½??ï¿½ï¿½??
+      //$newFile = fopen($newFilePath, "w"); //ï¿½ä¨°?a???tï¿½ï¿½ï¿½ï¿½Dï¿½ä¨¨?
       //fwrite($newFile, $post);
-      //fclose($newFile); //1?¡À????t
+      //fclose($newFile); //1?ï¿½ï¿½???t
   }
   
   public function testmd5(){
@@ -1283,27 +1296,183 @@ class IndexController extends Controller {
 		exit;
 	}
 	
-	public function teststep(){
-		ini_set("memory_limit","1024M");
-		$psn=40;
-		$first_time=strtotime('2020-09-15 00:00:00');
-		$end_time=$first_time+86400*5;
-		$acclist=M('access_base')->where(array('psn'=>$psn))->where('time >='.$first_time.' and time <'.$end_time)->select();
-		//dump($acclist);
-		$devlist=M('device')->where(array('psn'=>$psn))->select();
-		foreach($devlist as $key=>$dev){
-			foreach($acclist as $acc){
-				if($acc['psn']==$dev['psn']&&$acc['devid']==$dev['devid']){
-					$devlist[$key]['step']=$devlist[$key]['step']+$acc['rssi2'];
+	
+	public function getlost(){
+		$mode=M('','','DB_CONFIG');
+		$rids=array(380153,310137,310134,310132,310138310139,310133,330453,330451,330456,330458,330457,330455,330450,330452,340612,320430,320427,320424);
+		$whererid['rid']=array('in',$rids);
+		$ret = M('device')->where($whererid)->where(array('flag'=>1))->select();
+		foreach($ret as $dev){
+			$ids[]=$dev['id'];
+		}
+		if(empty($ids)===false){
+			$whereid['id']=array('in',$ids);
+			$ret = M('device')->where($whereid)->save(array('flag'=>4));
+			dump($ret);
+
+		}
+
+		exit;
+		
+	}
+	
+	public function getstationstate(){
+			$bdevice = M('bdevice')->field('autoid,psn,id,uptime,version')->where(array('switch'=>1))->select();
+			$count = 48;
+			$delay = 3600;
+    	$now = time();
+			$start_time = strtotime(date('Y-m-d',$now));
+
+    	$cur_time = $now - $start_time;
+    	$cur_time = (int)($cur_time/$delay)*$delay;
+    	
+    	$first_time = $cur_time+$start_time;
+    	$end_time = $cur_time+$start_time-$count*$delay;	
+    	$timeall[]=$end_time;
+    	$timeall[]=$first_time;
+    	
+    	dump(count($bdevice));
+    	dump(date('Y-m-d H:i:s',$first_time));
+    	dump(date('Y-m-d H:i:s',$end_time));
+    	
+    	$brssi = M('brssi')->where(array('station'=>1278))->where('time>='.$end_time.' and time<='.$first_time)->order('time desc')->select();
+			echo 'lost:<br>';
+    	foreach($bdevice as $s){
+    		$psn=$s['psn'];
+    		$sid=$s['id'];
+    		$uptime=(int)substr($s['uptime'],0,2);
+    		$times=$count/$uptime;
+    		$v=0;
+				foreach($brssi as $r){
+					if($r['psnid']==$psn&&$r['bsn']==$sid){
+						$v++;
+					}
+				}
+
+				$s['times']=$v;
+    		if($v>$times){
+    			//echo 'assert';
+					$sn=str_pad($s['psn'],5,'0',STR_PAD_LEFT).str_pad($s['id'],4,'0',STR_PAD_LEFT);
+    			//dump($sn);
+    		}else if($v< $times){
+    			if($v==0){
+    				$bdev_lost[]=$s['autoid'];
+	    			unset($phone);
+	    			unset($smsmsg);
+						$sn=str_pad($s['psn'],5,'0',STR_PAD_LEFT).str_pad($s['id'],4,'0',STR_PAD_LEFT);
+						echo $sn."<br>";
+						//dump($sn);
+	    			//dump('lose:'.($times-$v));
+	    		}
+    		}else{
+    			$bdev_normal[]=$s['autoid'];
+    		}
+    	}
+ 
+			exit;
+	}
+	
+	public function test(){
+		ini_set('memory_limit','4096M');
+		$lastweek_start = date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),date("d")-date("w")+1-7,date("Y")));
+		$lastweek_end = date("Y-m-d H:i:s",mktime(24,0,0,date("m"),date("d")-date("w")+7-7,date("Y")));
+		$lastweek_starttime=strtotime($lastweek_start);
+		$lastweek_endtime=strtotime($lastweek_end);
+		$psn=$_GET['psn'];
+		echo 'PSN:'.$psn;
+		dump($lastweek_start);	
+		dump($lastweek_starttime);
+		dump($lastweek_end);
+		dump($lastweek_endtime);
+
+		$devs=M('device')->where(['psn'=>$psn])->where('dev_state=3 or dev_state=7')->select();
+		
+		foreach($devs as $dev){
+			$ids[]=$dev['devid'];
+		}
+		if(count($ids)>0){
+			$whereinids['devid']=array('in',$ids);
+		}
+		$time1=time();
+		$mydb='access_base';
+		$accs=M($mydb)->field('psn,devid,rssi1,rssi2,rssi3,time')->where($whereinids)->where(['psn'=>$psn])->where('time >='.$lastweek_starttime.' and time <='.$lastweek_endtime)->select();
+		$time2=time();
+		dump($time2-$time1);
+		dump(count($accs));
+		foreach($accs as $acc){
+			foreach($devs as $dev){
+				if($dev['devid']===$acc['devid']){
+					$acc_list[$dev['id']][$acc['time']]=$acc;
 				}
 			}
 		}
-		foreach($devlist as $key=>$dev){
-			if($dev['step']==0){
-				$devnone[]=$dev['devid'];
+
+		foreach($devs as $dev){
+			unset($step_list);
+			unset($selectSql);
+			$id=$dev['id'];
+			$step_list=$acc_list[$id];
+			
+			if(count($step_list)< 2){
+				continue;
 			}
+			$cur_time=$lastweek_starttime;
+			$next_time=$cur_time+7200;
+			$step_sum=0;
+			$step_count=0;
+			while($next_time<= $lastweek_endtime){
+				//dump(date("Y-m-d H:i:s",$cur_time));
+				//dump(date("Y-m-d H:i:s",$next_time));
+				$cur_step=$step_list[$cur_time];
+				$next_step=$step_list[$next_time];
+				$cur_time=$cur_time+7200;
+				$next_time=$cur_time+7200;
+				//dump($cur_step);
+				//dump($next_step);
+				//dump($cur_step['rssi3']);
+				if($cur_step&&$next_step){
+					$step=$next_step['rssi2']-$cur_step['rssi2'];
+					if($step< 0){
+						if(($cur_step['rssi3']&0x03)==0x01){
+							$step=0;
+						}else{
+							if($cur_step['rssi2'] > 50000){
+								$step=65535+$next_step['rssi2']-$cur_step['rssi2'];
+							}
+						}
+					}
+					//dump($step);
+					if($step>0){
+						$step_sum+=$step;
+						$step_count+=1;
+					}
+				}
+			}
+			if($step_count>0){
+				$avg_step=(int)($step_sum/$step_count);
+				echo 'DEV:';
+				dump($dev['devid']);
+				//dump($step_sum);
+				dump($step_count);
+				dump($avg_step);
+				$ret = M('device')->where(['id'=>$id])->save(['avg_step'=>$avg_step,'step_count'=>$step_count]);
+				dump($ret);
+			}
+
 		}
-		dump($devnone);
-		exit;
+		
+		
+	}
+	
+	public function addstep(){
+				$devs = M('device')->field('psn,devid,rid,avg_step,step_count')->where('avg_step>0')->select();
+				$start_time = date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),date("d")-date("w")+1-7-7,date("Y")));
+				//$start_time=strtotime($start_time);
+				foreach($devs as $key=>$dev){
+					$devs[$key]['time']=$start_time;
+				}
+				dump($start_time);
+				$ret = M('device_step')->addAll($devs);
+				dump($ret);
 	}
 }
