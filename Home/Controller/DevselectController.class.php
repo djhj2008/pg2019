@@ -399,6 +399,7 @@ class DevselectController extends HomeController {
     {
 	  	$psnid = $_GET['psnid'];
 	  	$id=$_GET['devid'];
+	  	$step_freq=3600*1;
 	  	
     	$start_time = strtotime($time);
     	$end_time = strtotime($time2)+86400;
@@ -410,7 +411,7 @@ class DevselectController extends HomeController {
 	  		$psn=$_GET['psn'];
 	  	}
 			
-			$devrid=M('device')->field('rid,avg_step')->where(array('devid'=>$id,'psn'=>$psn))->find();
+			$devrid=M('device')->field('rid,avg_step,version')->where(array('devid'=>$id,'psn'=>$psn))->find();
 			$rid=$devrid['rid'];
 			$this->assign('rid',$rid);
 			$avg_step=$devrid['avg_step'];
@@ -422,25 +423,28 @@ class DevselectController extends HomeController {
       //$s1=M()->table('access_base')->where($wherestr)->group('time')->order('time desc')>buildSql();
       
       
-      $s1_time = strtotime('2020-11-01 00:00:00');
-      $s2_time = strtotime('2020-12-01 00:00:00');
-      if($start_time<$s1_time){
- 				$s1=M()->table('access_base202010')->where($wherestr)->group('time')->order('time desc')->select();
-				foreach($s1 as $s){
+      if($psn>=80||$psn==5){
+				$s3=M()->table('access_v6')->where($wherestr)->group('time')->order('time desc')->select();
+				foreach($s3 as $s){
 					$selectSql[]=$s;
 				}
-      }
-      if($start_time<$s2_time){
- 				$s2=M()->table('access_base202011')->where($wherestr)->group('time')->order('time desc')->select();
-				foreach($s2 as $s){
-					$selectSql[]=$s;
-				}
-      }
+      }else{
+	      $s1_time = strtotime('2021-01-01 00:00:00');
+	      //$s2_time = strtotime('2020-12-01 00:00:00');
+	      if($start_time<$s1_time){
+	 				$s1=M()->table('access_base2020')->where($wherestr)->group('time')->order('time desc')->select();
+					foreach($s1 as $s){
+						$selectSql[]=$s;
+					}
+	      }
 
-      $s3=M()->table('access_base')->where($wherestr)->group('time')->order('time desc')->select();
-			foreach($s3 as $s){
-				$selectSql[]=$s;
-			}
+				$s3=M()->table('access_base')->where($wherestr)->group('time')->order('time desc')->select();
+				foreach($s3 as $s){
+					$selectSql[]=$s;
+				}
+      }
+      
+      
 			
       //dump($id);
       if($selectSql){
@@ -450,48 +454,55 @@ class DevselectController extends HomeController {
           $this->assign('date2',$time2);
           $this->assign('id',$id);
           $next_time=0;
-					foreach($selectSql as $key=>$acc){
-						if($key<count($selectSql)-1){
-							$step = (int)$acc['rssi2'];
-							$pre_step = 0;
-							$cur_time =  (int)$acc['time'];
-							//echo 'cmp:';
-							//dump(date('Y-m-d H:i:s',$cur_time));
-							//dump(date('Y-m-d H:i:s',$next_time));
-							if($next_time>0&&$cur_time> $next_time){
-								continue;
-							}
-							
-							foreach($selectSql as $acc2){
-								$pre_time =  (int)$acc2['time'];
-								$next_time = $cur_time-7200;
-								if($cur_time-$pre_time==7200){
-									$pre_step =  (int)$acc2['rssi2'];	
-									break;
+          if($devrid['version']==6){
+          	foreach($selectSql as $key=>$acc){
+          		$selectSql[$key]['step2']='+'.$acc['step_total'];
+							$selectSql[$key]['step3']=$cur_step-$avg_step;
+						}
+          }else{
+						foreach($selectSql as $key=>$acc){
+							if($key<count($selectSql)-1){
+								$step = (int)$acc['rssi2'];
+								$pre_step = 0;
+								$cur_time =  (int)$acc['time'];
+								//echo 'cmp:';
+								//dump(date('Y-m-d H:i:s',$cur_time));
+								//dump(date('Y-m-d H:i:s',$next_time));
+								if($next_time>0&&$cur_time> $next_time){
+									continue;
 								}
-							}
-							//dump($pre_step);
-							if($pre_step==0){
-								continue;
-							}
-							if($step-$pre_step>=0){
-								$cur_step = $step-$pre_step;
-							}else{
-								if(($acc['rssi3']&0x03)==0x01){
-									$cur_step=0;
-								}else{
-									if($pre_step<50000){
-
-									}else{
-										$cur_step=65535-$pre_step+$step;
+								
+								foreach($selectSql as $acc2){
+									$pre_time =  (int)$acc2['time'];
+									$next_time = $cur_time-$step_freq;
+									if($cur_time-$pre_time==$step_freq){
+										$pre_step =  (int)$acc2['rssi2'];	
+										break;
 									}
 								}
+								//dump($pre_step);
+								if($pre_step==0){
+									continue;
+								}
+								if($step-$pre_step>=0){
+									$cur_step = $step-$pre_step;
+								}else{
+									if(($acc['rssi3']&0x03)==0x01){
+										$cur_step=0;
+									}else{
+										if($pre_step<50000){
+
+										}else{
+											$cur_step=65535-$pre_step+$step;
+										}
+									}
+								}
+								$selectSql[$key]['step3']=$cur_step-$avg_step;
+								$selectSql[$key]['step2']='+'.$cur_step;
+								
 							}
-							$selectSql[$key]['step3']=$cur_step-$avg_step;
-							$selectSql[$key]['step2']='+'.$cur_step;
-							
 						}
-					}
+          }
           $this->assign('selectSql',$selectSql);
       }else{
           $this->assign('devid',$id);

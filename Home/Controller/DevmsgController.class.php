@@ -12,7 +12,7 @@ class DevmsgController extends Controller {
 		$mode=M('','','DB_CONFIG');
 		$time = time();
 		$start_time=date('Y-m-d H:i:s',$time-86400*7);
-		dump($start_time);
+		//dump($start_time);
 		$table=M('devmsg');
 		$devmsg=$table->where('time>="'.$start_time.'"')->select();
 
@@ -39,7 +39,17 @@ class DevmsgController extends Controller {
 		$this->assign('devmsg',$devmsg);
 		$this->display();
 	}
-	
+
+	public function steplist(){
+		$mode=M('','','DB_CONFIG');
+
+		$table=M('stepmsg');
+		$devmsg=$table->order('time desc')->select();
+		
+		$this->assign('devmsg',$devmsg);
+		$this->display();
+	}
+		
 	public function sendmsg(){
 
 		$id=$_GET['id'];
@@ -63,7 +73,6 @@ class DevmsgController extends Controller {
 			}else{
 				M('devmsg')->where(array('id'=>$id))->save(array('state'=>2));
 			}
-
 		}
 		$this ->redirect('/Devmsg/lostdevlist',NULL,0,'');
 	}
@@ -81,7 +90,6 @@ class DevmsgController extends Controller {
 		
 		$this ->redirect('/Devmsg/lostdevlist',NULL,0,'');
 	}
-	
 	
 	public function addmsg(){
 		$phone=$_POST['phone'];
@@ -114,6 +122,7 @@ class DevmsgController extends Controller {
 		$this->assign('msg',$msg);
 		$this->display();
 	}
+	
 	public function pushmsg(){
 		$phone1=$_POST['phone'];
 		$phone2=$_POST['phone2'];

@@ -810,8 +810,8 @@ class DatapushV60Controller extends Controller {
     $user2=D('taccess');
 		$access2=$user2->addAll($accadd_list2);
 
-		$user3=D('device');
-		$ret=$user3->addAll($rfid_list);
+		//$user3=D('device');
+		//$ret=$user3->addAll($rfid_list);
 
 		foreach($cur_devs as $dev){
 			$devid = $dev['devid'];

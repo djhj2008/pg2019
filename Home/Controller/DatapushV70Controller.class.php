@@ -1,7 +1,7 @@
 <?php
 namespace Home\Controller;
 use Think\Controller;
-class DatapushV40Controller extends Controller {
+class DatapushV70Controller extends Controller {
 
 	public function pushnewsubV30(){
 		// $checksum=crc32("Thequickbrownfoxjumpedoverthelazydog.");
@@ -12,19 +12,19 @@ class DatapushV40Controller extends Controller {
 		$HOUR_DELAY_LEN = 2;
 		$MIN_DELAY_LEN = 2;
 		$FREQ_LEN = 1;
-
+		
 		$TIME_DIFF_LEN=3;
-				
+		
 		$BTSN_LEN  = 10;//统编10位1类型,2-4国家编码,5-10区域编码
 		$BDSN_LEN  = 4;//BS字符长度
 		$BSN_LEN  = $BTSN_LEN+$BDSN_LEN;//BS字符长度
 		$BVS_LEN  = 1; //B device version
 		
-		$BRSSI_LEN = 9;
-		$BRSSI_MAX_LEN = 1;
-		$BRSSI_COUNT = 4;
-		$BRSSI_SN_LEN = 1;
-		$BRSSI_SIGN_LEN =1;
+    $BRSSI_MAX_LEN = 1;
+    $BRSSI_COUNT = 10;
+    $BRSSI_SN_LEN = 1;
+    $BRSSI_SIGN_LEN = 1;
+		$BRSSI_LEN = $BRSSI_MAX_LEN+$BRSSI_COUNT*($BRSSI_SN_LEN+$BRSSI_SIGN_LEN);
 		
 		$CDATA_START = $TIME_LEN+$BSN_LEN+$BVS_LEN+$BRSSI_LEN;
 		
@@ -38,7 +38,7 @@ class DatapushV40Controller extends Controller {
 		
 		$SENS_LEN  =1;//有效值个数
 		
-		$VALUE_LEN = 10;//data中每个长度
+		$VALUE_LEN = 14;// ver6 data中每个长度
 		$COUNT_VALUE = 4;
 
 		$DATA_LEN = ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN)*2+$VALUE_LEN*$COUNT_VALUE; //一条data长度
@@ -50,13 +50,13 @@ class DatapushV40Controller extends Controller {
     $strarr    =unpack("H*", $post);//unpack() 函数从二进制字符串对数据进行解包。
     $str       =implode("", $strarr);
 
-		//$str = "323032303031303130313031303031313634303432333030300002c001055000000000000000000000000005e5";
+		//$str = "323032303037323331323030313034313239313038363735363330300000a00a05500000000000000000000c0000a0036173040104796227758227752227796227730228765227ffffff0000a0044c73040104766227766227766227766227764227735227ffffff0000a00538740701210491333800009023380000926338000092633800000000a0074573040104798227795227758227797227787227779227ffffff0000a00951740500310477522700007942270000797227000078522700000000a00a387407002a0472122700007212270000731227000073122700000000a00b607407013b0479622700047952270004796227000479422700040000a00c4b7407013d0470922600007092260000709226000070922600000000a00d3f740701320479622700007962270000797227000079722700000000a00e507407013d0479622700008012270000802227000077922600000000a00f427407003e0458722500005332250000534225000051122500000000a01037740702280483222800008212280000811228000083222800000000556b";
     $sndir = substr($str, ($TIME_LEN+$BTSN_LEN)*2,$BDSN_LEN*2);
     $sn_footer = hexdec($sndir)&0x1fff;
     $sn_header = hexdec($sndir)>>13;
-    $logbase="lora_log/backupV4030/";
-    $logerr="lora_log/errorV4030/";
-    $logreq="lora_log/reqV4030/";
+    $logbase="lora_log/backupV6030/";
+    $logerr="lora_log/errorV6030/";
+    $logreq="lora_log/reqV6030/";
     ob_clean();
     {
         $logdir =$logbase;
@@ -89,7 +89,6 @@ class DatapushV40Controller extends Controller {
     	exit;
 		}
 
-
     $hour_delay =substr($str,$DELAY_START*2,$HOUR_DELAY_LEN*2);
     $hour_delay =(int)pack("H*",$hour_delay);
     $min_delay =substr($str,($DELAY_START+$HOUR_DELAY_LEN)*2,$HOUR_DELAY_LEN*2);
@@ -98,7 +97,9 @@ class DatapushV40Controller extends Controller {
     $freq = (int)pack("H*",$freq);
     $time_diff = substr($str,($DELAY_START+$HOUR_DELAY_LEN+$MIN_DELAY_LEN+$FREQ_LEN)*2,$TIME_DIFF_LEN*2);
     $time_diff = (int)pack("H*",$time_diff);
-    
+    //var_dump($hour_delay);
+    //var_dump($min_delay);
+
     $sid =  (int)$_GET['sid']&0x1fff;
     //var_dump($sid);
     $bsnstr   =substr($str, $TIME_LEN*2,$BSN_LEN*2);
@@ -141,10 +142,14 @@ class DatapushV40Controller extends Controller {
     	}    	
     	exit;
     }
-    $psninfo = D('psn')->where(array('tsn'=>$btsn,'sn'=>$psn))->find();
+    $psninfo = D('psn')->where(array('sn'=>$psn))->find();
     //$psninfo = D('psn')->where(array('sn'=>$psn))->find();
     if($psninfo){
     	$psnid=$psninfo['id'];
+    	$delay_up=$psninfo['delay_up'];
+    	$delay_up=str_pad($delay_up,2,'0',STR_PAD_LEFT);
+    	$retry_up=$psninfo['retry_up'];
+    	$retry_up=str_pad($retry_up,1,'0',STR_PAD_LEFT);
     }else{
     	echo "OKE";
     	{
@@ -212,11 +217,23 @@ class DatapushV40Controller extends Controller {
 						'rssi3'=>$bsign[2],
 						'sn4'=>$brssisn[3],
 						'rssi4'=>$bsign[3],
+						'sn5'=>$brssisn[4],
+						'rssi5'=>$bsign[4],
+						'sn6'=>$brssisn[5],
+						'rssi6'=>$bsign[5],
+						'sn7'=>$brssisn[6],
+						'rssi7'=>$bsign[6],
+						'sn8'=>$brssisn[7],
+						'rssi8'=>$bsign[7],
+						'sn9'=>$brssisn[8],
+						'rssi9'=>$bsign[8],
+						'sn10'=>$brssisn[9],
+						'rssi10'=>$bsign[9],	
 						'time'=>time(),
 						);
 	 	$saveRssi=D('brssi')->add($rssi);
 
-    $bdevinfo    =D('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->find();
+    $bdevinfo  =D('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->find();
 
     if($bdevinfo){
     	$uptime=$bdevinfo['uptime'];
@@ -227,11 +244,23 @@ class DatapushV40Controller extends Controller {
     	
 			$log_flag= $bdevinfo['log_flag'];//0 self log 1 sys log
 			$dump_rate=$bdevinfo['dump_rate'];
+			
 			$step_rate=$bdevinfo['step_rate'];
 			$step_rate=str_pad($step_rate,3,'0',STR_PAD_LEFT);
 			$step_setup=$bdevinfo['step_setup'];
 			$step_setup=str_pad($step_setup,3,'0',STR_PAD_LEFT);
+			$step_sleeptime=$bdevinfo['step_sleeptime'];
+			$step_sleeptime=str_pad($step_sleeptime,3,'0',STR_PAD_LEFT);
+
+			$step_rate2=$bdevinfo['step_rate2'];
+			$step_rate2=str_pad($step_rate2,3,'0',STR_PAD_LEFT);
+			$step_setup2=$bdevinfo['step_setup2'];
+			$step_setup2=str_pad($step_setup2,3,'0',STR_PAD_LEFT);
+			$step_sleeptime2=$bdevinfo['step_sleeptime2'];
+			$step_sleeptime2=str_pad($step_sleeptime2,3,'0',STR_PAD_LEFT);
 			
+			$bt_fw=$bdevinfo['bt_fw'];
+					
     	if($bdevinfo['version']!=$bvs){
     		//var_dump($bdevinfo['version']);
     		$saveSql=M('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->save(array('version'=>$bvs));	
@@ -269,10 +298,11 @@ class DatapushV40Controller extends Controller {
     
     //echo "delay_time:";
 		//var_dump($delay_time);
-
-    $count     =substr($str,$CDATA_START*2,$COUNT_LEN*2);//2为解包后的倍数
-    $count	   =hexdec($count);//从十六进制转十进制
-    $data      =substr($str,($CDATA_START+$COUNT_LEN)*2,$count*$DATA_LEN);//取出data
+    $count = substr($str,$CDATA_START*2,$COUNT_LEN*2);//2为解包后的倍数
+    $count = hexdec($count);//从十六进制转十进制
+    
+    $end = 0-$CRC_LEN*2;
+    $data      =substr($str,($CDATA_START+$COUNT_LEN)*2,$end);//取出data
     $env_temp = 0;
     $snint = 0;
     $battery = 0;
@@ -296,6 +326,7 @@ class DatapushV40Controller extends Controller {
    	//var_dump($re_devs);
    	
 		foreach($cur_devs as $cur_dev){
+			$step_list[$cur_dev['devid']]['state']=(int)$cur_dev['dev_state'];
 			$step_list[$cur_dev['devid']]['switch']=(int)$cur_dev['step_switch'];
 		}
    	
@@ -365,7 +396,14 @@ class DatapushV40Controller extends Controller {
 	    	$state=$state&$stmp;
 				$step_update = $step_update|$state;
 				
-	    	if($cvs>3){
+				if($cvs==6){
+					$sensstr 	 =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
+					$vaildstr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
+	    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
+					$sens=0-hexdec($sensstr);
+					$step_list[$snint]['state']=$state;
+				}
+	    	else if($cvs==4||$cvs==5){
 					$sensstr 	 =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
 					$vaildstr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
 	    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
@@ -397,10 +435,10 @@ class DatapushV40Controller extends Controller {
 		    		  foreach($change_devs as $ch_dev){
 		    		  	if($ch_dev['psnid']==$psnid&&
 		    		  		$ch_dev['new_devid']==$snint){
-		    		  			$change_dev_find=true;
+		    		  			$change_dev_find=false;
 		    		  			$rfid=$ch_dev['rfid'];
 		    		  			if($ch_dev['flag']==2){
-		    		  				$change_dev_find=false;
+		    		  				$change_dev_find=true;
 		    		  				$ret=M('changeidlog')->where(array('id'=>$ch_dev['id']))->save(array('flag'=>3));
 		    		  			}
 		    		  		}
@@ -411,7 +449,7 @@ class DatapushV40Controller extends Controller {
 		    		  		break;
 		    		  	}
 		    		  }
-		    		  if($change_dev_find==false){
+		    		  if($change_dev_find==true){
 								$addrfdev=array(
 									'psn'=>$dev_psn,
 									'psnid'=>$psnid,
@@ -463,7 +501,7 @@ class DatapushV40Controller extends Controller {
 	    			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
 	    		}
 			    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
-		    	if($cvs>3){
+			    if($cvs==6){
 		    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);
 				    	//echo "tempstr_tmp:";
 				    	//dump($tempstr_tmp);
@@ -478,7 +516,89 @@ class DatapushV40Controller extends Controller {
 					    	$temp2str3 = substr($tempstr_tmp,2,1);
 					    	$temp2int =base_convert($temp2str1,16,10);
 			    		
-			    			$stepstr = substr($tempstr_tmp,-4);
+			    			$nTotalStepCounts = substr($tempstr_tmp,6,3);
+			    			$nTotalStepCountsint = (int)base_convert($nTotalStepCounts,16,10);
+			    			
+			    			$nyStepCounts = substr($tempstr_tmp,9,3);
+			    			$nyStepCountsint = (int)base_convert($nyStepCounts,16,10);		    			
+			    			
+			    			$nPosChange = substr($tempstr_tmp,13,1);
+			    			$nPosChange	= (int)base_convert($nPosChange,16,10);
+			    			
+			    			$nPosChangeint =$nPosChange&0x80;
+			    			$nStepClimeCountint	 =$nPosChange&0x7f;
+			    			
+						    if(($temp1int&0x08)==0x08){
+					    		$temp1str1=$temp1int&0x07;
+					    		if($temp1str1==0){
+					    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+					    		}else{
+					    			$temp1 = '-'.$temp1str1.$temp1str2.".".$temp1str3;
+					    		}
+					    	}else{
+						    		if($temp1str1==0){
+						    			$temp1 = $temp1str2.".".$temp1str3;
+						    		}else{
+						    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
+						    		}
+					    	}
+
+							  //var_dump('temp1:'.$temp1);
+							  if(($temp2int&0x08)==0x08){
+							  	$temp2str1=$temp2int&0x07;
+									if($temp2str1 == 0){
+								    $temp2 = '-'.$temp2str2.".".$temp2str3;
+							 	 	}else{
+							 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
+							 	 	}
+						 		}else{
+						 			if($temp2str1 == 0){
+								    $temp2 = $temp2str2.".".$temp2str3;
+							 	 	}else{
+							 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+							 	 	}
+						 			
+						 		}
+						 	
+								$acc_add=array(
+						  				'psn'=>$dev_psn,
+						  				'psnid'=>$psnid,
+								  		'devid'=>$snint,
+								  		'temp1'=>$temp1,
+								  		'temp2'=>$temp1,
+								  		'env_temp'=>$temp2,
+								  		'sign'=>$sign,
+								  		'rssi1'=>$sens,
+								  		'rssi2'=>$stepint,
+								  		'rssi3'=>$step_update,
+								  		'cindex'=>$cindex,
+								  		'lcount'=>$lcount,
+								  		'delay'=>$delay,
+								  		'time' =>$up_time,
+								  		'sid' =>$sid,
+								  	);
+
+								$accadd_list[]=$acc_add;
+							}else{
+								//nothing
+							}
+			    }
+		    	else if($cvs==4||$cvs==5){
+		    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);
+				    	//echo "tempstr_tmp:";
+				    	//dump($tempstr_tmp);
+			    		if($type==0){
+						    $temp1str1 = substr($tempstr_tmp,3,1);
+					  		$temp1str2 = substr($tempstr_tmp,0,1);
+					    	$temp1str3 = substr($tempstr_tmp,1,1);
+					    	$temp1int =base_convert($temp1str1,16,10);
+
+					    	$temp2str1 = substr($tempstr_tmp,4,1);
+					  		$temp2str2 = substr($tempstr_tmp,5,1);
+					    	$temp2str3 = substr($tempstr_tmp,2,1);
+					    	$temp2int =base_convert($temp2str1,16,10);
+			    		
+			    			$stepstr = substr($tempstr_tmp,6,4);
 			    			$stepint = (int)base_convert($stepstr,16,10);
 			    			
 						    if(($temp1int&0x08)==0x08){
@@ -531,16 +651,7 @@ class DatapushV40Controller extends Controller {
 								  		'sid' =>$sid,
 								  	);
 
-								$dev_save=array(
-											'devid'=>$snint,
-											'psn'=>$dev_psn,
-											'psnid'=>$psnid,
-											'battery'=>$battery,
-								  	 	'dev_state'=>$state,
-								  	 	'version'=>$cvs);
-								  	 	
 								$accadd_list[]=$acc_add;
-								$devsave_list[]=$dev_save;
 							}else{
 								//nothing
 							}
@@ -673,16 +784,8 @@ class DatapushV40Controller extends Controller {
 								  		'time' =>$up_time,
 								  		'sid' =>$sid,
 								  	);
-								$dev_save=array(
-											'devid'=>$snint,
-											'psn'=>$dev_psn,
-											'psnid'=>$psnid,
-											'battery'=>$battery,
-								  	 	'dev_state'=>$state,
-								  	 	'version'=>$cvs);
-								  	 	
+
 								$accadd_list[]=$acc_add;
-								$devsave_list[]=$dev_save;
 							}else{
 								if($j==0){
 							    $temp1str1 = substr($tempstr,3,1);
@@ -781,19 +884,18 @@ class DatapushV40Controller extends Controller {
 						  		'sid' =>$sid,
 						  	);
 
-								$dev_save2=array(
-																'devid'=>$snint,
-																'psn'=>$dev_psn,
-																'psnid'=>$psnid,
-																'battery'=>$battery,
-													  	 	'dev_state'=>$state,
-													  	 	'version'=>$cvs);
-
 								$accadd_list2[]=$acc_add2;
-								$devsave_list[]=$dev_save2;
 							}
 		    	}
 				}
+				$dev_save=array(
+									'devid'=>$snint,
+									'psn'=>$dev_psn,
+									'psnid'=>$psnid,
+									'battery'=>$battery,
+						  	 	'dev_state'=>$state,
+						  	 	'version'=>$cvs);
+				$devsave_list[]=$dev_save;
 	    }
   	}
 
@@ -801,15 +903,15 @@ class DatapushV40Controller extends Controller {
 		//dump($accadd_list2);
 		//dump($rfid_list);
 		
-  	$mydb='access_base';
+  	$mydb='access_test';
     $user=D($mydb);
-		$access1=$user->addAll($accadd_list); 
+		$access1=$user->addAll($accadd_list);
     		
     $user2=D('taccess');
 		$access2=$user2->addAll($accadd_list2);
 
-		//$user3=D('device');
-		//$ret=$user3->addAll($rfid_list);
+		$user3=D('device');
+		$ret=$user3->addAll($rfid_list);
 
 		foreach($cur_devs as $dev){
 			$devid = $dev['devid'];
@@ -819,7 +921,7 @@ class DatapushV40Controller extends Controller {
 			$version= $dev['version'];
 			foreach($devsave_list as $devsave){
 				unset($mysave);
-				if($devid==$devsave['devid']){
+				if($devid==$devsave['devid']&&$dev_psn==$devsave['psn']){
 					if($battery!=$devsave['battery']){
 						$mysave['battery']=$devsave['battery'];
 					}
@@ -858,10 +960,11 @@ class DatapushV40Controller extends Controller {
   			}
   	}
 
-		$devres_count=count($devres);
+		$devres_count=count($re_devs);
 		$devres_count=str_pad($devres_count,2,'0',STR_PAD_LEFT);
 		$devres_str=$devres_count.'';
-		foreach($devres as $devre_id){
+		foreach($re_devs as $re_dev){
+				$devre_id = $redev['devid'];
 				//$string=base_convert($devre_id, 10, 16);
 				$devre_id=str_pad($devre_id,4,'0',STR_PAD_LEFT);
 				$devres_str=$devres_str.$devre_id;
@@ -904,7 +1007,7 @@ class DatapushV40Controller extends Controller {
 			$header="OK2".date('YmdHis'); 
 		}
 			
-		$body=$header.$delay_time.$rate.$log_flag.$dump_rate.$step_rate.$step_setup.$change_str.$footer.$stepres_str.$devres_str;
+		$body=$header.$delay_time.$rate.$log_flag.$dump_rate.$step_rate.$step_setup.$step_sleeptime.$delay_up.$retry_up.$change_str.$footer.$stepres_str.$devres_str;
   	{
         $logdir =$logreq;
         if(!file_exists($logdir)){
@@ -966,8 +1069,7 @@ class DatapushV40Controller extends Controller {
 
 			$SENS_LEN  =1;//有效值个数
 			
-			$VALUE_LEN = 10;//data中每个长度
-			$VALUE_LEN_NEW = 11;//data中每个长度
+			$VALUE_LEN = 14;//data中每个长度
 			$COUNT_VALUE = 4;
 
 			$DATA_LEN = ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN+$SENS_LEN)*2+$VALUE_LEN*$COUNT_VALUE; //一条data长度
@@ -982,9 +1084,9 @@ class DatapushV40Controller extends Controller {
 	    $sndir = substr($str, ($TIME_LEN + $BTSN_LEN) * 2, $BDSN_LEN * 2);
 	    $sn_footer = hexdec($sndir) & 0x1fff;
 	    $sn_header = hexdec($sndir) >> 13;
-	    $logbase = "lora_log/backupV4047/";
-	    $logerror = "lora_log/errorV4047/";
-	    $logreq = "lora_log/reqV4047/";
+	    $logbase = "lora_log/backupV6047/";
+	    $logerror = "lora_log/errorV6047/";
+	    $logreq = "lora_log/reqV6047/";
 			ob_clean();
 	    {
 	        $logdir = $logbase;
@@ -1137,6 +1239,7 @@ class DatapushV40Controller extends Controller {
 			$rssi = array(
 							'psnid'=>$psnid,
 							'bsn'=>$bsnint,
+							'station'=>1301,
 							'rssi'=>$brssimax,
 							'sn1'=>$brssisn[0],
 							'rssi1'=>$bsign[0],
@@ -1195,6 +1298,8 @@ class DatapushV40Controller extends Controller {
 
 	    //dump('count:' . $count);
 	    //dump('psn:' . $psn . ' psnid:' . $psnid);
+			$cur_devs =D('device')->where(array('psnid'=>$psnid))->order('devid asc')->select();
+			
       $change_devs = D('changeidlog')->where(array('psnid' => $psnid))->select();
 
 	    //未解包比对
@@ -1219,7 +1324,6 @@ class DatapushV40Controller extends Controller {
 		        $dev_sn = hexdec($snstr);
 
 		        $dev_psnid = $psnid;
-						$rfid = $dev_psn*10000+$snint;
 						
 		        if ($dev_psn != $psn) {
 		            $dev_psnid_find = false;
@@ -1310,14 +1414,14 @@ class DatapushV40Controller extends Controller {
 		                	$dev_info=D('device')->field('rid')->where(array('devid'=>$snint,'psn'=>$dev_psn))->find();
 		                	if($dev_info){
 		                		$rfid=$dev_info['rid'];
+				                $change_dev = array('psnid' => $psnid,
+				                    'old_psn' => $dev_psn,
+				                    'old_devid' => $snint,
+				                    'sid' => $sid,
+				                    'rfid'=> $rfid,
+				                );
+					             $change_add[]= $change_dev; 
 		                	}
-			                $change_dev = array('psnid' => $psnid,
-			                    'old_psn' => $dev_psn,
-			                    'old_devid' => $snint,
-			                    'sid' => $sid,
-			                    'rfid'=> $rfid,
-			                );
-				             $change_add[]= $change_dev; 
 		        			 }
 		        		}
 		        }
@@ -1334,8 +1438,16 @@ class DatapushV40Controller extends Controller {
 		        $lcount = ($lcount) >> 4;
 		        $type = $state & $stmp3;
 		        $state = $state & $stmp;
-
-			    	if($cvs>3){
+						$step_update = $step_update|$state;
+						
+						if($cvs==6){
+							$sensstr 	 =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
+							$vaildstr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
+			    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
+							$sens=0-hexdec($sensstr);
+							$step_list[$snint]['state']=$state;
+						}
+			    	else if($cvs==4||$cvs==5){
 							$sensstr 	 =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
 							$vaildstr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
 			    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
@@ -1374,7 +1486,89 @@ class DatapushV40Controller extends Controller {
 			    			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
 			    		}
 					    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
-				    	if($cvs>3){
+			    if($cvs==6){
+		    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);
+				    	//echo "tempstr_tmp:";
+				    	//dump($tempstr_tmp);
+			    		if($type==0){
+						    $temp1str1 = substr($tempstr_tmp,3,1);
+					  		$temp1str2 = substr($tempstr_tmp,0,1);
+					    	$temp1str3 = substr($tempstr_tmp,1,1);
+					    	$temp1int =base_convert($temp1str1,16,10);
+
+					    	$temp2str1 = substr($tempstr_tmp,4,1);
+					  		$temp2str2 = substr($tempstr_tmp,5,1);
+					    	$temp2str3 = substr($tempstr_tmp,2,1);
+					    	$temp2int =base_convert($temp2str1,16,10);
+			    		
+			    			$nTotalStepCounts = substr($tempstr_tmp,6,3);
+			    			$nTotalStepCountsint = (int)base_convert($nTotalStepCounts,16,10);
+			    			
+			    			$nyStepCounts = substr($tempstr_tmp,9,3);
+			    			$nyStepCountsint = (int)base_convert($nyStepCounts,16,10);		    			
+			    			
+			    			$nPosChange = substr($tempstr_tmp,13,1);
+			    			$nPosChange	= (int)base_convert($nPosChange,16,10);
+			    			
+			    			$nPosChangeint =$nPosChange&0x80;
+			    			$nStepClimeCountint	 =$nPosChange&0x7f;
+			    			
+						    if(($temp1int&0x08)==0x08){
+					    		$temp1str1=$temp1int&0x07;
+					    		if($temp1str1==0){
+					    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+					    		}else{
+					    			$temp1 = '-'.$temp1str1.$temp1str2.".".$temp1str3;
+					    		}
+					    	}else{
+						    		if($temp1str1==0){
+						    			$temp1 = $temp1str2.".".$temp1str3;
+						    		}else{
+						    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
+						    		}
+					    	}
+
+							  //var_dump('temp1:'.$temp1);
+							  if(($temp2int&0x08)==0x08){
+							  	$temp2str1=$temp2int&0x07;
+									if($temp2str1 == 0){
+								    $temp2 = '-'.$temp2str2.".".$temp2str3;
+							 	 	}else{
+							 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
+							 	 	}
+						 		}else{
+						 			if($temp2str1 == 0){
+								    $temp2 = $temp2str2.".".$temp2str3;
+							 	 	}else{
+							 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+							 	 	}
+						 			
+						 		}
+						 	
+								$acc_add=array(
+						  				'psn'=>$dev_psn,
+						  				'psnid'=>$psnid,
+								  		'devid'=>$snint,
+								  		'temp1'=>$temp1,
+								  		'temp2'=>$temp1,
+								  		'env_temp'=>$temp2,
+								  		'sign'=>$sign,
+								  		'rssi1'=>$sens,
+								  		'rssi2'=>$stepint,
+								  		'rssi3'=>$step_update,
+								  		'cindex'=>$cindex,
+								  		'lcount'=>$lcount,
+								  		'delay'=>$delay,
+								  		'time' =>$up_time,
+								  		'sid' =>$sid,
+								  	);
+
+								$accadd_list[]=$acc_add;
+							}else{
+								//nothing
+							}
+			    }
+		    	else if($cvs==4||$cvs==5){
 				    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);
 						    	//echo "tempstr_tmp:";
 						    	//dump($tempstr_tmp);
@@ -1441,17 +1635,8 @@ class DatapushV40Controller extends Controller {
 										  		'time' =>$up_time,
 										  		'sid' =>$sid,
 										  	);
-
-										$dev_save=array(
-													'devid'=>$snint,
-													'psn'=>$dev_psn,
-													'psnid'=>$psnid,
-													'battery'=>$battery,
-										  	 	'dev_state'=>$state,
-										  	 	'version'=>$cvs);
-										  	 	
+	 	
 										$accadd_list[]=$acc_add;
-										$devsave_list[]=$dev_save;
 									}else{
 										//nothing
 									}
@@ -1616,16 +1801,8 @@ class DatapushV40Controller extends Controller {
 										  		'time' =>$up_time,
 										  		'sid' =>$sid,
 										  	);
-										$dev_save=array(
-													'devid'=>$snint,
-													'psn'=>$dev_psn,
-													'psnid'=>$psnid,
-													'battery'=>$battery,
-										  	 	'dev_state'=>$state,
-										  	 	'version'=>$cvs);
 										  	 	
 										$accadd_list[]=$acc_add;
-										$devsave_list[]=$dev_save;
 									}else{
 										if($j==0){
 									    $temp1str1 = substr($tempstr,3,1);
@@ -1724,16 +1901,7 @@ class DatapushV40Controller extends Controller {
 								  		'sid' =>$sid,
 								  	);
 
-										$dev_save2=array(
-																		'devid'=>$snint,
-																		'psn'=>$dev_psn,
-																		'psnid'=>$psnid,
-																		'battery'=>$battery,
-															  	 	'dev_state'=>$state,
-															  	 	'version'=>$cvs);
-
 										$accadd_list2[]=$acc_add2;
-										$devsave_list[]=$dev_save2;
 									}
 									$acc1301_list_find = false;
 			            /*
@@ -1818,6 +1986,7 @@ class DatapushV40Controller extends Controller {
 	                    foreach($acc1301_values as $acc1301_value){
 	                        if($acc1301_value['time']==$acc1301add['time']&&
 	                            $acc1301_value['psnid']==$acc1301add['psnid']&&
+	                            $acc1301_value['psn']==$acc1301add['psn']&&
 	                            $acc1301_value['devid']==$acc1301add['devid'])
 	                        {
 	                            if(count($blacklist)<64){
@@ -1860,7 +2029,34 @@ class DatapushV40Controller extends Controller {
 	  
 	    $chuser=D('changeidlog');
 	    $ret=$chuser->addAll($change_add);
-	     
+
+			foreach($cur_devs as $dev){
+				$devid = $dev['devid'];
+				$dev_psn =$dev['psn'];
+				$battery= $dev['battery'];
+				$dev_state= $dev['dev_state'];
+				$version= $dev['version'];
+				foreach($devsave_list as $devsave){
+					unset($mysave);
+					if($devid==$devsave['devid']&&$dev_psn==$devsave['psn']){
+						if($battery!=$devsave['battery']){
+							$mysave['battery']=$devsave['battery'];
+						}
+						if($dev_state!=$devsave['dev_state']){
+							$mysave['dev_state']=$devsave['dev_state'];
+						}
+						if($version!=$devsave['version']){
+							$mysave['version']=$devsave['version'];
+						}
+						if(!empty($mysave)){
+							$dev1=M('device')->where(array('devid'=>$devid,'psn'=>$dev_psn))->save($mysave);
+							//$dev1=D('device')->save($mysave);
+							//dump($mysave);
+						}
+					}
+				}
+			}
+		
       foreach ($change_devs as $ch_dev) {
           if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
 								if($ch_dev['flag'] == 1){
@@ -1941,7 +2137,7 @@ class DatapushV40Controller extends Controller {
 	    $sid = $_GET['sid'];
 	    $sn_footer = (int)$sid & 0x1fff;
 	    $sn_header = (int)$sid >> 13;
-	    $logbase = "lora_log/syslogV30/";
+	    $logbase = "lora_log/syslogV60/";
 
 	    {
 	        $logdir = $logbase;

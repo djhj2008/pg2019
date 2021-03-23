@@ -224,8 +224,8 @@ class CollectController extends Controller {
     public function downValuesync(){
 				ini_set("memory_limit","2048M");
 			  $now = time();
-			  $v = strtotime(date('Y-m-d H:i:s',$now));
-				$hours = 12;
+			  $v = strtotime(date('Y-m-d',$now));
+				$hours = 10;
 		    //$down_value= 35;//$_POST['temp'];
 		    
 				$psnid = $_GET['psnid'];
@@ -239,7 +239,7 @@ class CollectController extends Controller {
 				dump($psn);
 				dump($down_value);
 				dump($step_value);
-	    	$start_time = $v;
+	    	$start_time = $v+3600*6;
 	    	$end_time = $start_time-3600*$hours;
 				dump(date('Y-m-d H:i:s',$start_time));
 				dump(date('Y-m-d H:i:s',$end_time));
@@ -247,7 +247,7 @@ class CollectController extends Controller {
         $mydb='access_base';
         
 				$psn=$psnid;
-				$devSelect=M('device')->where(array('dev_type'=>0,'psn'=>$psn))->order('devid desc')->select();
+				$devSelect=M('device')->where(array('psn'=>$psn))->order('devid desc')->select();
 				
         $accs=M($mydb)->field('id,psn,devid,temp1,temp2,rssi2,rssi3,time')->where(['psn'=>$psn])->where('time <= '.$start_time.' and time >= '.$end_time)
 									        ->order('time asc')
@@ -276,8 +276,8 @@ class CollectController extends Controller {
 					$high_flag=0;
 					$step_flag=0;
 					$pre_time=0;
-					if(count($temp_list[$devid])>=3){
-						dump($devid);
+					if(count($temp_list[$devid])>=5){
+						//dump($devid);
 						foreach($temp_list[$devid] as $time){
 							if($pre_time>0){
 								if($time-$pre_time==3600){
@@ -287,7 +287,7 @@ class CollectController extends Controller {
 								}
 							}
 							$pre_time=$time;
-							if($high_flag>=3){
+							if($high_flag>=5){
 								//dump($devid);
 								$ids[]=$devid;
 								break;
@@ -296,7 +296,7 @@ class CollectController extends Controller {
 					}
 					//dump($ids);
 					$pre_time=0;
-					if(count($step_list[$devid])>=3){
+					if(count($step_list[$devid])>=5){
 						foreach($step_list[$devid] as $key2=>$step_info){
 							if($key2< count($step_list[$devid])-1){
 								$step = $step_info['step'];
@@ -329,12 +329,6 @@ class CollectController extends Controller {
 							}
 
 							if($cur_step>=$step_value){
-								//dump($devid);
-								//dump(date('Y-m-d H:i:s',$cur_time));
-								//dump(date('Y-m-d H:i:s',$pre_time));
-								//dump($cur_time-$pre_time);
-								//dump($cur_step);
-								//dump($step_flag);
 								if($pre_time>0){
 									if($cur_time-$pre_time==3600){
 										$step_flag+=1;
@@ -344,6 +338,8 @@ class CollectController extends Controller {
 								}else{
 									$step_flag+=1;
 								}
+							}else{
+								$step_flag=0;
 							}
 							$pre_time=$cur_time;
 							if($step_flag>=$hstep_count){
@@ -354,8 +350,50 @@ class CollectController extends Controller {
 						}
 					}
 				}
-				dump($ids);
-				dump($stepids);
+				
+				foreach($ids as $id){
+					foreach($stepids as $stepid){
+						if($id==$stepid){
+							$msglist[]=$id;
+							break;
+						}
+					}
+				}
+				
+				//dump($ids);
+				//dump($stepids);
+				$step_time_start=$v-86400*20;
+				$stepSelect=M('stepmsg')->where('step_time >'.$step_time_start)->select();
+				
+				dump($msglist);
+				dump($stepSelect);
+				if($msglist){
+					$wheremsg['devid']=['in',$msglist];
+					$devs=M('device')->where(array('psn'=>$psn))->where($wheremsg)->select();
+					foreach($devs as $dev){
+						$rid=substr($dev['rid'],-8);
+						$step_find=false;
+						foreach($stepSelect as $stepsel){
+							if($stepsel['rid']==$rid){
+								$step_find=true;
+								break;
+							}
+						}
+						if($step_find==false){
+							$stepmsg['rid']=$rid;
+							$stepmsg['psn']=$dev['psn'];
+							$stepmsg['devid']=$dev['devid'];
+							$stepmsg['step_time']=$v;
+							$stepmsg_list[]=$stepmsg;
+						}
+					}
+				}
+				
+				dump($stepmsg_list);
+				if($stepmsg_list){
+					$ret = M('stepmsg')->addAll($stepmsg_list);
+				}
+
 				$ret=M('device')->where(array('psn'=>$psn,'step_state'=>1))->save(array('step_state'=>0));
 				$ret=M('device')->where(array('psn'=>$psn,'high_state'=>1))->save(array('high_state'=>0));
 
@@ -368,9 +406,113 @@ class CollectController extends Controller {
 					$wheredev['devid']=['in',$ids];
 					$ret=M('device')->where(array('psn'=>$psn))->where($wheredev)->save(array('high_state'=>1));
 				}
+
 				exit;
     }
 
+		public function sendmsg(){
+
+			$id=$_GET['id'];
+			$mode=M('','','DB_CONFIG');
+			$stepmsg=M('stepmsg')->where(array('flag'=>0))->select();
+
+			foreach($stepmsg as $msg){
+				$sn_list[]=$msg['rid'];
+			}
+
+			if($sn_list){
+				$wherecode['sn_code']=array('in',$sn_list);
+				$cows = $mode->table('cows')->where($wheresn)->select();
+			}else{
+				echo "SN NULL.";
+				exit;
+			}
+			if($cows){
+				foreach($cows as $cow){
+					$cow_ids[]= $cow['id'];
+					$farmers[]=$cow['farmer_id'];
+				}
+			}else{
+				echo "COWS NULL.";
+				exit;
+			}
+			
+			$farmers=array_unique($farmers);
+			$wherefarmers['fs.id']=array('in',$farmers);
+			$farmerlist = $mode->table(array('farmers'=>'fs'))
+									->field('fs.id as id,fs.name as name,fs.phone as phone,fs.village_id as village_id,fs.town_id as town_id')
+									->where($wherefarmers)
+									->select();
+						
+			foreach($farmerlist as $farmer){
+				$farmer_sel[$farmer['id']]=$farmer['name'];
+				$phone_sel[$farmer['id']]=$farmer['phone'];
+				$villages[]=$farmer['village_id'];
+				$towns[]=$farmer['town_id'];
+			}
+			
+			$villages=array_unique($villages);
+			$wherevillages['ss.id']=array('in',$villages);
+			$villagelist = $mode->table(array('subareas'=>'ss'))
+									->field('ss.id as id,ss.name as name')
+									->where(array('type'=>'village_id'))
+									->where($wherevillages)
+									->select();
+									
+			foreach($villagelist as $village){
+				$village_sel[$village['id']]=$village['name'];
+			}		
+
+			$towns=array_unique($towns);
+			
+			$wheretowns['ss.id']=array('in',$towns);
+			$townlist = $mode->table(array('subareas'=>'ss'))
+									->field('ss.id as id,ss.name as name')
+									->where($wheretowns)
+									->where(array('type'=>'town_id'))
+									->select();
+									
+			foreach($townlist as $town){
+				$town_sel[$town['id']]=$town['name'];
+			}
+		
+		
+		
+		
+			foreach($cows as $cow){
+				$msg['farmer']=$farmer_sel[$cow['farmer_id']];
+				$msg['phone']=$phone_sel[$cow['farmer_id']];
+				$msg['village']=$village_sel[$cow['village_id']];
+				$msg['town']=$town_sel[$cow['town_id']];
+				$msg['sn_code']=$cow['sn_code'];
+			}
+			
+			foreach($stepmsg as $msg){
+				foreach($cows as $cow){
+					if($cow['sn_code']==$msg['rid']){
+						$savemsg['farmer']=$farmer_sel[$cow['farmer_id']];
+						$savemsg['phone']=$phone_sel[$cow['farmer_id']];
+						$savemsg['village']=$village_sel[$cow['village_id']];
+						$savemsg['town']=$town_sel[$cow['town_id']];
+						$savemsg['flag']=1;
+						$ret=M('stepmsg')->where(array('id'=>$msg['id']))->save($savemsg);
+						$tmp = '19482119';
+						$smsmsg=array($savemsg['farmer'],$msg['rid']);
+						$phone1=$savemsg['phone'];
+						if($phone1){
+							//$phone1="13311152676";
+							$phone=array($phone1);
+							//$ret=send163msgtmp($phone,$smsmsg,$tmp);
+							//dump($phone);
+							//dump($smsmsg);
+							dump($ret);
+						}
+						break;
+					}
+				}
+			}
+		}
+	
     public function downValue2(){
 				ini_set("memory_limit","2048M");
 			  $now = time();

@@ -69,13 +69,14 @@ class AccmanagerController extends Controller {
 			dump(date('Y-m-d H:i:s',$start_time));
 			//dump(date('Y-m-d H:i:s',$end_time));
 
-			$mydb='access_base2020'.$db;
+			$mydb='access_daily'.$db;
 			dump($mydb);
 			$ret=M($mydb)->where('time>='.$start_time.' and time<'.$end_time)->select();
 			echo 'db count:'.count($ret);
 			echo '<br>';
 			if(count($ret)===0){
 					$table_name = 'access_base'.$db2;
+					dump($table_name);
 					$acclist=M($table_name)
 												->field('temp1,temp2,env_temp,delay,sign,rssi1,rssi2,rssi3,cindex,lcount,time,devid,psn,psnid,sid,cur_time')
 												->where('time>='.$start_time.' and time<'.$end_time)->select();
@@ -83,17 +84,17 @@ class AccmanagerController extends Controller {
 					$als = array_chunk($acclist, 3000, true);
 					//dump(date('Y-m-d H:i:s',time()));
 					//$ret = M('access_base202008')->addAll($acclist);
-					dump($table_name);
+					//dump($table_name);
 					foreach($als as $al){
 						unset($tl);
-						dump(date('Y-m-d H:i:s',time()));
+						//dump(date('Y-m-d H:i:s',time()));
 						foreach($al as $a){
 							$tl[]=$a;
 						}
 						$user = M($mydb);
 						$ret =$user->addAll($tl);
 						//dump($user->getlastsql());
-						dump($ret);
+						//dump($ret);
 					}
 			}
 		}
@@ -102,7 +103,15 @@ class AccmanagerController extends Controller {
 			$now = $_GET['time'];
 			$db=$_GET['db'];
 			$db2=$_GET['db2'];
+			$day = $_GET['day'];
+			$now = '2021'.$now.str_pad($day,2,'0',STR_PAD_LEFT);
+			//dump($now);
+			//exit;
 			//$this->syncnowacc($now,$db);
+			if(empty($now)||empty($db)||empty($db2)||empty($day)){
+				echo 'NULL';
+				//exit;
+			}
 			$this->syncnowacc2($now,$db,$db2);
 		}
 	

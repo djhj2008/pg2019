@@ -706,7 +706,7 @@ function httpfile($url, $data,$file, $method='POST'){
 				$token=$appfile['md5']; 
 				$ret['crc']=$token;
 				$ota['ota']=$ret;
-				$ota['url']="http://iot.xunrun.com.cn/".$appfile['path'];
+				$ota['url']="http://engine.mjiangtech.cn/".$appfile['path'];
 				$label = json_encode($ota);
 		    echo $label;
   	  }

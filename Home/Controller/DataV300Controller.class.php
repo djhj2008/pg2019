@@ -1,45 +1,11 @@
 <?php
 namespace Home\Controller;
 use Think\Controller;
-class DataV100Controller extends Controller {
+class DataV300Controller extends Controller {
   public function index(){
        ob_clean();
        echo 'test';
        exit;
-  }
-  
-  public function simcard(){
-  	$bdevice=M('bdevice')->where(['switch'=>1])->order('psn asc')->select();
-  	foreach($bdevice as $dev){
-  		$bsn =str_pad($dev['psn'],5,'0',STR_PAD_LEFT).str_pad($dev['id'],4,'0',STR_PAD_LEFT);
-  		$pre_dev=M('bdevice')->where(['new_bsn'=>$bsn])->find();
-  		//dump($bsn);
-  		if($pre_dev){
-  			//dump($pre_dev);
-  			if(empty($pre_dev['number'])){
-  				$bsn =str_pad($pre_dev['psn'],5,'0',STR_PAD_LEFT).str_pad($pre_dev['id'],4,'0',STR_PAD_LEFT);
-  				$pre_pre_dev=M('bdevice')->where(['new_bsn'=>$bsn])->find();
-  				//dump($bsn);
-  				if($pre_pre_dev){
-  					//dump($pre_pre_dev);
-  					$sim=$pre_pre_dev['number'];
-  				}else{
-  					dump('err.');
-  				}
-  			}else{
-  				$sim=$pre_dev['number'];
-  			}
-  		}else{
-  			$sim=$dev['number'];
-  		}
-  		dump('sn:'.$bsn.' sim:'.$sim);
-  		$simcard['sn']=(int)$bsn;
-  		$simcard['sim']=(int)$sim;
-  		$sim_list[]=$simcard;
-  	}
-  	$ret = M('simcards')->addAll($sim_list);
-  	//dump($bdevice);
-  	exit;
   }
   
   public function savelog($sn_header,$sn_footer,$logbase,$res_file,$post){
@@ -67,12 +33,13 @@ class DataV100Controller extends Controller {
       fclose($newFile); //关闭文件
   }
   
-  public function masterV10(){
+  public function masterV60(){
+		$version_interface='V300';
   	$post = file_get_contents('php://input');
     $sid = $_GET['sid'];
     $sn_footer = (int)$sid & 0x1fff;
     $sn_header = (int)$sid >> 13;
-    $logbase="lora_json/V10/";
+    $logbase="lora_json/".$version_interface."/";
     $res_file="master_res";
     $err_file="master_err";
     $req_file="master_req";
@@ -112,8 +79,8 @@ class DataV100Controller extends Controller {
     	$psnid = $psninfo['id'];
 			$delay_up = $psninfo['delay_up']; 
 			$retry_up = $psninfo['retry_up'];
-    	$ret['delay_up']=$delay_up;
-    	$ret['retry_up']=$retry_up;
+    	$ret['delay_up']=(int)$delay_up;
+    	$ret['retry_up']=(int)$retry_up;
     }else{
     	$ret['ret']='fail';
     	$ret['msg']='PSN NULL.';
@@ -131,12 +98,30 @@ class DataV100Controller extends Controller {
     	$min=(int)substr($uptime,2,2);
     	$ivl_count = (int)$bdevinfo['count'];
     	
-			$ret['log']=$bdevinfo['log_flag'];
-			$ret['rate_flag']=$bdevinfo['dump_rate'];
-			$step['rate']=$bdevinfo['step_rate'];
-			$step['config']=$bdevinfo['step_setup'];
-			$step['sleeptime']=$bdevinfo['step_sleeptime'];
+			$ret['log']=(int)$bdevinfo['log_flag'];
+			$ret['rate_flag']=(int)$bdevinfo['dump_rate'];
+			$step['rate']=(int)$bdevinfo['step_rate'];
+			$step['config']=(int)$bdevinfo['step_setup'];
+			$step['sleeptime']=(int)$bdevinfo['step_sleeptime'];
 
+			$step['rate2']=(int)$bdevinfo['step_rate2'];
+			$step['config2']=(int)$bdevinfo['step_setup2'];
+			$step['config3']=(int)$bdevinfo['step_setup3'];
+			$step['sleeptime2']=(int)$bdevinfo['step_sleeptime2'];
+
+			$bt_ota_flag = (int)$bdevinfo['bt_ota_flag'];
+			$bt['state']=(int)$bdevinfo['bt_state'];
+			if($bt_ota_flag){
+				$bt_fw=M('appfiles')->where(array('type'=>'bt'))->order('ver desc')->find();
+				if($bt_fw){
+					$bt['fw']=$bt_fw['ver'];
+					$token=$osfile['md5']; 
+					$ota['crc']=$token;
+					$ota['url']="http://".$osfile['url'].$osfile['path'];
+				}
+			}
+			$ret['bt']=$bt;
+			
   		$ivl[0]=$hour;
   		$ivl[1]=$min;
   		$ivl[2]=$ivl_count;
@@ -280,7 +265,7 @@ class DataV100Controller extends Controller {
 				}
 
 
-	    	if($devid>0&&$devid<2800)
+	    	if($devid>=30&&$devid<2800)
 	    	{
 	    		$rfid_find=false;
 		    	foreach($cur_devs as $cur_dev){
@@ -294,17 +279,17 @@ class DataV100Controller extends Controller {
 		    		  foreach($change_devs as $ch_dev){
 		    		  	if($ch_dev['psnid']==$psnid&&
 		    		  		$ch_dev['new_devid']==$devid){
-		    		  			$change_dev_find=true;
+		    		  			$change_dev_find=false;
 		    		  			$rfid=$ch_dev['rfid'];
 		    		  			if($ch_dev['flag']==2){
-		    		  				$change_dev_find=false;
+		    		  				$change_dev_find=true;
 		    		  				$ret=M('changeidlog')->where(array('id'=>$ch_dev['id']))->save(array('flag'=>3));
 		    		  			}
 		    		  		}
 		    		  }
 		    		  foreach($rfid_list as $rfid_dev){
 		    		  	if($rfid_dev['devid']==$devid&&$dev_psn==$rfid_dev['psn']){
-		    		  		$change_dev_find=true;
+		    		  		$change_dev_find=false;
 		    		  		break;
 		    		  	}
 		    		  }
@@ -336,21 +321,23 @@ class DataV100Controller extends Controller {
 			}
 		
 		}
-		
+		//dump($accadd_list);
 		if($accadd_list){
-	  	$mydb='access_base';
+	  	$mydb='access_v6';
 	    $user=D($mydb);
 			$user->addAll($accadd_list);
 		}
-    
+
+/*    
     if($accadd_list2){
 	    $user2=D('taccess');
 			$user2->addAll($accadd_list2);
     }		
+*/
 
 		if($rfid_list){
-			//$user3=D('device');
-			//$user3->addAll($rfid_list);
+			$user3=D('device');
+			$user3->addAll($rfid_list);
 		}
 		
 		foreach($cur_devs as $dev){
@@ -440,7 +427,7 @@ class DataV100Controller extends Controller {
 		$step['count'] = $stepres_count;
 		$step['data'] = $stepres_list;
 		$ret['step']=$step;
-		
+		$ret['psn']=$psn;
 		$ret['time']=date('Y-m-d H:i:s', time());
 
   	$ret['ret']='success';
@@ -451,12 +438,13 @@ class DataV100Controller extends Controller {
   	exit;
   }
 
-  public function slaverV10(){
+  public function slaverV60(){
+  	$version_interface='V300';
   	$post = file_get_contents('php://input');
     $sid = $_GET['sid'];
     $sn_footer = (int)$sid & 0x1fff;
     $sn_header = (int)$sid >> 13;
-    $logbase="lora_json/V10/";
+    $logbase="lora_json/".$version_interface."/";
     $res_file="slaver_res";
     $err_file="slaver_err";
     $req_file="slaver_req";
@@ -548,10 +536,11 @@ class DataV100Controller extends Controller {
     	exit;
 		}
 		
+
 		$cur_devs =D('device')->where(array('psnid'=>$psnid))->order('devid asc')->select();
 		
     $change_devs = D('changeidlog')->where(array('psnid' => $psnid))->select();
-   			   	
+  	
 		foreach($small as $data){
 			//dump($data);
 			$rfdev_ret=$this->parsedata($data,$psn,$psnid,$bsnint,$interval);
@@ -681,9 +670,8 @@ class DataV100Controller extends Controller {
         $psn_buf_psn=$psn_buf['psn'];
         if(count($psn_buf['devid'])>0){
             $wheredev['devid']=array('in',$psn_buf['devid']);
-            $curdb1301='access1301_base';
+            $curdb1301='access1301_v6';
             $acc1301_values=D($curdb1301)->where(array('psn'=>$psn_buf_psn))->where($wheredev)->where('time >='.$start.' and time<='.$end)->select();
-
             foreach($psnallinfo as $psninfo){
                 if($psn_buf_psnid==$psninfo['id']){
                     $blacklist_psn=$psninfo['sn'];
@@ -725,9 +713,10 @@ class DataV100Controller extends Controller {
 
         }
     }
-    
+		//dump($accadd_list);
+		//dump($acc1301addall);
 		if($accadd_list){
-    	$mydb='access_base';
+    	$mydb='access_v6';
 	    $user=D($mydb);
 	    $user->addAll($accadd_list);
 		}
@@ -767,7 +756,7 @@ class DataV100Controller extends Controller {
 				}
 			}
 		}
-	
+
     foreach ($change_devs as $ch_dev) {
         if ($ch_dev['flag'] == 1 || $ch_dev['flag'] == 2) {
 							if($ch_dev['flag'] == 1){
@@ -785,6 +774,7 @@ class DataV100Controller extends Controller {
 							}
         } 
     }
+    
     if(count($ch_list_buf)>0){
     	$where_ch_dev['id']=array('in',$ch_list_buf);
     	$dev=M('changeidlog')->where($where_ch_dev)->save(array('flag'=>2));
@@ -823,24 +813,24 @@ class DataV100Controller extends Controller {
   	exit;
   }
   
-  public function parsedata($data,$psn,$psnid,$sid,$invl){
+  public function parsedata($data,$psn,$psnid,$sid,$intl){
 			$CSN_LEN  =4;//设备字符长度
 			$SIGN_LEN =1;//信号
 			$CVS_LEN =1;//client version
 			$STATE_LEN  =1;//state
 			$DELAY_LEN  =1;//delay
 			$VAILD_LEN  =1;//有效值个数
-			
 			$SENS_LEN  =1;//有效值个数
 			
+			$VALUE_LEN_V6 = 14;
 			$VALUE_LEN_V4 = 10;//data中每个长度
 			$VALUE_LEN_V3 = 9;//data中每个长度
 			$COUNT_VALUE = 4;
 			
 			
-			$hour_delay = $invl[0];
-			$min_delay	= $invl[1];
-			$freq				= $invl[2];
+			$hour_delay = $intl[0];
+			$min_delay	= $intl[1];
+			$freq				= $intl[2];
 			
 	    $day_begin = strtotime(date('Y-m-d',time()));
 	    $hour_time = 60*60;
@@ -857,7 +847,7 @@ class DataV100Controller extends Controller {
 			
     	if($dev_psn!=$psn)
     	{
-    		$ret['ret']='fail';
+    		//$ret['ret']='fail';
     	}
     	
     	$signstr = substr($data,($CSN_LEN)*2,$SIGN_LEN*2);
@@ -890,22 +880,34 @@ class DataV100Controller extends Controller {
     	$type = $state&$stmp3;
     	$state=$state&$stmp;
 			$step_update = $step_update|$state;
-			
-    	if($cvs>3){
-				$sensstr 	 =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
+			if($cvs==6){
+				$sensstr 	 =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);//rx rssi
 				$vaildstr  =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
-    		$vaild = hexdec($vaildstr);
+				$vaild = hexdec($vaildstr);
+    		$tempstr	 =	substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN_V6*$vaild);//temp1十六进制字符
+				$sens=0-hexdec($sensstr);
+			}
+			else if($cvs>3&&$cvs<6){
+				$sensstr 	 =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);//rx rssi
+				$vaildstr  =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
+				$vaild = hexdec($vaildstr);
     		$tempstr	 =	substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN_V4*$vaild);//temp1十六进制字符
 				$sens=0-hexdec($sensstr);
     	}else{
 				$sens=0;
 				$vaildstr  = substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$VAILD_LEN*2);
-    		$vaild = hexdec($vaildstr);
+				$vaild = hexdec($vaildstr);
     		$tempstr   = substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$VAILD_LEN)*2,$VALUE_LEN_V3*$COUNT_VALUE);//temp1十六进制字符
     	}
-
+    	
     	if($type>0){
     		$type=1;
+    	}
+			
+    	if($dev_psn>=40&&$cvs==3)
+    	{
+    		$ret['ret']='fail';
+    		return $ret;
     	}
 			
 			$rfdev=array(
@@ -927,8 +929,13 @@ class DataV100Controller extends Controller {
 	    	$interval = ($min_delay/$freq)*60;
 	    }
 	    
+	    //dump($intl);
+	    
 	    $start = $real_time-$interval*$freq;
 	    $end = $real_time;
+	    
+	    //dump(date('Y-m-d H:i:s',$start));
+	    //dump(date('Y-m-d H:i:s',$end));
 	    
 			if($vaild>4){
 				$vaild=4;
@@ -939,9 +946,96 @@ class DataV100Controller extends Controller {
 	    		$up_time = $start+$interval*$j+$interval*($freq-$vaild);
     		}else{
     			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
-    		}
+    		}    		
 		    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
-	    	if($cvs>3){
+		    //dump(date('Y-m-d H:i:s',$up_time));
+		    if($cvs==6){
+	    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN_V6,$VALUE_LEN_V6);
+			    	//echo "tempstr_tmp:";
+			    	//dump($tempstr_tmp);
+		    		if($type==0){
+					    $temp1str1 = substr($tempstr_tmp,3,1);
+				  		$temp1str2 = substr($tempstr_tmp,0,1);
+				    	$temp1str3 = substr($tempstr_tmp,1,1);
+				    	$temp1int =base_convert($temp1str1,16,10);
+
+				    	$temp2str1 = substr($tempstr_tmp,4,1);
+				  		$temp2str2 = substr($tempstr_tmp,5,1);
+				    	$temp2str3 = substr($tempstr_tmp,2,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
+		    		
+		    			$nTotalStepCounts = substr($tempstr_tmp,6,3);
+		    			$nTotalStepCountsint = (int)base_convert($nTotalStepCounts,16,10);
+		    			
+		    			$nyStepCounts = substr($tempstr_tmp,9,3);
+		    			$nyStepCountsint = (int)base_convert($nyStepCounts,16,10);		    			
+		    			
+		    			$nPosChange = substr($tempstr_tmp,12,2);
+		    			$nPosChange	= (int)base_convert($nPosChange,16,10);
+		    			
+		    			$nPosChangeint =($nPosChange&0x80)>>7;
+		    			$nStepClimeCountint	 =$nPosChange&0x7f;
+		    			
+					    if(($temp1int&0x08)==0x08){
+				    		$temp1str1=$temp1int&0x07;
+				    		if($temp1str1==0){
+				    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+				    		}else{
+				    			$temp1 = '-'.$temp1str1.$temp1str2.".".$temp1str3;
+				    		}
+				    	}else{
+					    		if($temp1str1==0){
+					    			$temp1 = $temp1str2.".".$temp1str3;
+					    		}else{
+					    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
+					    		}
+				    	}
+
+						  //var_dump('temp1:'.$temp1);
+						  if(($temp2int&0x08)==0x08){
+						  	$temp2str1=$temp2int&0x07;
+								if($temp2str1 == 0){
+							    $temp2 = '-'.$temp2str2.".".$temp2str3;
+						 	 	}else{
+						 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
+						 	 	}
+					 		}else{
+					 			if($temp2str1 == 0){
+							    $temp2 = $temp2str2.".".$temp2str3;
+						 	 	}else{
+						 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+						 	 	}
+					 			
+					 		}
+					 	
+							$acc_add=array(
+					  				'psn'=>$dev_psn,
+					  				'psnid'=>$psnid,
+							  		'devid'=>$snint,
+							  		'temp1'=>$temp1,
+							  		'temp2'=>$temp1,
+							  		'env_temp'=>$temp2,
+							  		'sign'=>$sign,
+							  		'rssi1'=>$sens,
+							  		'rssi2'=>0,
+							  		'rssi3'=>$step_update,
+							  		'rssi4'=>$cvs,
+							  		'step_total'=>$nTotalStepCountsint,
+							  		'step_y'=>$nyStepCountsint,
+							  		'step_pos'=>$nPosChangeint,
+							  		'step_clime'=>$nStepClimeCountint,
+							  		'cindex'=>$cindex,
+							  		'lcount'=>$lcount,
+							  		'delay'=>$delay,
+							  		'time' =>$up_time,
+							  		'sid' =>$sid,
+							  	);
+
+							$accadd_list[]=$acc_add;
+						}else{
+							//nothing
+						}
+		    }else if($cvs>3&&$cvs< 6){
 	    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN_V4,$VALUE_LEN_V4);
 		    		if($type==0){
 					    $temp1str1 = substr($tempstr_tmp,3,1);
@@ -1000,6 +1094,11 @@ class DataV100Controller extends Controller {
 							  		'rssi1'=>$sens,
 							  		'rssi2'=>$stepint,
 							  		'rssi3'=>$step_update,
+							  		'rssi4'=>$cvs,
+							  		'step_total'=>0,
+							  		'step_y'=>0,
+							  		'step_pos'=>0,
+							  		'step_clime'=>0,
 							  		'cindex'=>$cindex,
 							  		'lcount'=>$lcount,
 							  		'delay'=>$delay,
@@ -1012,236 +1111,241 @@ class DataV100Controller extends Controller {
 							//nothing
 						}
 	    	}else{
-		    		if($type==0){
-							if($j==0){
-						    $temp1str1 = substr($tempstr,3,1);
-					  		$temp1str2 = substr($tempstr,0,1);
-					    	$temp1str3 = substr($tempstr,1,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
+	    		if($type==0){
+						if($j==0){
+					    $temp1str1 = substr($tempstr,3,1);
+				  		$temp1str2 = substr($tempstr,0,1);
+				    	$temp1str3 = substr($tempstr,1,1);
+				    	$temp1int =base_convert($temp1str1,16,10);
 
-					    	$temp2str1 = substr($tempstr,4,1);
-					  		$temp2str2 = substr($tempstr,5,1);
-					    	$temp2str3 = substr($tempstr,2,1);
-					    	$temp2int =base_convert($temp2str1,16,10);
-					    	
-					    	$temp3str1 = substr($tempstr,9,1);
-					  		$temp3str2 = substr($tempstr,6,1);
-					    	$temp3str3 = substr($tempstr,7,1);
-					    	$temp3int =base_convert($temp3str1,16,10);
-				    	}else if($j==1){
-				    		$temp1str1 = substr($tempstr,10,1);
-					  		$temp1str2 = substr($tempstr,11,1);
-					    	$temp1str3 = substr($tempstr,8,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
-					    	
-					    	$temp2str1 = substr($tempstr,15,1);
-					  		$temp2str2 = substr($tempstr,12,1);
-					    	$temp2str3 = substr($tempstr,13,1);
-					    	$temp2int =base_convert($temp2str1,16,10);
-					    	
-					    	$temp3str1 = substr($tempstr,16,1);
-					  		$temp3str2 = substr($tempstr,17,1);
-					    	$temp3str3 = substr($tempstr,14,1);
-					    	$temp3int =base_convert($temp3str1,16,10);
-				    	}else if($j==2){
-						    $temp1str1 = substr($tempstr,21,1);
-					  		$temp1str2 = substr($tempstr,18,1);
-					    	$temp1str3 = substr($tempstr,19,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
-					    	
-					    	$temp2str1 = substr($tempstr,22,1);
-					  		$temp2str2 = substr($tempstr,23,1);
-					    	$temp2str3 = substr($tempstr,20,1);
-					    	$temp2int =base_convert($temp2str1,16,10);
-					    	
-					    	$temp3str1 = substr($tempstr,27,1);
-					  		$temp3str2 = substr($tempstr,24,1);
-					    	$temp3str3 = substr($tempstr,25,1);
-					    	$temp3int =base_convert($temp3str1,16,10);			    	
-				    	}else if($j==3){
-				    		$temp1str1 = substr($tempstr,28,1);
-					  		$temp1str2 = substr($tempstr,29,1);
-					    	$temp1str3 = substr($tempstr,26,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
+				    	$temp2str1 = substr($tempstr,4,1);
+				  		$temp2str2 = substr($tempstr,5,1);
+				    	$temp2str3 = substr($tempstr,2,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
+				    	
+				    	$temp3str1 = substr($tempstr,9,1);
+				  		$temp3str2 = substr($tempstr,6,1);
+				    	$temp3str3 = substr($tempstr,7,1);
+				    	$temp3int =base_convert($temp3str1,16,10);
+			    	}else if($j==1){
+			    		$temp1str1 = substr($tempstr,10,1);
+				  		$temp1str2 = substr($tempstr,11,1);
+				    	$temp1str3 = substr($tempstr,8,1);
+				    	$temp1int =base_convert($temp1str1,16,10);
+				    	
+				    	$temp2str1 = substr($tempstr,15,1);
+				  		$temp2str2 = substr($tempstr,12,1);
+				    	$temp2str3 = substr($tempstr,13,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
+				    	
+				    	$temp3str1 = substr($tempstr,16,1);
+				  		$temp3str2 = substr($tempstr,17,1);
+				    	$temp3str3 = substr($tempstr,14,1);
+				    	$temp3int =base_convert($temp3str1,16,10);
+			    	}else if($j==2){
+					    $temp1str1 = substr($tempstr,21,1);
+				  		$temp1str2 = substr($tempstr,18,1);
+				    	$temp1str3 = substr($tempstr,19,1);
+				    	$temp1int =base_convert($temp1str1,16,10);
+				    	
+				    	$temp2str1 = substr($tempstr,22,1);
+				  		$temp2str2 = substr($tempstr,23,1);
+				    	$temp2str3 = substr($tempstr,20,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
+				    	
+				    	$temp3str1 = substr($tempstr,27,1);
+				  		$temp3str2 = substr($tempstr,24,1);
+				    	$temp3str3 = substr($tempstr,25,1);
+				    	$temp3int =base_convert($temp3str1,16,10);			    	
+			    	}else if($j==3){
+			    		$temp1str1 = substr($tempstr,28,1);
+				  		$temp1str2 = substr($tempstr,29,1);
+				    	$temp1str3 = substr($tempstr,26,1);
+				    	$temp1int =base_convert($temp1str1,16,10);
 
-					    	$temp2str1 = substr($tempstr,33,1);
-					  		$temp2str2 = substr($tempstr,30,1);
-					    	$temp2str3 = substr($tempstr,31,1);
-					    	$temp2int =base_convert($temp2str1,16,10);
+				    	$temp2str1 = substr($tempstr,33,1);
+				  		$temp2str2 = substr($tempstr,30,1);
+				    	$temp2str3 = substr($tempstr,31,1);
+				    	$temp2int =base_convert($temp2str1,16,10);
 
-					    	$temp3str1 = substr($tempstr,34,1);
-					  		$temp3str2 = substr($tempstr,35,1);
-					    	$temp3str3 = substr($tempstr,32,1);
-					    	$temp3int =base_convert($temp3str1,16,10);					    	
-				    	}
-		    		
-					    if(($temp1int&0x08)==0x08){
-				    		$temp1str1=$temp1int&0x07;
+				    	$temp3str1 = substr($tempstr,34,1);
+				  		$temp3str2 = substr($tempstr,35,1);
+				    	$temp3str3 = substr($tempstr,32,1);
+				    	$temp3int =base_convert($temp3str1,16,10);					    	
+			    	}
+	    		
+				    if(($temp1int&0x08)==0x08){
+			    		$temp1str1=$temp1int&0x07;
+			    		if($temp1str1==0){
+			    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+			    		}else{
+			    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+			    		}
+			    	}else{
 				    		if($temp1str1==0){
-				    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+				    			$temp1 = $temp1str2.".".$temp1str3;
 				    		}else{
-				    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+				    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
 				    		}
-				    	}else{
-					    		if($temp1str1==0){
-					    			$temp1 = $temp1str2.".".$temp1str3;
-					    		}else{
-					    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
-					    		}
-				    	}
+			    	}
 
-						  //var_dump('temp1:'.$temp1);
-						  if(($temp2int&0x08)==0x08){
-						  	$temp2str1=$temp2int&0x07;
-								if($temp2str1 == 0){
-							    $temp2 = '-'.$temp2str2.".".$temp2str3;
-						 	 	}else{
-						 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
-						 	 	}
-					 		}else{
-					 			if($temp2str1 == 0){
-							    $temp2 = $temp2str2.".".$temp2str3;
-						 	 	}else{
-						 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
-						 	 	}
-					 			
-					 		}
-					 	
-					    //var_dump('temp2:'.$temp2);
-					    if(($temp3int&0x08)==0x08){
-					    	$temp3str1=$temp3int&0x07;
-						    if($temp3str1 == 0){
-							    $temp3 = '-'.$temp3str2.".".$temp3str3;
-						 	 	}else{
-						 	 	 	$temp3 = '-'.$temp3str1.$temp3str2.".".$temp3str3;
-						 	 	}
-					 		}else{
-					 			if($temp3str1 == 0){
-							    $temp3 = $temp3str2.".".$temp3str3;
-						 	 	}else{
-						 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
-						 	 	}
-							}
-
-							$acc_add=array(
-					  				'psn'=>$dev_psn,
-					  				'psnid'=>$psnid,
-							  		'devid'=>$snint,
-							  		'temp1'=>$temp1,
-							  		'temp2'=>$temp2,
-							  		'env_temp'=>$temp3,
-							  		'sign'=>$sign,
-							  		'rssi1'=>0,
-							  		'rssi2'=>0,
-							  		'rssi3'=>0,
-							  		'cindex'=>$cindex,
-							  		'lcount'=>$lcount,
-							  		'delay'=>$delay,
-							  		'time' =>$up_time,
-							  		'sid' =>$sid,
-							  	);
-
-							$accadd_list[]=$acc_add;
-						}else{
-							if($j==0){
-						    $temp1str1 = substr($tempstr,3,1);
-					  		$temp1str2 = substr($tempstr,0,1);
-					    	$temp1str3 = substr($tempstr,1,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
-
-					    	$temp2str1 = substr($tempstr,4,1);
-					  		$temp2str2 = substr($tempstr,5,1);
-					    	$temp2str3 = substr($tempstr,2,1);
-					    	
-					    	$temp3str1 = substr($tempstr,9,1);
-					  		$temp3str2 = substr($tempstr,6,1);
-					    	$temp3str3 = substr($tempstr,7,1);
-				    	}else if($j==1){
-				    		$temp1str1 = substr($tempstr,10,1);
-					  		$temp1str2 = substr($tempstr,11,1);
-					    	$temp1str3 = substr($tempstr,8,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
-					    	
-					    	$temp2str1 = substr($tempstr,15,1);
-					  		$temp2str2 = substr($tempstr,12,1);
-					    	$temp2str3 = substr($tempstr,13,1);	
-					    	
-					    	$temp3str1 = substr($tempstr,16,1);
-					  		$temp3str2 = substr($tempstr,17,1);
-					    	$temp3str3 = substr($tempstr,14,1);	
-				    	}else if($j==2){
-						    $temp1str1 = substr($tempstr,21,1);
-					  		$temp1str2 = substr($tempstr,18,1);
-					    	$temp1str3 = substr($tempstr,19,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
-					    	
-					    	$temp2str1 = substr($tempstr,22,1);
-					  		$temp2str2 = substr($tempstr,23,1);
-					    	$temp2str3 = substr($tempstr,20,1);
-					    	
-					    	$temp3str1 = substr($tempstr,27,1);
-					  		$temp3str2 = substr($tempstr,24,1);
-					    	$temp3str3 = substr($tempstr,25,1);					    	
-				    	}else if($j==3){
-				    		$temp1str1 = substr($tempstr,28,1);
-					  		$temp1str2 = substr($tempstr,29,1);
-					    	$temp1str3 = substr($tempstr,26,1);
-					    	$temp1int =base_convert($temp1str1,16,10);
-
-					    	$temp2str1 = substr($tempstr,33,1);
-					  		$temp2str2 = substr($tempstr,30,1);
-					    	$temp2str3 = substr($tempstr,31,1);	
-
-					    	$temp3str1 = substr($tempstr,34,1);
-					  		$temp3str2 = substr($tempstr,35,1);
-					    	$temp3str3 = substr($tempstr,32,1);						    	
-				    	}
-
-					    if(($temp1int&0x08)==0x08){
-				    		$temp1str1=$temp1int&0x07;
-				    		if($temp1str1==0){
-				    			$temp1 = '-'.$temp1str2.".".$temp1str3;
-				    		}else{
-				    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
-				    		}
-				    	}else{
-					    		if($temp1str1==0){
-					    			$temp1 = $temp1str2.".".$temp1str3;
-					    		}else{
-					    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
-					    		}
-				    	}
-
-						  //var_dump('temp1:'.$temp1);
+					  //var_dump('temp1:'.$temp1);
+					  if(($temp2int&0x08)==0x08){
+					  	$temp2str1=$temp2int&0x07;
 							if($temp2str1 == 0){
+						    $temp2 = '-'.$temp2str2.".".$temp2str3;
+					 	 	}else{
+					 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
+					 	 	}
+				 		}else{
+				 			if($temp2str1 == 0){
 						    $temp2 = $temp2str2.".".$temp2str3;
 					 	 	}else{
 					 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
 					 	 	}
-					    //var_dump('temp2:'.$temp2);
+				 			
+				 		}
+				 	
+				    //var_dump('temp2:'.$temp2);
+				    if(($temp3int&0x08)==0x08){
+				    	$temp3str1=$temp3int&0x07;
 					    if($temp3str1 == 0){
+						    $temp3 = '-'.$temp3str2.".".$temp3str3;
+					 	 	}else{
+					 	 	 	$temp3 = '-'.$temp3str1.$temp3str2.".".$temp3str3;
+					 	 	}
+				 		}else{
+				 			if($temp3str1 == 0){
 						    $temp3 = $temp3str2.".".$temp3str3;
 					 	 	}else{
 					 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
 					 	 	}
-		    
-					  	$acc_add2=array(
-					   	  'psn'=>$dev_psn,
-					   	  'psnid'=>$psnid,
-					  		'devid'=>$snint,
-					  		'temp1'=>$temp1,
-					  		'temp2'=>$temp2,
-				  			'env_temp'=>$temp3,
-				  			'sign'=>$sign,
-					  		'cindex'=>$cindex,
-					  		'lcount'=>$lcount,
-					  		'delay'=>$delay,
-					  		'time' =>$up_time,
-					  		'sid' =>$sid,
-					  	);
-
-							$accadd_list2[]=$acc_add2;
 						}
+
+						$acc_add=array(
+				  				'psn'=>$dev_psn,
+				  				'psnid'=>$psnid,
+						  		'devid'=>$snint,
+						  		'temp1'=>$temp1,
+						  		'temp2'=>$temp2,
+						  		'env_temp'=>$temp3,
+						  		'sign'=>$sign,
+						  		'rssi1'=>0,
+						  		'rssi2'=>0,
+						  		'rssi3'=>0,
+						  		'rssi4'=>$cvs,
+						  		'step_total'=>0,
+						  		'step_y'=>0,
+						  		'step_pos'=>0,
+						  		'step_clime'=>0,
+						  		'cindex'=>$cindex,
+						  		'lcount'=>$lcount,
+						  		'delay'=>$delay,
+						  		'time' =>$up_time,
+						  		'sid' =>$sid,
+						  	);
+
+						$accadd_list[]=$acc_add;
+					}else{
+						if($j==0){
+					    $temp1str1 = substr($tempstr,3,1);
+				  		$temp1str2 = substr($tempstr,0,1);
+				    	$temp1str3 = substr($tempstr,1,1);
+				    	$temp1int =base_convert($temp1str1,16,10);
+
+				    	$temp2str1 = substr($tempstr,4,1);
+				  		$temp2str2 = substr($tempstr,5,1);
+				    	$temp2str3 = substr($tempstr,2,1);
+				    	
+				    	$temp3str1 = substr($tempstr,9,1);
+				  		$temp3str2 = substr($tempstr,6,1);
+				    	$temp3str3 = substr($tempstr,7,1);
+			    	}else if($j==1){
+			    		$temp1str1 = substr($tempstr,10,1);
+				  		$temp1str2 = substr($tempstr,11,1);
+				    	$temp1str3 = substr($tempstr,8,1);
+				    	$temp1int =base_convert($temp1str1,16,10);
+				    	
+				    	$temp2str1 = substr($tempstr,15,1);
+				  		$temp2str2 = substr($tempstr,12,1);
+				    	$temp2str3 = substr($tempstr,13,1);	
+				    	
+				    	$temp3str1 = substr($tempstr,16,1);
+				  		$temp3str2 = substr($tempstr,17,1);
+				    	$temp3str3 = substr($tempstr,14,1);	
+			    	}else if($j==2){
+					    $temp1str1 = substr($tempstr,21,1);
+				  		$temp1str2 = substr($tempstr,18,1);
+				    	$temp1str3 = substr($tempstr,19,1);
+				    	$temp1int =base_convert($temp1str1,16,10);
+				    	
+				    	$temp2str1 = substr($tempstr,22,1);
+				  		$temp2str2 = substr($tempstr,23,1);
+				    	$temp2str3 = substr($tempstr,20,1);
+				    	
+				    	$temp3str1 = substr($tempstr,27,1);
+				  		$temp3str2 = substr($tempstr,24,1);
+				    	$temp3str3 = substr($tempstr,25,1);					    	
+			    	}else if($j==3){
+			    		$temp1str1 = substr($tempstr,28,1);
+				  		$temp1str2 = substr($tempstr,29,1);
+				    	$temp1str3 = substr($tempstr,26,1);
+				    	$temp1int =base_convert($temp1str1,16,10);
+
+				    	$temp2str1 = substr($tempstr,33,1);
+				  		$temp2str2 = substr($tempstr,30,1);
+				    	$temp2str3 = substr($tempstr,31,1);	
+
+				    	$temp3str1 = substr($tempstr,34,1);
+				  		$temp3str2 = substr($tempstr,35,1);
+				    	$temp3str3 = substr($tempstr,32,1);						    	
+			    	}
+
+				    if(($temp1int&0x08)==0x08){
+			    		$temp1str1=$temp1int&0x07;
+			    		if($temp1str1==0){
+			    			$temp1 = '-'.$temp1str2.".".$temp1str3;
+			    		}else{
+			    			$temp1 =  '-'.$temp1str1.$temp1str2.".".$temp1str3;
+			    		}
+			    	}else{
+				    		if($temp1str1==0){
+				    			$temp1 = $temp1str2.".".$temp1str3;
+				    		}else{
+				    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
+				    		}
+			    	}
+
+					  //var_dump('temp1:'.$temp1);
+						if($temp2str1 == 0){
+					    $temp2 = $temp2str2.".".$temp2str3;
+				 	 	}else{
+				 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
+				 	 	}
+				    //var_dump('temp2:'.$temp2);
+				    if($temp3str1 == 0){
+					    $temp3 = $temp3str2.".".$temp3str3;
+				 	 	}else{
+				 	 	 	$temp3 = $temp3str1.$temp3str2.".".$temp3str3;
+				 	 	}
+	    
+				  	$acc_add2=array(
+				   	  'psn'=>$dev_psn,
+				   	  'psnid'=>$psnid,
+				  		'devid'=>$snint,
+				  		'temp1'=>$temp1,
+				  		'temp2'=>$temp2,
+			  			'env_temp'=>$temp3,
+			  			'sign'=>$sign,
+				  		'cindex'=>$cindex,
+				  		'lcount'=>$lcount,
+				  		'delay'=>$delay,
+				  		'time' =>$up_time,
+				  		'sid' =>$sid,
+				  	);
+
+						$accadd_list2[]=$acc_add2;
+					}
 	    	}
 			}
 			
@@ -1250,6 +1354,7 @@ class DataV100Controller extends Controller {
 			
 			$ret['ret']='success';
 			$ret['rfdev']=$rfdev;
+			//dump($ret);
 			return	$ret;
   }
   
@@ -1259,7 +1364,7 @@ class DataV100Controller extends Controller {
 	    $sid = $_GET['sid'];
 	    $sn_footer = (int)$sid & 0x1fff;
 	    $sn_header = (int)$sid >> 13;
-	    $logbase = "lora_log/syslogV100/";
+	    $logbase = "lora_log/syslogV200/";
 
 	    {
 	        $logdir = $logbase;
@@ -1293,91 +1398,6 @@ class DataV100Controller extends Controller {
 		echo 'OK:'.date("Y-m-d_H:i:s");
 		exit;
 	}
-  
-	public function testjson()
-	{
-			$ret['cmd']="master";
-			$ret['time']="2014-07-02 22:05:00";
-			
-			$interval[]=4;
-			$interval[]=0;
-			$interval[]=1;
-			$ret['interval']=$interval;
-			
-			$ret['freq']=1;
-			$ret['log']=1;
-			$ret['rate_flag']=1;//跳频开关
-			$ret['sens']=100;
-			
-			$station['flag']=1;
-			$station['new']="000300001";
-			$station['freq']=1;
-			$ret['station']=$station;
-			
-			$url['flag']=1;
-			$url['url']="iot.xunrun.com.cn";
-			$ret['url']=$url;
-			
-			$step['count']=5;
-			for($i=0;$i<5;$i++){
-				$dev['sn']=300000+$i;
-				$dev['flag']=0;
-				$row[]=$dev;
-			}
-			$step['data']=$row;
-			$ret['step']=$step;
-			
-			$recover['count']=40;
-			for($i=0;$i<40;$i++){
-				$stop_list[]=300000+$i;
-			}
-			$recover['dev']=$stop_list;
-			$ret['recover']=$recover;
-			
-			
-			$label = json_encode($ret);
-	    echo $label;
-	    exit;
-	}
-	
-	public function testjsondecode(){
-		$json=http("http://iot.xunrun.com.cn/pg/djtest/testjson");
-		dump($json);
-		$ret= json_decode($json,true);
-		dump($ret['step']['data']);
-		dump($ret['recover']['dev']);
-		exit;
-	}
-	
-  public function testcode(){
-			$sn=$_GET['sn'];
-      $dateArr = array();
-      $temp1Arr = array();
-      $temp2Arr = array();
-      $temp3Arr = array();
-			for($i=0;$i<12;$i++){
-				$time=strtotime(date('Y-m-d',time()))-3600*16;
-				$timestr=date('H:i',$time+3600*$i);
-				$data=mt_rand(100,850);
-				$temp=mt_rand(34,36);
-				$temp2=mt_rand(4,5);
-				$sub=mt_rand(10,99)/100;
-				$sub2=mt_rand(10,99)/100;
-				$temp=$temp+$sub;
-				$temp2=$temp-$temp2-$sub2;
-				array_push($dateArr,$timestr);
-				array_push($temp1Arr,$data);
-				array_push($temp2Arr,$temp);
-				array_push($temp3Arr,$temp2);
-			}
-			//dump($temp3Arr);
-			$this->assign('temp3Arr',json_encode(array_reverse($temp3Arr)));
-			$this->assign('temp2Arr',json_encode(array_reverse($temp2Arr)));
-			$this->assign('temp1Arr',json_encode(array_reverse($temp1Arr)));
-			$this->assign('dateArr',json_encode(array_reverse($dateArr)));
-			$this->assign('sn',$sn);
-			$this->display();
-  }
   
   public function dailyworklist(){
     	$sn=$_GET['sn'];

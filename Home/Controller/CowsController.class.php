@@ -78,10 +78,10 @@ class CowsController extends Controller {
     	$vaccin_id=$_GET['vaccin_id'];
 			$doctors=M('doctors')->where(['town_id'=>$town_id])->where('id >= 15')->select();
 			$mode=M('','','DB_CONFIG');
-			$num=120;
+			$num=80;
 			$vaccin=M('vaccins')->where(['id'=>$vaccin_id])->find();
 			$first_time = strtotime($vaccin['time']);
-			$days = $vaccin['days'];
+			$days = (int)$vaccin['days'];
 			if(count($doctors)<1){
 				echo 'DOCTOR NULL.';
 				exit;
@@ -93,9 +93,15 @@ class CowsController extends Controller {
 				dump($key);
 				dump($town_id);
 
-				$cows=$mode->table('cows')->field('id,farmer_id')->where(['town_id'=>$town_id])->order('farmer_id desc')->select();
+				$cows=$mode->table('cows')->field('id,farmer_id')->where(['town_id'=>$town_id])->where('survival_state=1')->order('farmer_id desc')->select();
 				dump(count($cows));
 				
+				$day_num=count($cows)/($days-1);
+				
+				if($day_num>$num){
+					$num=(int)$day_num;
+				}
+				dump($num);
 				$count=0;
 				$index=0;
 				
@@ -107,18 +113,18 @@ class CowsController extends Controller {
 					$farmer_id=$cow['farmer_id'];
 					$cow_id=$cow['id'];
 					
-					$g_count=$mode->table('gives')->where(['cows_id'=>$cow_id])->count();
+					//$g_count=$mode->table('gives')->where(['cows_id'=>$cow_id])->count();
 					
-					if($g_count==4&&$vaccin_id==4){
-						continue;
-					}
+					//if($g_count==4&&$vaccin_id==4){
+					//	continue;
+					//}
 					
 					if($count>=$num){
 						if($farmer_id!=$cows[$key2-1]['farmer_id']){
 							//$count=0;
 							$index=(int)($count/$num);
 						}
-					}				
+					}
 					//$index=(int)($count/$num);
 					//dump($count);
 					//dump($index);
@@ -136,13 +142,13 @@ class CowsController extends Controller {
 					$count+=1;
 					
 					$gives[]=$tmp;
-					dump(date('Y-m-d H:i:s',$cur_time));
-					dump($tmp);
+					//dump(date('Y-m-d H:i:s',$cur_time));
+					//dump($tmp);
 				}
 				
 				//dump($gives);
-				//$ret=$mode->table('gives')->addAll($gives);
-				//dump($ret);
+				$ret=$mode->table('gives')->addAll($gives);
+				dump($ret);
 				exit;
 			}
 			
@@ -158,6 +164,14 @@ class CowsController extends Controller {
 				dump($whereinvillage);
 				$cows=$mode->table('cows')->field('id,farmer_id')->where(['town_id'=>$town_id])->where($whereinvillage)->order('farmer_id desc')->select();
 				dump(count($cows));
+				
+				$day_num=count($cows)/($days-1);
+				
+				if($day_num>$num){
+					$num=(int)$day_num;
+				}
+				dump($num);
+				
 				$count=0;
 				foreach($cows as $key2=>$cow){
 					$farmer_id=$cow['farmer_id'];
@@ -185,15 +199,15 @@ class CowsController extends Controller {
 					$count+=1;
 					
 					$gives[]=$tmp;
-					dump(date('Y-m-d H:i:s',$cur_time));
-					dump($tmp);
+					//dump(date('Y-m-d H:i:s',$cur_time));
+					//dump($tmp);
 					
 				}
 			}
 			
 			//dump($gives);
-			//$ret=$mode->table('gives')->addAll($gives);
-			//dump($ret);
+			$ret=$mode->table('gives')->addAll($gives);
+			dump($ret);
 			exit;
     }
     

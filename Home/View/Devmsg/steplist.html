@@ -6,7 +6,6 @@
 	<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script>
 	
 	<!-- 新 Bootstrap 核心 CSS 文件 -->
-	<!--<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css">-->
 				<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
         <!-- DataTables -->
         <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
@@ -25,7 +24,6 @@
         <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
 				<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
 				<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
-		
   <style>
     b {color: #23527C;}
   </style>
@@ -36,113 +34,53 @@
  	<div class="navbar navbar-default navbar-fixed-left" >
 		<ul class="nav navbar-nav" >
 			<li><a href="<%$smarty.const.__APP__%>/devselect/select"><b >首页</b></a></li>
+			<li><a href="<%$smarty.const.__APP__%>/devmsg/lostdevlist"><b>异常设备</b></a></li>
 			<li><a href="<%$smarty.const.__APP__%>/acadd/checkrssi"><b>基站RSSI</b></a></li>
 			</ul>
 		</div>
 		</div>
-
-<div>
-
-  <form class="form-horizontal" name="f1"      action=""   method="post" >
-    <fieldset>
-    <div class="control-group" >
-	      <label class="control-label" style="margin-top: 5px">日期开始</label>
-	      <div class="controls"  style="margin-top: 10px">
-	      <input name="time" type="date"  value="<%$date%>">
-				</div>
-				<label class="control-label" style="margin-top: 5px">日期结束</label>
-				<div class="controls"  style="margin-top: 10px">
-				<input name="time2" type="date"  value="<%$date2%>">
-				</div>
-		</div>
-    </fieldset>
-  <div class="form-actions"  style="margin-top: 10px">
-    <button type="submit" class="btn btn-primary">查询</button>
-  </div>
-  </form>
-
-</div>
-    <div>
+		
+    <div class="container">
      <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
      <thead>
      <tr>
-				<th>RFID</th>
-        <th>DevId</th>
-        <th>温度</th>
-        <th>温度</th>
-        <th>温度</th>
-        <th>延迟</th>
-        <th>信号</th>
-        <th>小板信号</th>
-				<th>计步器IC</th>
-				<th>计步器开关</th>
-				<th>总步数</th>
-				<th>步数</th>
-				<th>步差</th>	
-				<th>步Y</th>
-				<th>步POS</th>	
-				<th>步CLIME</th>	
-				<th>跳频开关</th>
-				<th>计步器配置</th>
-				<th>工程状态</th>
-        <th>频点</th>
-        <th>丢失</th>
-        <th>状态</th>
-        <th>基站ID</th>
-        <th>基站</th>
+        <th>防疫码</th>
         <th>厂号</th>
+        <th>设备ID</th>
+     		<th>农户</th>
+     		<th>电话</th>
+     		<th>乡</th>
+     		<th>村</th>
         <th>时间</th>
+        <th>类型</th>
+        <th>短信状态</th>
+        <th>操作</th>
      </tr>
      </thead>
      <tbody>
-    <%foreach $selectSql as $v%>
+    <%foreach $devmsg as $v%>
     <tr>
-    	<td><%$rid%></td>
-      <td><%$v.devid%></td>
-      <td><%$v.temp1%></td>
-      <td><%$v.temp2%></td>
-      <%if $v.env_temp eq 255 %>
-      <td>空</td>
-      <%else%>
-      <td><%$v.env_temp%></td>
-      <%/if%>
-      <td><%$v.delay%></td>
-      <td><%$v.sign%></td>
-      <td><%$v.rssi1%></td>
-			<%if ($v['rssi3']&0x01) eq 0x01 %>
-      <td>有</td>
-      <%else%>
-      <td>无</td>
-      <%/if%>
-			<%if ($v['rssi3']&0x02) eq 0x02 %>
-      <td>1</td>
-      <%else%>
-      <td>0</td>
-      <%/if%>
-			<td><%$v['rssi2']%></td>
-			<td><%$v['step2']%></td>
-			<td><%$v['step3']%></td>
-			<td><%$v['step_y']%></td>
-			<td><%$v['step_pos']%></td>
-			<td><%$v['step_clime']%></td>
-      <%if ($v['rssi3']&0x04) eq 0x04 %>
-      <td>1</td>
-      <%else%>
-      <td>0</td>
-      <%/if%>
-      <%if ($v['rssi3']&0x08) eq 0x08 %>
-      <td>1</td>
-      <%else%>
-      <td>0</td>
-      <%/if%>
-      <td><%$v.rssi3%></td>
-      <td><%$v.cindex%></td>
-      <td><%$v.lcount%></td>
-      <td><%$v.state%></td>
-      <td><%$v.sid%></td>
-      <td><%$v.psnid%></td>
+      <td><%$v.rid%></td>
       <td><%$v.psn%></td>
-      <td><%date("Y-m-d H:i:s",$v.time)%></td>
+      <td><%$v.devid%></td>
+    	<td><%$v.farmer%></td>
+    	<td><%$v.phone%></td>
+    	<td><%$v.town%></td>
+    	<td><%$v.village%></td>
+      <td><%date('Y-m-d H:i:s',$v.step_time)%></td>
+      <td>活动量</td>
+      <td>
+      <%if $v.flag eq 1 %>
+					已发送
+			<%else if $v.flag eq 2 %>
+					发送失败
+			<%else%>
+					未发送
+			<%/if%></td>
+      <td>
+					<a href="<%$smarty.const.__APP__%>/devselect/querytemp?devid=<%$v['devid']%>&psnid=<%$v['psn']%>">查看温度</a>
+					<a href="<%$smarty.const.__APP__%>/collect/monthValue?devid=<%$v['devid']%>&psnid=<%$v['psn']%>">|温度图</a>
+			</td>
     </tr>
     <%/foreach%>
      </tbody>
@@ -176,7 +114,9 @@
     <!-- App js -->
     <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.core.js"></script>
     <script src="<%$smarty.const.PUBLIC_ROOT_URL%>assets/js/jquery.app.js"></script>
+    
 <script type="text/javascript">
+
             $(document).ready(function() {
                 //Buttons examples
                 var table = $('#datatable-buttons').DataTable({
@@ -184,50 +124,19 @@
                     iDisplayLength: 25,
                     info: true,
                     buttons: ['excel','pdf'],
-			              order: [[ 25, "desc" ]],
+			              order: [[ 7, "desc" ]],
 										columnDefs: [
 												{
 											      "targets": 1,
 												},
 												{
 											      "targets": 2,
-											      "searchable": false
 												},
 												{
 											      "targets": 3,
-											      "searchable": false
 												},
 												{
 											      "targets": 4,
-											      "searchable": false
-												},
-												{
-											      "targets": 5,
-											      "searchable": false
-												},
-												{
-											      "targets": 6,
-											      "searchable": false
-												},
-												{
-											      "targets": 7,
-											      "searchable": false
-												},
-												{
-											      "targets": 8,
-											      "searchable": false
-												},
-												{
-											      "targets": 9,
-											      "searchable": false
-												},
-												{
-											      "targets": 10,
-											      "searchable": false
-												},
-												{
-											      "targets": 11,
-											      "searchable": false
 												},
 										],
                     language: {

@@ -705,8 +705,8 @@ class DatapushV20Controller extends Controller {
 		//dump("acc add 1:");
 		//dump($access1);
 
-		$user3=D('device');
-		$ret=$user3->addAll($rfid_list);
+		//$user3=D('device');
+		//$ret=$user3->addAll($rfid_list);
 		//dump($rfid_list);
 		
 		foreach($cur_devs as $dev){

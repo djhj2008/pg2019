@@ -26,7 +26,7 @@ class IndexController extends Controller {
 						dump($devid);
 						$rid=substr($rfid['sbi_fym'],0,15);
 						dump($rid);
-						//$ret=M('device')->where(array('psn'=>$psn,'devid'=>$devid))->save(array('rid'=>$rid));
+						$ret=M('device')->where(array('psn'=>$psn,'devid'=>$devid))->save(array('rid'=>$rid));
 					}
 		}
 
@@ -35,6 +35,68 @@ class IndexController extends Controller {
 		
 		
 	}
+	public function devscan(){
+		$psn=$_GET['psn'];
+		$devs=M('device')->where(array('psn'=>$psn))->order('devid desc')->select();
+		
+		foreach($devs as $dev){
+					$devid=$dev['devid'];
+					if(strlen($dev['rid'])!=15){
+						//dump($dev['devid']);
+						foreach($devs as $dev2){
+							if($dev2['devid']==$devid&&$dev['id']!=$dev2['id']){
+								if(strlen($dev2['rid'])==15){
+									dump($dev['rid']);
+									dump($dev2['rid']);
+									dump($dev['id']);
+									$ret=M('device')->where(array('id'=>$dev['id']))->delete();
+									//dump($ret);
+								}
+								break;
+							}
+							
+						}
+					}
+		}
+	}
+	
+	public function adddev(){
+		$psn=(int)$_GET['psn'];
+		$devid=(int)$_GET['devid'];
+		$count=(int)$_GET['count'];
+		$devs=M('device')->where(array('psn'=>$psn))->order('devid desc')->select();
+		
+		for($i=$devid;$i< $devid+$count;$i++){
+			$dev_find=false;
+			$rfid = $psn*10000+$i;
+			foreach($devs as $dev){
+				if($dev['devid']==$i){
+					$dev_find=true;
+					break;
+				}
+			}
+			if($dev_find===false){
+					$rfdev=array(
+					'psn'=>$psn,
+					'psnid'=>$psn,
+					'devid'=>$i,
+					'rid'=>$rfid,
+					'flag'=>1,
+				);
+				$rfid_list[]=$rfdev;
+			}
+		}
+		if($rfid_list){
+			dump($rfid_list);
+			$user3=D('device');
+			$user3->addAll($rfid_list);
+		}else{
+			echo "null";
+		}
+		exit;
+		
+
+	}	
 	
   public function masterV10(){
   	$post = file_get_contents('php://input');
@@ -1252,7 +1314,8 @@ class IndexController extends Controller {
   }
   
   public function testmd5(){
-  	$file = 'app/app4097';
+  	$file = '../ota/mj_app4097';
+  	
   	echo md5_file($file);
   	exit;
   }
