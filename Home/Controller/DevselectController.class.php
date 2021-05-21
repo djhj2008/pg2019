@@ -416,14 +416,12 @@ class DevselectController extends HomeController {
 			$this->assign('rid',$rid);
 			$avg_step=$devrid['avg_step'];
 			
-      $mydb=['access_base','access_base202011','access_base202010'];
-      
       $wherestr='devid ='.$id.' and psn= '.$psn.' and time >= '.$start_time.' and time <= '.$end_time;
 
       //$s1=M()->table('access_base')->where($wherestr)->group('time')->order('time desc')>buildSql();
       
       
-      if($psn>=80||$psn==5){
+      if($psn==0){
 				$s3=M()->table('access_v6')->where($wherestr)->group('time')->order('time desc')->select();
 				foreach($s3 as $s){
 					$selectSql[]=$s;
@@ -454,7 +452,7 @@ class DevselectController extends HomeController {
           $this->assign('date2',$time2);
           $this->assign('id',$id);
           $next_time=0;
-          if($devrid['version']==6){
+          if($devrid['version']>=6){
           	foreach($selectSql as $key=>$acc){
           		$selectSql[$key]['step2']='+'.$acc['step_total'];
 							$selectSql[$key]['step3']=$cur_step-$avg_step;

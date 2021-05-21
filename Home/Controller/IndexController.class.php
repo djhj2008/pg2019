@@ -94,16 +94,53 @@ class IndexController extends Controller {
 			echo "null";
 		}
 		exit;
-		
+	}	
 
+	public function addfactory(){
+		$psn=(int)$_GET['psn'];
+		$devid=(int)$_GET['devid'];
+		$count=(int)$_GET['count'];
+		$productno=$_GET['productno'];
+		$devs=M('factory')->where(array('psnid'=>$psn))->order('devid desc')->select();
+		
+		for($i=$devid;$i< $devid+$count;$i++){
+			$dev_find=false;
+			$rfid = $psn*10000+$i;
+			foreach($devs as $dev){
+				if($dev['devid']==$i){
+					$dev_find=true;
+					break;
+				}
+			}
+			if($dev_find===false){
+					$rfdev=array(
+					'psnid'=>$psn,
+					'devid'=>$i,
+    			'productno'=>$productno,
+					'state'=>1,
+    			'fsn'=>"ABC",
+					'time'=>time()
+				);
+				$rfid_list[]=$rfdev;
+			}
+		}
+		if($rfid_list){
+			dump($rfid_list);
+			$user3=D('factory');
+			$user3->addAll($rfid_list);
+		}else{
+			echo "null";
+		}
+		exit;
 	}	
 	
-  public function masterV10(){
+  public function masterV60(){
+		$version_interface='V300';
   	$post = file_get_contents('php://input');
     $sid = $_GET['sid'];
     $sn_footer = (int)$sid & 0x1fff;
     $sn_header = (int)$sid >> 13;
-    $logbase="lora_json/V10/";
+    $logbase="lora_json/".$version_interface."/";
     $res_file="master_res";
     $err_file="master_err";
     $req_file="master_req";
@@ -137,15 +174,14 @@ class IndexController extends Controller {
 		$interval = $parm['interval'];
 		$slaver_stop = (int)$parm['no1301'];
 		$ccid = $parm['ccid'];
-		$now = $parm['time'];
 				
- 		$psninfo = D('psn')->where(array('tsn'=>$btsn,'sn'=>$psn))->find();
+ 		$psninfo = D('psn')->where(array('sn'=>$psn))->find();
     if($psn){
     	$psnid = $psninfo['id'];
 			$delay_up = $psninfo['delay_up']; 
 			$retry_up = $psninfo['retry_up'];
-    	$ret['delay_up']=$delay_up;
-    	$ret['retry_up']=$retry_up;
+    	$ret['delay_up']=(int)$delay_up;
+    	$ret['retry_up']=(int)$retry_up;
     }else{
     	$ret['ret']='fail';
     	$ret['msg']='PSN NULL.';
@@ -163,12 +199,30 @@ class IndexController extends Controller {
     	$min=(int)substr($uptime,2,2);
     	$ivl_count = (int)$bdevinfo['count'];
     	
-			$ret['log']=$bdevinfo['log_flag'];
-			$ret['rate_flag']=$bdevinfo['dump_rate'];
-			$step['rate']=$bdevinfo['step_rate'];
-			$step['config']=$bdevinfo['step_setup'];
-			$step['sleeptime']=$bdevinfo['step_sleeptime'];
+			$ret['log']=(int)$bdevinfo['log_flag'];
+			$ret['rate_flag']=(int)$bdevinfo['dump_rate'];
+			$step['rate']=(int)$bdevinfo['step_rate'];
+			$step['config']=(int)$bdevinfo['step_setup'];
+			$step['sleeptime']=(int)$bdevinfo['step_sleeptime'];
 
+			$step['rate2']=(int)$bdevinfo['step_rate2'];
+			$step['config2']=(int)$bdevinfo['step_setup2'];
+			$step['config3']=(int)$bdevinfo['step_setup3'];
+			$step['sleeptime2']=(int)$bdevinfo['step_sleeptime2'];
+
+			$bt_ota_flag = (int)$bdevinfo['bt_ota_flag'];
+			$bt['state']=(int)$bdevinfo['bt_state'];
+			if($bt_ota_flag){
+				$bt_fw=M('appfiles')->where(array('type'=>'bt'))->order('ver desc')->find();
+				if($bt_fw){
+					$bt['fw']=$bt_fw['ver'];
+					$token=$osfile['md5']; 
+					$ota['crc']=$token;
+					$ota['url']="http://".$osfile['url'].$osfile['path'];
+				}
+			}
+			$ret['bt']=$bt;
+			
   		$ivl[0]=$hour;
   		$ivl[1]=$min;
   		$ivl[2]=$ivl_count;
@@ -188,7 +242,7 @@ class IndexController extends Controller {
     	}
     	
     	if(!empty($savebd)){
-    		//$saveSql=M('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->save($savebd);	
+    		$saveSql=M('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->save($savebd);	
     	}
 
     	if($ota_flag){
@@ -202,7 +256,11 @@ class IndexController extends Controller {
 					$ota['url']="http://".$osfile['url'].$osfile['path'];
 					$ret['ota']=$ota;
 			  }else{
-				  $appfile=M('appfiles')->where(array('type'=>'app'))->where('ver>'.$app_ver)->order('ver desc')->find();
+			  	if($app_ver< 8193){
+				  	$appfile=M('appfiles')->where(array('type'=>'app'))->where('ver>'.$app_ver)->order('ver desc')->find();
+			  	}else{
+				  	$appfile=M('appfiles')->where(array('type'=>'btapp'))->where('ver>'.$app_ver)->order('ver desc')->find();
+			  	}
 				  if($appfile){
 						$ota['cmd']='app';
 						$ota['ver']=$appfile['ver']; 
@@ -214,6 +272,7 @@ class IndexController extends Controller {
 				  }
 			  }
     	}
+
     	$url_flag = (int)$bdevinfo['url_flag'];
 			$url_url = $bdevinfo['url'];
 			$change_flag= (int)$bdevinfo['change_flag'];
@@ -224,11 +283,10 @@ class IndexController extends Controller {
 				$url['url']=$url_url;
 				$ret['url']=$url;
 			}
-
 			if($change_flag==1){
 				$station['new']=$new_bsn;
 				$ch_psnint=(int)substr($new_bsn,0,5);
-				$ch_bsnint=(int)substr($new_bsn,5,4);
+				$ch_bsnint=(int)substr($new_bsn,5,4); 
 				$ch_bdevinfo=D('bdevice')->where(array('id'=>$ch_bsnint,'psn'=>$ch_psnint))->find();
 				if($ch_bdevinfo)
 				{
@@ -255,7 +313,6 @@ class IndexController extends Controller {
 			}else{
 					$rssi['rssi'.$key] = $sign;
 			}
-			
 		}
 		$rssi['psnid']=$psnid;
 		$rssi['bsn']=$bsnint;
@@ -263,7 +320,7 @@ class IndexController extends Controller {
 		$rssi['delay']=$bigdiff;
 		$rssi['temp']=$bigtemp;
 		$rssi['time']=time();
-
+		
 		if($rssi){
 			$saveRssi=D('brssi')->add($rssi);
 		}
@@ -291,8 +348,8 @@ class IndexController extends Controller {
 		}
 		   	
 		foreach($small as $data){
-
-			$rfdev_ret=$this->parsedata($data,$psnid,$bsnint,$interval);
+			//dump($data);
+			$rfdev_ret=$this->parsedata($data,$psn,$psnid,$bsnint,$interval,$app_ver);
 			if($rfdev_ret['ret']=='success'){
 				$dev_save = $rfdev_ret['rfdev'];
 				$devid = (int)$dev_save['devid'];
@@ -303,7 +360,6 @@ class IndexController extends Controller {
 				$devsave_list[]=$dev_save;
 				$devbuf[]=$devid;
 				$rfid = $dev_psn*10000+$devid;
-				dump($dev_save);
 				
 				$list1 = $rfdev_ret['list1'];
 				
@@ -314,7 +370,7 @@ class IndexController extends Controller {
 				}
 
 
-	    	if($devid>0&&$devid<2800)
+	    	if($devid>=30&&$devid<2800)
 	    	{
 	    		$rfid_find=false;
 		    	foreach($cur_devs as $cur_dev){
@@ -328,17 +384,17 @@ class IndexController extends Controller {
 		    		  foreach($change_devs as $ch_dev){
 		    		  	if($ch_dev['psnid']==$psnid&&
 		    		  		$ch_dev['new_devid']==$devid){
-		    		  			$change_dev_find=true;
+		    		  			$change_dev_find=false;
 		    		  			$rfid=$ch_dev['rfid'];
 		    		  			if($ch_dev['flag']==2){
-		    		  				$change_dev_find=false;
+		    		  				$change_dev_find=true;
 		    		  				$ret=M('changeidlog')->where(array('id'=>$ch_dev['id']))->save(array('flag'=>3));
 		    		  			}
 		    		  		}
 		    		  }
 		    		  foreach($rfid_list as $rfid_dev){
-		    		  	if($rfid_dev['devid']==$devid){
-		    		  		$change_dev_find=true;
+		    		  	if($rfid_dev['devid']==$devid&&$dev_psn==$rfid_dev['psn']){
+		    		  		$change_dev_find=false;
 		    		  		break;
 		    		  	}
 		    		  }
@@ -370,24 +426,23 @@ class IndexController extends Controller {
 			}
 		
 		}
-		
+		//dump($accadd_list);
 		if($accadd_list){
-	  	$mydb='access_'.$psn;
+	  	$mydb='access_v6';
 	    $user=D($mydb);
-	    //dump($psn);
-	    //dump($accadd_list);
-			//$user->addAll($accadd_list);
+			$user->addAll($accadd_list);
 		}
-    
+
+/*    
     if($accadd_list2){
 	    $user2=D('taccess');
-			//$user2->addAll($accadd_list2);
+			$user2->addAll($accadd_list2);
     }		
+*/
 
 		if($rfid_list){
-			$user3=D('device');
-			dump($rfid_list);
-			$user3->addAll($rfid_list);
+			//$user3=D('device');
+			//$user3->addAll($rfid_list);
 		}
 		
 		foreach($cur_devs as $dev){
@@ -409,12 +464,12 @@ class IndexController extends Controller {
 						$mysave['version']=$devsave['version'];
 					}
 					if(!empty($mysave)){
-						//$dev1=M('device')->where(array('devid'=>$devid,'psn'=>$dev_psn))->save($mysave);
+						$dev1=M('device')->where(array('devid'=>$devid,'psn'=>$dev_psn))->save($mysave);
 					}
 				}
 			}
 		}
-		dump($re_devs);
+
   	foreach($re_devs as $redev){
   			$devid_tmp=$redev['devid'];
   			foreach($devbuf as $devre){
@@ -424,8 +479,7 @@ class IndexController extends Controller {
   				}
   			}
   	}
-		dump($devres);
-		dump($re_devs2);
+
   	foreach($re_devs2 as $redev){
   			$devid_tmp=$redev['devid'];
   			foreach($devbuf as $devre){
@@ -435,7 +489,7 @@ class IndexController extends Controller {
   				}
   			}
   	}
-		dump($devres2);
+
 		$devres_count=count($re_devs);
 		foreach($re_devs as $re_dev){
 				$devre_id = $redev['devid'];
@@ -448,12 +502,12 @@ class IndexController extends Controller {
 
 		if(!empty($devres)){
 			$whereredev['devid']=array('in',$devres);
-			//$dev1=D('device')->where($whereredev)->where(array('psn'=>$psn))->save(array(re_flag=>2));
+			$dev1=D('device')->where($whereredev)->where(array('psn'=>$psn))->save(array(re_flag=>2));
 		}
 
-		if(!empty($devres2)){
+		if(!empty($devres2)){ 
 			$whereredev2['devid']=array('in',$devres2);
-			//$dev1=D('device')->where($whereredev2)->where(array('psn'=>$psn))->save(array(re_flag=>3));
+			$dev1=D('device')->where($whereredev2)->where(array('psn'=>$psn))->save(array(re_flag=>3));
 		}
 		
 		$stepres_count=0;
@@ -478,7 +532,7 @@ class IndexController extends Controller {
 		$step['count'] = $stepres_count;
 		$step['data'] = $stepres_list;
 		$ret['step']=$step;
-		
+		$ret['psn']=$psn;
 		$ret['time']=date('Y-m-d H:i:s', time());
 
   	$ret['ret']='success';
@@ -1314,7 +1368,7 @@ class IndexController extends Controller {
   }
   
   public function testmd5(){
-  	$file = '../ota/mj_app4097';
+  	$file = '../ota/mj_flash_8194.img';
   	
   	echo md5_file($file);
   	exit;
@@ -1538,4 +1592,302 @@ class IndexController extends Controller {
 				$ret = M('device_step')->addAll($devs);
 				dump($ret);
 	}
+	
+	  public function gettempnow(){
+	  	$token=(int)ldx_decode($_GET['token']);
+	  	$addr=ldx_decode($_GET['addr']);
+	  	$now=time();
+	  	$role=$_GET['role'];
+	  	
+	  	$mode=M('','','DB_CONFIG');
+			//dump($addr);
+			//dump($now-$token);
+			//dump($token-$now);
+	  	if(!$token||$token< $now-60*5||$token>$now+60){
+	  		$jarr=array('ret'=>array('ret_message'=>'token error','status_code'=>10000201));
+	  		echo json_encode($jarr);
+	  		//exit;
+	  	}
+	    $sn=$_POST['sn'];
+	    if(empty($sn)){
+	    	$sn=$_GET['sn'];
+	    }
+	    //$fym='2640423';
+	    if($addr=='ldx'){
+	    	$fym='2640423';
+	    }
+
+	    $cow=$mode->table('cows')->where(array('sn_code'=>$sn))->find();
+	    //dump($cow['health_state']);
+	    //dump($cow['survival_state']);
+	    if($cow['health_state']==3||$cow['survival_state']==3){
+	    	$role=NULL;
+	    }
+	    
+	    $rid=(int)$sn;
+	    //dump($rid);
+	    if($rid < 300030){
+	    	$rid=$fym.str_pad($sn,8,'0',STR_PAD_LEFT);
+	    }
+	    //dump($rid);
+	    //dump($rfid);
+			$dev = M('device')->field('psn,devid,psnid,rid,avg_temp,psn_now,cow_state,dev_state')->where(array('rid'=>$rid))->where('flag!=2')->order('time desc')->find();
+							
+			//dump($dev);
+			$psn=$dev['psn'];
+			$devid=$dev['devid'];
+			$psn_now=$dev['psn_now'];
+			$hw_step = ((int)$dev['dev_state'])&0x01;
+			//$hw_step = 1;
+			$psnfind = M('psn')->where(array('id'=>$psn))->find();
+			if(empty($psnfind)){
+				echo "PSN NULL.";
+				exit;
+			}
+			
+			$memcache = new \Memcache;
+			$mem_ret=$memcache->connect('localhost', 11211);
+		
+			$get_result=false;
+
+			if($mem_ret===true){
+				$key_sn=$rid;
+				if($dev['cow_state']==4||$dev['cow_state']==5){
+					if($role=='admin'){
+						$key_sn=$role.$rid;
+						$rid_list=array("264042300052773","264042300052774","264042300052776","264042300052777","264042300052778","264042300052779","264042300052780","264042300052781","264042300052782","264042300052783");
+						$index= rand(0,9);
+						$rid=$rid_list[$index];
+						$dev = M('device')->field('psn,devid,psnid,rid,avg_temp,psn_now,cow_state,dev_state')->where(array('rid'=>$rid))->where('flag!=2')->order('time desc')->find();
+						$psn=$dev['psn'];
+						$devid=$dev['devid'];
+					}
+				}
+				//var_dump($key_sn);
+				$get_result = $memcache->get($key_sn);
+				//var_dump($get_result);
+			}
+			//dump($dev);
+			if($get_result===false){
+				$btemp=35.5;//$psnfind['base_temp'];
+				$hlevl1=$psnfind['htemplev1'];
+				$hlevl2=$psnfind['htemplev2'];
+				$llevl1=$psnfind['ltemplev1'];
+				$llevl2=$psnfind['ltemplev2'];
+				$temp_value=$psnfind['check_value'];
+				//($temp_value);
+
+				//dump($dev);
+		  	$avg=(float)$dev['avg_temp'];
+		  	//dump($avg);
+				if(empty($dev)){
+					$jarr=array('ret'=>array('ret_message'=>'sn error','status_code'=>10000301));
+					echo json_encode($jarr);
+					exit;
+				}
+				$now = time();
+				$time =date('Y-m-d',$now);
+				$start_time = strtotime($time)-86400*6;
+				$end_time = strtotime($time)+86400;	
+				$delay=7200;
+		  	$cur_time = $now - $start_time-86400;
+		  	$cur_time = (int)($cur_time/$delay)*$delay;
+		  	$first_time = $cur_time+$start_time;
+		  	
+		  	//dump($cur_time);
+		  	$count=($cur_time-7200)/3600;
+		  	$count=24+$count;
+
+				$mydb='access_base';
+				$acclist=M($mydb)->field('temp1,temp2,rssi2,rssi3,time')->where(array('devid'=>$devid,'psn'=>$psn))->where('time >= '.$start_time.' and time <= '.$end_time)
+														        ->group('time')
+														        ->order('time asc')
+														        ->select();	
+				if(empty($acclist)){
+		  		$jarr=array('ret'=>array('ret_message'=>'acc error','status_code'=>10000401));
+		  		echo json_encode($jarr);
+		  		exit;
+				}
+				
+				foreach($acclist as $key=>$acc){
+		      	$temp1=$acc['temp1'];
+		      	$temp2=$acc['temp2'];
+		      	//dump($acc['time']);
+		      	$cur_time=$acc['time'];
+						if($avg>0){
+							$a=array($temp1,$temp2);
+							$t=max($a);
+							$vt=(float)$t;
+							if($vt < 32){
+								if($ntemp>32){
+									if($dev['cow_state']==5){
+										$ntemp=$vt;
+									}else{
+										$ntemp=$ntemp;
+									}
+								}else{
+									$ntemp=$vt;
+								}
+							}else{
+								$ntemp= round($btemp+($vt-$avg)*$temp_value,2);
+							}
+						}else{
+								$a=array($temp1,$temp2);
+								$t=max($a);
+								$vt=(float)$t;
+								$ntemp=$vt;
+							
+						}
+						
+						$acclist[$key]['temp1']=$ntemp;
+						//$acclist[$key]['step']=$acc['rssi2'];
+						//$acclist[$key]['step']=200+$key;
+						if($key<count($acclist)-1){
+							$step = (int)$acc['rssi2'];
+							$next_time = (int)$acclist[$key+1]['time'];
+							if($next_time-$cur_time==3600){
+								$next_step = (int)$acclist[$key+1]['rssi2'];
+
+								if($next_step-$step>=0){
+									$cur_step = $next_step-$step;
+								}else{
+									if(($acc['rssi3']&0x03)==0x01){
+										$cur_step=0;
+									}else{
+										//$cur_step = $next_step-$step;
+										$cur_step=65535+$next_step-$step;
+									}
+									if($next_step==0){
+										$cur_step=0;
+									}
+								}
+								$acclist[$key]['step']=$cur_step;
+							}else{
+								$acclist[$key]['step']=0;
+							}
+						}else{
+
+						}
+						$acclist[$key]['cur_time']=date('Y-m-d H:i:s',$acc['time']);
+				}
+
+				$jarr=array('ret'=>array('ret_message'=>'success','status_code'=>10000100,'avg'=>$avg,'hw_step'=>$hw_step,'sn'=>$sn,'data'=>$acclist));
+				$ret=json_encode($jarr);
+				if($mem_ret===true){
+					$now=time();
+					//var_dump($now);
+					$time_out=$now%7200;
+					$expire_time=7200-$time_out-1;
+					//var_dump($expire_time);
+					$get_result=$memcache->set($key_sn, $ret, false, $expire_time);
+					//var_dump($time_out);
+					$memcache->close();
+				}
+				echo $ret;
+				exit;
+			}else{
+				//echo 'memcache.';
+				echo $get_result;
+				$memcache->close();
+				exit;
+			}
+			
+	  }
+  
+  
+  public function weuipushmsg(){
+  	$mode=M('','','DB_CONFIG');
+  	$template_id = '-HzOtD2zosdFQYPhtu5NZg8hHm-X2UcNIo00dcVM4C4';	
+		$appid = 'wx4dba4ec159da3bf7';
+		$secret = 'bf6fac869e348f3454d68ef9956cd61b';
+  	$now = time();
+  	
+  	$post=file_get_contents('php://input');
+    $array = json_decode($post,TRUE);
+    
+  	$now=time();
+		$msg= $array['wxmsg'];
+		$lost_list= $array['data'];
+
+		dump($lost_list);
+		
+		$start_time = strtotime(date('Y-m-d',$now));
+  	$cur_time = ($now - $start_time)/3600;
+  	
+  	if($cur_time<6||$cur_time>10){
+  		//return;
+  	}
+  	
+  	$tokens=M('weui_token')->where('exprie_time >'.$now)->order('time desc')->find();
+
+  	if($tokens){
+  		$acc_token=$tokens['access_token'];
+  	}else{
+  		$url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid='.$appid.'&secret='.$secret;
+  		$ret=http($url);
+			$ret=json_decode($ret,true);
+			if(!empty($ret['access_token'])){
+				$savetoken['exprie_time']=$now+(int)$ret['expires_in'];
+				$savetoken['access_token']=$ret['access_token'];
+				$token=M('weui_token')->add($savetoken);
+				$acc_token=$ret['access_token'];
+			}
+  	}
+  	
+  	{
+  		$url='https://api.weixin.qq.com/cgi-bin/tags/get?access_token='.$acc_token;
+  		$ret=http($url);
+  		$tags=json_decode($ret,true);
+  		foreach($tags['tags'] as $tag){
+				if($tag['name']=='station'){
+					$tagid=$tag['id'];
+					break;
+				}
+  		}
+  	}
+  	
+  	{
+  		$url = 'https://api.weixin.qq.com/cgi-bin/user/tag/get?access_token='.$acc_token;
+  		$data['tagid']=$tagid;
+  		$data['next_openid']='';
+  		$data=json_encode($data,true);
+  		$ret=http($url,$data,'POST');
+  		$users=json_decode($ret,true);
+  		$ids=$users['data']['openid'];
+  	}
+  	
+  	foreach($lost_list as $lost){
+  			foreach($ids as $id){
+  				$url = 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token='.$acc_token;
+  				$sn=$lost['sn'];
+  				$count = $lost['expire_days'];
+  				dump($sn);
+					$station = $mode->table('basestations')->where(array('base_code'=>$sn))->find();
+					//dump($station);
+					$jwmsg='';
+					unset($wmsg);
+    			$loc = $station['title'];
+		    	$wmsg['touser']=$id;
+		    	$wmsg['template_id']=$template_id;
+		    	$msg_data['first']['value']='您有一条新的基站资费信息';
+		    	$msg_data['first']['color']="#173177";
+		    	$msg_data['keyword1']['value']=$sn;
+		    	$msg_data['keyword1']['color']="#173177";
+		    	$msg_data['keyword2']['value']=$loc;
+		    	$msg_data['keyword2']['color']="#173177";
+		    	$msg_data['keyword3']['value']=$count."天后欠费";
+		    	$msg_data['keyword3']['color']="#173177";
+		    	$msg_data['keyword4']['value']="资费到期提醒";
+		    	$msg_data['keyword4']['color']="#173177";
+		    	$msg_data['remark']['value']="请相关工作人员及时处理";
+		    	$msg_data['remark']['color']="#173177";
+		    	$wmsg['data']=$msg_data;
+		    	$jwmsg=json_encode($wmsg,true);
+	    		$ret=http($url,$jwmsg,'POST');
+	    		$ret=json_encode($ret,true);
+  			}
+  	}	
+  	exit;
+  }
+  
 }

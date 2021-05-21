@@ -1002,6 +1002,20 @@ class AddController extends HomeController {
 			//$dev=M('device')->where(array('psn'=>$old_psn,'devid'=>$old_devid))->find();
 			//$rfid=$dev['rfid'];
 			$ret=M('changeidlog')->where(array('id'=>$id))->save($newdev);
+			
+			$addrfdev=array(
+				'psn'=>$psnid,
+				'psnid'=>$psnid,
+				'shed'=>1,
+				'fold'=>1,
+				'flag'=>0,
+				'state'=>0,
+				'rid'=>$rfid,
+				'age'=>1,
+				'devid'=>$new_devid,
+			);
+			$ret=M('device')->add($addrfdev);
+								
 			$this ->redirect('devselect/devmove',array('psnid'=>$psnid),0,'');
     }
     

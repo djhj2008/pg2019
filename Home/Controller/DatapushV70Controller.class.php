@@ -396,14 +396,8 @@ class DatapushV70Controller extends Controller {
 	    	$state=$state&$stmp;
 				$step_update = $step_update|$state;
 				
-				if($cvs==6){
-					$sensstr 	 =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
-					$vaildstr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
-	    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符
-					$sens=0-hexdec($sensstr);
-					$step_list[$snint]['state']=$state;
-				}
-	    	else if($cvs==4||$cvs==5){
+
+	    	if($cvs>3){
 					$sensstr 	 =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
 					$vaildstr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
 	    		$tempstr	 =	substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN*$COUNT_VALUE);//temp1十六进制字符

@@ -1,7 +1,7 @@
 <?php
 namespace Home\Controller;
 use Think\Controller;
-class DataV300Controller extends Controller {
+class DataV333Controller extends Controller {
   public function index(){
        ob_clean();
        echo 'test';
@@ -34,7 +34,7 @@ class DataV300Controller extends Controller {
   }
   
   public function masterV60(){
-		$version_interface='V300';
+		$version_interface='V333';
   	$post = file_get_contents('php://input');
     $sid = $_GET['sid'];
     $sn_footer = (int)$sid & 0x1fff;
@@ -221,11 +221,10 @@ class DataV300Controller extends Controller {
 		$rssi['rssi']=$brssimax;
 		$rssi['delay']=$bigdiff;
 		$rssi['temp']=$bigtemp;
-		$rssi['count']=$count;
 		$rssi['time']=time();
 		
 		if($rssi){
-			$saveRssi=D('brssi')->add($rssi);
+			//$saveRssi=D('brssi')->add($rssi);
 		}
 
 		if($count!=count($small)){
@@ -329,11 +328,11 @@ class DataV300Controller extends Controller {
 			}
 		
 		}
-		//dump($accadd_list);
+		dump($accadd_list);
 		if($accadd_list){
 	  	$mydb='access_base';
 	    $user=D($mydb);
-			$user->addAll($accadd_list);
+			//$user->addAll($accadd_list);
 		}
 
 /*    
@@ -447,7 +446,7 @@ class DataV300Controller extends Controller {
   }
 
   public function slaverV60(){
-  	$version_interface='V300';
+  	$version_interface='V333';
   	$post = file_get_contents('php://input');
     $sid = $_GET['sid'];
     $sn_footer = (int)$sid & 0x1fff;
@@ -529,7 +528,6 @@ class DataV300Controller extends Controller {
 		$rssi['delay']=$bigdiff;
 		$rssi['temp']=$bigtemp;
 		$rssi['station']=1301;
-		$rssi['count']=$count;
 		$rssi['time']=time();
 		
 		if($rssi){

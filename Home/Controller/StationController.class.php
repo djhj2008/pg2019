@@ -850,7 +850,8 @@ class StationController extends Controller {
     	$devchangelist=M('device')->field('id,rid,psn,devid')->where(array('flag'=>2))->select();
 			$changeid=M('changeidlog')->where(array('flag'=>3))->select();
     	
-    	$low_count = rand(20,50);
+    	$low_count = rand(20,100);
+    	$lost_count = rand(300,600);
     	
 			foreach($changeid as $dev){
 				$psn=$dev['old_psn'];
@@ -893,6 +894,7 @@ class StationController extends Controller {
 			dump($devcowstate);
 			//dump($devflag);
 			$health_count=0;
+			$lose_count=0;
 			foreach($cowlist as $cow){
 				$rid=(int)$cow['sn_code'];
 				
@@ -907,11 +909,18 @@ class StationController extends Controller {
 				}else if($cow['survival_state']==3){
 					if($devcowstate[$rid]!=4){
 						$backcow[]=$cow['id'];
+					}else{
+						$lose_count++;
+						if($lose_count> $lost_count){
+							$backcow[]=$cow['id'];
+						}
 					}
 				}else if($cow['survival_state']==1){
 					if($devcowstate[$rid]==4){
+						if($lose_count< $lost_count){
 							$loseadd[]=$cow['id'];
-						//$losetime=$first_time;
+							$lose_count++;
+						}
 					}
 					if(isset($stopdev[$rid])){
 						$startdev[]=$stopdev[$rid];
@@ -919,12 +928,13 @@ class StationController extends Controller {
 				}
 				//dump(count($lowadd));
 				if($cow['health_state']==3){
-					$health_count++;
 					if($devcowstate[$rid]!=5&&$devcowstate[$rid]!=4){
 						$wellcow[]=$cow['id'];
-					}
-					if($health_count> $low_count){
-						$wellcow[]=$cow['id'];
+					}else{
+						$health_count++;
+						if($health_count> $low_count){
+							$wellcow[]=$cow['id'];
+						}
 					}
 				}else if($cow['health_state']==1){
 					if($devcowstate[$rid]==5){

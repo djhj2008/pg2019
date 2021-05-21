@@ -435,6 +435,10 @@ class DatapushV20Controller extends Controller {
 					continue;
 				}
 				
+		    if($cvs>3){
+		    	continue;
+		    }
+		    
 	    	for($j=0;$j < $vaild;$j++){
 	    		if($freq>1){
 		    		$up_time = $start+$interval*$j+$interval*($freq-$vaild);

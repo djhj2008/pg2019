@@ -879,14 +879,15 @@ class DataV200Controller extends Controller {
     	$type = $state&$stmp3;
     	$state=$state&$stmp;
 			$step_update = $step_update|$state;
-			if($cvs==6){
+			
+			if($cvs>=6){
 				$sensstr 	 =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);//rx rssi
 				$vaildstr  =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
 				$vaild = hexdec($vaildstr);
     		$tempstr	 =	substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN+$VAILD_LEN)*2,$VALUE_LEN_V6*$vaild);//temp1Ê®Áù½øÖÆ×Ö·û
 				$sens=0-hexdec($sensstr);
 			}
-			else if($cvs>3&&$cvs<6){
+			else if($cvs>3&&$cvs< 6){
 				$sensstr 	 =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);//rx rssi
 				$vaildstr  =  substr($data, ($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
 				$vaild = hexdec($vaildstr);
@@ -946,88 +947,6 @@ class DataV200Controller extends Controller {
 	    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN_V6,$VALUE_LEN_V6);
 			    	//echo "tempstr_tmp:";
 			    	//dump($tempstr_tmp);
-		    		if($type==0){
-					    $temp1str1 = substr($tempstr_tmp,3,1);
-				  		$temp1str2 = substr($tempstr_tmp,0,1);
-				    	$temp1str3 = substr($tempstr_tmp,1,1);
-				    	$temp1int =base_convert($temp1str1,16,10);
-
-				    	$temp2str1 = substr($tempstr_tmp,4,1);
-				  		$temp2str2 = substr($tempstr_tmp,5,1);
-				    	$temp2str3 = substr($tempstr_tmp,2,1);
-				    	$temp2int =base_convert($temp2str1,16,10);
-		    		
-		    			$nTotalStepCounts = substr($tempstr_tmp,6,3);
-		    			$nTotalStepCountsint = (int)base_convert($nTotalStepCounts,16,10);
-		    			
-		    			$nyStepCounts = substr($tempstr_tmp,9,3);
-		    			$nyStepCountsint = (int)base_convert($nyStepCounts,16,10);		    			
-		    			
-		    			$nPosChange = substr($tempstr_tmp,12,2);
-		    			$nPosChange	= (int)base_convert($nPosChange,16,10);
-		    			
-		    			$nPosChangeint =($nPosChange&0x80)>>7;
-		    			$nStepClimeCountint	 =$nPosChange&0x7f;
-		    			
-					    if(($temp1int&0x08)==0x08){
-				    		$temp1str1=$temp1int&0x07;
-				    		if($temp1str1==0){
-				    			$temp1 = '-'.$temp1str2.".".$temp1str3;
-				    		}else{
-				    			$temp1 = '-'.$temp1str1.$temp1str2.".".$temp1str3;
-				    		}
-				    	}else{
-					    		if($temp1str1==0){
-					    			$temp1 = $temp1str2.".".$temp1str3;
-					    		}else{
-					    			$temp1 = $temp1str1.$temp1str2.".".$temp1str3;
-					    		}
-				    	}
-
-						  //var_dump('temp1:'.$temp1);
-						  if(($temp2int&0x08)==0x08){
-						  	$temp2str1=$temp2int&0x07;
-								if($temp2str1 == 0){
-							    $temp2 = '-'.$temp2str2.".".$temp2str3;
-						 	 	}else{
-						 	 	 	$temp2 = '-'.$temp2str1.$temp2str2.".".$temp2str3;
-						 	 	}
-					 		}else{
-					 			if($temp2str1 == 0){
-							    $temp2 = $temp2str2.".".$temp2str3;
-						 	 	}else{
-						 	 	 	$temp2 = $temp2str1.$temp2str2.".".$temp2str3;
-						 	 	}
-					 			
-					 		}
-					 	
-							$acc_add=array(
-					  				'psn'=>$dev_psn,
-					  				'psnid'=>$psnid,
-							  		'devid'=>$snint,
-							  		'temp1'=>$temp1,
-							  		'temp2'=>$temp1,
-							  		'env_temp'=>$temp2,
-							  		'sign'=>$sign,
-							  		'rssi1'=>$sens,
-							  		'rssi2'=>0,
-							  		'rssi3'=>$step_update,
-							  		'rssi4'=>$cvs,
-							  		'step_total'=>$nTotalStepCountsint,
-							  		'step_y'=>$nyStepCountsint,
-							  		'step_pos'=>$nPosChangeint,
-							  		'step_clime'=>$nStepClimeCountint,
-							  		'cindex'=>$cindex,
-							  		'lcount'=>$lcount,
-							  		'delay'=>$delay,
-							  		'time' =>$up_time,
-							  		'sid' =>$sid,
-							  	);
-
-							$accadd_list[]=$acc_add;
-						}else{
-							//nothing
-						}
 		    }else if($cvs>3&&$cvs< 6){
 	    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN_V4,$VALUE_LEN_V4);
 		    		if($type==0){

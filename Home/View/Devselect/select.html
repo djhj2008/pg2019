@@ -60,6 +60,9 @@
 		  <div class="weui-btn-area">
 		    <button class="weui-btn weui-btn_primary" onclick="stepmsg()">步数温度推送记录</button>
 		  </div>
+		  <div class="weui-btn-area">
+		    <button class="weui-btn weui-btn_primary" onclick="stepxyz()">计步器XYZ</button>
+		  </div>
 		  <!--div class="weui-btn-area">
 		    <button class="weui-btn weui-btn_primary" onclick="querytemp()">温度查询</button>
 		  </div-->
@@ -182,6 +185,9 @@
       }
       function stepmsg(){
           window.location.href="<%$smarty.const.__APP__%>/devmsg/steplist";
+      }
+      function stepxyz(){
+          window.location.href="<%$smarty.const.__APP__%>/djtest/steplist";
       }
       function querytemp(){
           window.location.href="<%$smarty.const.__APP__%>/product/querysntemp";

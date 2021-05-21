@@ -602,7 +602,7 @@ function httpfile($url, $data,$file, $method='POST'){
 	}
 	
 	public function testjsondecode(){
-		$json=http("http://iot.xunrun.com.cn/pg/djtest/testjson");
+		$json=http("http://engine.mjiangtech.cn/pg/djtest/testjson");
 		$ret= json_decode($json,true);
 		dump($ret['step']['data']);
 		dump($ret['recover']['dev']);
@@ -713,4 +713,254 @@ function httpfile($url, $data,$file, $method='POST'){
 
 	    exit;
   }
+  
+  public function savelog($sn_header,$sn_footer,$logbase,$res_file,$post){
+	    $logdir = $logbase;
+      if (!file_exists($logdir)) {
+          mkdir($logdir);
+      }
+      $logdir = $logdir . $sn_header . '/';
+      if (!file_exists($logdir)) {
+          mkdir($logdir);
+      }
+      $logdir = $logdir . $sn_footer . '/';
+      if (!file_exists($logdir)) {
+          mkdir($logdir);
+      }
+      $logdir = $logdir . date('Y-m-d', time()) . '/';
+      if (!file_exists($logdir)) {
+          mkdir($logdir);
+      }
+
+      $filename = $res_file.date("His_") . mt_rand(100, 999) . ".log"; //新图片名称
+      $newFilePath = $logdir . $filename;//图片存入路径
+      $newFile = fopen($newFilePath, "w"); //打开文件准备写入
+      fwrite($newFile, $post);
+      fclose($newFile); //关闭文件
+  }
+  
+  public function uploadxyz(){
+  	$version_interface='Djtest';
+    $sid = $_GET['sid'];
+    $sn_footer = (int)$sid & 0x1fff;
+    $sn_header = (int)$sid >> 13;
+  	$post = file_get_contents('php://input');
+    $logbase="lora_json/".$version_interface."/";
+    $res_file="uploadxyz_res";
+    $req_file="uploadxyz_req";
+    $log_flag=true;
+    if($log_flag)
+    {
+			$this->savelog($sn_header,$sn_footer,$logbase,$res_file,$post);
+    }
+    
+		$parm = json_decode($post,true);
+		$count=$parm['count'];
+		$stepxyz=$parm['stepxyz'];
+		$psn = ((int)$parm['sn'])>>13;
+		$bsnint = ((int)$parm['sn'])& 0x1fff;
+		
+  	$psninfo = D('psn')->where(array('sn'=>$psn))->find();
+    if($psn){
+    	$psnid = $psninfo['id'];
+			$delay_up = $psninfo['delay_up']; 
+			$retry_up = $psninfo['retry_up'];
+    	$body['delay_up']=(int)$delay_up;
+    	$body['retry_up']=(int)$retry_up;
+    }else{
+    	$body['ret']='fail';
+    	$body['msg']='PSN NULL.';
+			$label = json_encode($body);
+	    echo $label;
+    	exit;
+    }
+    
+    $bdevinfo = M('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->find();
+     if($bdevinfo){
+    	$uptime=$bdevinfo['uptime'];
+    	$hour=(int)substr($uptime,0,2);
+    	$min=(int)substr($uptime,2,2);
+    	$ivl_count = (int)$bdevinfo['count'];
+    	
+			$body['log']=(int)$bdevinfo['log_flag'];
+			$body['rate_flag']=(int)$bdevinfo['dump_rate'];
+			$step['rate']=(int)$bdevinfo['step_rate'];
+			$step['config']=(int)$bdevinfo['step_setup'];
+			$step['sleeptime']=(int)$bdevinfo['step_sleeptime'];
+
+			$step['rate2']=(int)$bdevinfo['step_rate2'];
+			$step['config2']=(int)$bdevinfo['step_setup2'];
+			$step['config3']=(int)$bdevinfo['step_setup3'];
+			$step['sleeptime2']=(int)$bdevinfo['step_sleeptime2'];
+
+			$bt_ota_flag = (int)$bdevinfo['bt_ota_flag'];
+			$bt['state']=(int)$bdevinfo['bt_state'];
+			if($bt_ota_flag){
+				$bt_fw=M('appfiles')->where(array('type'=>'bt'))->order('ver desc')->find();
+				if($bt_fw){
+					$bt['fw']=$bt_fw['ver'];
+					$token=$osfile['md5']; 
+					$ota['crc']=$token;
+					$ota['url']="http://".$osfile['url'].$osfile['path'];
+				}
+			}
+			$body['bt']=$bt;
+			
+  		$ivl[0]=$hour;
+  		$ivl[1]=$min;
+  		$ivl[2]=$ivl_count;
+  		$body['interval']=$ivl;
+	
+    	$ota_flag = (int)$bdevinfo['ota_flag'];
+    	$os_ota_flag = (int)$bdevinfo['os_ota_flag'];
+			$body['freq'] = (int)$bdevinfo['rate_id'];
+    	if($bdevinfo['version']!=$app_ver){
+    		$savebd['version']=$app_ver;
+    	}
+    	if($bdevinfo['slaver_stop']!=$slaver_stop){
+    		$savebd['slaver_stop']=$slaver_stop;
+    	}
+    	if($bdevinfo['number']!=$ccid){
+    		$savebd['number']=$ccid;
+    	}
+    	
+    	if(!empty($savebd)){
+    		$saveSql=M('bdevice')->where(array('id'=>$bsnint,'psnid'=>$psnid))->save($savebd);	
+    	}
+
+    	if($ota_flag){
+			  $osfile=M('appfiles')->where(array('type'=>'os','ver'=>$os_ver))->order('time desc')->find();
+			  if($osfile){
+					$ota['cmd']='os';
+					$ota['ver']=$osfile['ver']; 
+					$ota['sn']=str_pad($psn,5,'0',STR_PAD_LEFT).str_pad($bsnint,4,'0',STR_PAD_LEFT);
+					$token=$osfile['md5']; 
+					$ota['crc']=$token;
+					$ota['url']="http://".$osfile['url'].$osfile['path'];
+					$body['ota']=$ota;
+			  }else{
+			  	if($app_ver< 8193){
+				  	$appfile=M('appfiles')->where(array('type'=>'app'))->where('ver>'.$app_ver)->order('ver desc')->find();
+			  	}else{
+				  	$appfile=M('appfiles')->where(array('type'=>'btapp'))->where('ver>'.$app_ver)->order('ver desc')->find();
+			  	}
+				  if($appfile){
+						$ota['cmd']='app';
+						$ota['ver']=$appfile['ver']; 
+						$ota['sn']=str_pad($psn,5,'0',STR_PAD_LEFT).str_pad($bsnint,4,'0',STR_PAD_LEFT);
+						$token=$appfile['md5']; 
+						$ota['crc']=$token;
+						$ota['url']="http://".$appfile['url'].$appfile['path'];
+						$body['ota']=$ota;
+				  }
+			  }
+    	}
+
+    	$url_flag = (int)$bdevinfo['url_flag'];
+			$url_url = $bdevinfo['url'];
+			$change_flag= (int)$bdevinfo['change_flag'];
+			$new_bsn=$bdevinfo['new_bsn'];
+			$url['flag']=$url_flag;
+			$station['flag']=$change_flag;
+			if($url_flag==1){
+				$url['url']=$url_url;
+				$body['url']=$url;
+			}
+			if($change_flag==1){
+				$station['new']=$new_bsn;
+				$ch_psnint=(int)substr($new_bsn,0,5);
+				$ch_bsnint=(int)substr($new_bsn,5,4); 
+				$ch_bdevinfo=D('bdevice')->where(array('id'=>$ch_bsnint,'psn'=>$ch_psnint))->find();
+				if($ch_bdevinfo)
+				{
+					$body['freq'] = $ch_bdevinfo['rate_id'];
+					$body['station']=$station;
+				}
+			}
+    }else{
+    	$body['ret']='fail';
+    	$body['msg']='PSN ID NULL.';
+			$label = json_encode($body);
+	    echo $label;
+	    $this->savelog($sn_header,$sn_footer,$logbase,$req_file,$label);
+    	exit;
+    }		
+		
+
+		$value_len=2;
+		if(count($stepxyz)!=$count){
+
+		}
+		//dump($parm);
+		//"sn":65538,"serial":1,"item":48,"data":
+		foreach($stepxyz as $step){
+			$dev_psn = ((int)$step['sn'])>>13;
+			$dev_id = ((int)$step['sn'])& 0x1fff;
+			$acc['sn']=$dev_psn*10000+$dev_id;
+			$acc['serial']=$step['serial'];
+			$item=(int)$step['item'];
+			$data=$step['data'];
+			for($i=0;$i< $item;$i++){
+				$value=substr($data,$i*3*$value_len,$value_len*3);
+				$x=hexdec(substr($value,0,2));
+				$y=hexdec(substr($value,2,2));
+				$z=hexdec(substr($value,4,2));
+				$acc['x']=$this->getbyte($x);
+				$acc['y']=$this->getbyte($y);
+				$acc['z']=$this->getbyte($z);
+				$acc_list[]=$acc;
+				//dump($acc);
+			}
+		}
+		//dump($acc_list);
+		$als = array_chunk($acc_list, 3000, true);
+		foreach($als as $al){
+			unset($tl);
+			foreach($al as $a){
+				$tl[]=$a;
+			}
+			$user = M('stepxyz');
+			$ret =$user->addAll($tl);
+		}
+		$body['cmd']='stepxyz';
+		$body['ret']='success';
+		$body['msg']='SUCCESS';
+		$body['time']=date('Y-m-d H:i:s', time());
+		$label=json_encode($body);
+		echo $label;
+    $this->savelog($sn_header,$sn_footer,$logbase,$req_file,$label);
+		exit;
+  }
+  
+  public function getbyte($x){
+  	if(($x&0x80)>>7==1){
+  		$v=$x&0x7f;
+  		$v=128-$v;
+  		$ret=0-$v;
+  	}else{
+  		$ret=$x;
+  	}
+  	return $ret;
+  }
+  
+  public function steplist(){
+  	$sn=$_GET['sn'];
+  	$count=$_GET['count'];
+		if($count==NULL){
+			$mx=100;
+		}else{
+			$mx=(int)$count;
+		}
+
+  	if($mx==0){
+  		$devmsg=M('stepxyz')->where(array('sn'=>$sn))->order('id desc')->select();
+  	}else{
+  		$devmsg=M('stepxyz')->where(array('sn'=>$sn))->order('id desc')->limit(0,$mx)->select();
+  	}
+
+		$this->assign('devmsg',$devmsg);
+		$this->display();
+  	
+  }
+  
 }

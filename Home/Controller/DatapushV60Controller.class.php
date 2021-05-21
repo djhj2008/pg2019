@@ -384,7 +384,7 @@ class DatapushV60Controller extends Controller {
 	    	$type = $state&$stmp3;
 	    	$state=$state&$stmp;
 				$step_update = $step_update|$state;
-				
+
 	    	if($cvs>3){
 					$sensstr 	 =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN)*2,$SENS_LEN*2);
 					$vaildstr  =  substr($data, $i*$DATA_LEN+($CSN_LEN+$SIGN_LEN+$CVS_LEN+$STATE_LEN+$DELAY_LEN+$SENS_LEN)*2,$VAILD_LEN*2);
@@ -483,7 +483,7 @@ class DatapushV60Controller extends Controller {
 	    			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
 	    		}
 			    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
-		    	if($cvs>3){
+		    	if($cvs>3&&$cvs< 6){
 		    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);
 				    	//echo "tempstr_tmp:";
 				    	//dump($tempstr_tmp);

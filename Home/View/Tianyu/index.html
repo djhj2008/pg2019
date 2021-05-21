@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:img="http://www.w3.org/1999/html">
+<head>
+	<meta charset="UTF-8">
+	<title>人脸</title>
+	<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4/jquery.min.js"></script>
+	
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+	<!-- <link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrapone.css"> -->
+	<link rel="stylesheet" href="<%$smarty.const.ABOOT_URL%>css/bootstrap.css">
+  <!-- DataTables -->
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+  <!-- Responsive datatable examples -->
+  <link href="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+  <!-- Buttons examples -->
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.buttons.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.bootstrap4.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/jszip.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/pdfmake.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/vfs_fonts.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.html5.min.js"></script>
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/buttons.print.min.js"></script>
+  <!-- Responsive examples -->
+  <script src="<%$smarty.const.PUBLIC_ROOT_URL%>plugins/datatables/dataTables.responsive.min.js"></script>
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="<%$smarty.const.ABOOT_URL%>js/bootstrap.min.js"></script>
+	
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui.min.css">
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/jquery-weui.css">
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/demos.css>
+	<link rel="stylesheet" href="<%$smarty.const.WEUI_URL%>/weui-ext.css>
+
+</head>
+<style>
+    b {color: #23527C;}
+</style>
+
+<body>
+    <header class="mwapp-header">
+        <div id="back" class="mwapp-header-icon-back"><span></span></div>
+        <div class="mwapp-header-title">人脸融合</div>
+    </header>
+<form action="<%$smarty.const.__APP__%>/tianyu/upload" enctype="multipart/form-data" method="post" >
+<div class="weui-cell">
+		  <div class="weui-cell__hd">
+		      <label for="" class="weui-label">明星脸选择</label>
+		  </div>
+		  <div class="weui-cell__bd">
+		      <select class="weui-select" name="rate_id" id="rate_id">
+		          <option value=1 >电鳗</option>
+		          <option value=2 >热巴</option>
+							<option value=3 >热吧2</option>
+							<option value=4 >卑鄙</option>
+							<option value=5 >贾玲</option>
+							<option value=6 >贾玲2</option>
+							<option value=7 >快乐星球</option>
+							<option value=8 >贾玲母亲</option>
+							<option value=9 >景田</option>
+		      </select>
+		  </div>
+</div>	  
+<div class="weui-cell">
+    <div class="weui-cell__hd"><label class="weui-label">照片上传</label></div>
+    <div class="weui-cell__bd">
+			<input type="file" name="photo" />
+    </div>
+</div>	
+		<div class="weui-btn-area">
+		  <button class="weui-btn weui-btn_primary" type="submit" id="btn">融合</button>
+		</div>
+</form>
+
+<script src="<%$smarty.const.AJS_URL%>jquery-2.1.4.js"></script>
+<script src="<%$smarty.const.AJS_URL%>fastclick.js"></script>
+<script src="<%$smarty.const.AJS_URL%>jquery-weui.js"></script>
+<script>
+</script> 
+</body>
+</html>

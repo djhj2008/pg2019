@@ -366,7 +366,7 @@ class CollectController extends Controller {
 				$stepSelect=M('stepmsg')->where('step_time >'.$step_time_start)->select();
 				
 				dump($msglist);
-				dump($stepSelect);
+				//dump($stepSelect);
 				if($msglist){
 					$wheremsg['devid']=['in',$msglist];
 					$devs=M('device')->where(array('psn'=>$psn))->where($wheremsg)->select();

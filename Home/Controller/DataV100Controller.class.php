@@ -941,7 +941,7 @@ class DataV100Controller extends Controller {
     			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
     		}
 		    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
-	    	if($cvs>3){
+	    	if($cvs>3&&$cvs< 6){
 	    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN_V4,$VALUE_LEN_V4);
 		    		if($type==0){
 					    $temp1str1 = substr($tempstr_tmp,3,1);

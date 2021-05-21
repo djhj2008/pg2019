@@ -481,7 +481,7 @@ class DatapushV50Controller extends Controller {
 	    			$up_time = $end+$interval*$j+$interval*($freq-$vaild);
 	    		}
 			    $up_time = strtotime(date('Y-m-d H:i',$up_time).':00');
-		    	if($cvs>3){
+		    	if($cvs>3&&$cvs< 6){
 		    		 	$tempstr_tmp = substr($tempstr,0+$j*$VALUE_LEN,$VALUE_LEN);
 				    	//echo "tempstr_tmp:";
 				    	//dump($tempstr_tmp);
